@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CsvHelper" Version="9.1.0" />
+    <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Data\2019_h_q1_19_1_2019.json" />
+    <None Remove="Data\2019_h_q1_20_1_2019.json" />
+    <None Remove="Data\2019_h_q1_21_1_2019.json" />
+    <None Remove="Data\2019_h_q1_22_1_2019.json" />
+    <None Remove="Data\2019_h_q1_23_1_2019.json" />
+    <None Remove="Data\2019_h_q1_24_1_2019.json" />
+    <None Remove="Data\2019_h_q1_26_1_2019.json" />
+    <None Remove="Data\2019_q1_19_1_2019.json" />
+    <None Remove="Data\2019_q1_20_1_2019.json" />
+    <None Remove="Data\JNotes_19_1_2019.json" />
+    <None Remove="Data\JNotes_20_1_2019.json" />
+    <None Remove="Data\PlayerPrefs.json" />
+  </ItemGroup>
+</Project>
