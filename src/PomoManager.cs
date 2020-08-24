@@ -163,6 +163,7 @@ namespace Jarvis {
             }
         }
 
+        // WIP - Todo create a pomodoro chimer to remind us when pomo ended, or when it has been a while since pomodoro was started. 
         private void PomoTicker() {
             //SoundPlayer typewriter = new SoundPlayer();
             //typewriter.SoundLocation = Environment.CurrentDirectory + "/typewriter.wav";
@@ -170,26 +171,26 @@ namespace Jarvis {
             while (true) {
                 bool wasPomoStarted = IsThereAnActivePomoTimer();
 
-
                 if (wasPomoStarted) {
 
-                    Thread.Sleep(30000);
+                    Thread.Sleep(1000 * 120 );   // chime every 90 seconds when timer ended
 
+                    // todo - load and play a notification file
                     if (IsActiveTimerEnded()) {
                         Console.Beep();
                         Console.Beep();
                     }
                 }
+                // When its been a while since a new pomo timer was started. 
+
                 else {
                     Console.Beep();
                     Console.Beep();
                     Console.Beep();
-                    Console.Beep();
 
-                    Thread.Sleep(1000 * 60 * 30);  // 30 mins
+                    Thread.Sleep(1000 * 60 * 30);  // Chime every 30 mins
                 }
             }
-
         }
 
         private int freeID = 1;

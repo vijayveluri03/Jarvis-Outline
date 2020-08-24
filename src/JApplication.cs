@@ -1,4 +1,4 @@
-﻿#define DEBUG_TROUBLESHOOT
+﻿//#define DEBUG_TROUBLESHOOT
 
 using System;
 using System.Collections.Generic;
@@ -15,31 +15,31 @@ namespace Jarvis {
         public bool IsExitSignalRaised { get { return exit; } }
         public OutlineManager OutlineManager { get; private set; }
         public PomoManager PomoManager { get; private set; }
+        public SharedLogic SharedLogic { get; private set; }
 
         public void Initialize() {
             instance = this;
 
     #if DEBUG_TROUBLESHOOT
-            Console.WriteLine(Environment.CurrentDirectory);
+            Console.WriteLine( "Current working directory : " + Environment.CurrentDirectory);
     #endif
 
-            // Loading Design and user data. 
+            // Loading Design and user data.
+
             ConsoleWriter.PushColor(ConsoleColor.White);    // @todo - Load the foreground color from design Data
             fsm = new QUtils.FSM();
             designData = JDesignData.Load();
+            SharedLogic = SharedLogic.Load();
             userData = JUserData.Load();
             ConsoleWriter.PopColor();                           // removing temporarily color. @todo -  remove this necessity
 
-            // Pushing default foreground color. Additional colors can be pushed and poped as and when needed. 
-            ConsoleWriter.PushColor(designData.defaultColorForText);
-
-            // Setting the default spacing
-            Utils.SetMaxColumnsForOptions(designData.ColumnCountForOptions);
-
+            ConsoleWriter.PushColor(designData.defaultColorForText);    // Pushing default foreground color.
+                                                                        // Additional colors can be pushed and poped as and when needed.
+            Utils.SetMaxColumnsForOptions(designData.ColumnCountForOptions); //// Setting the default spacing
 
             OutlineManager = new OutlineManager();
             PomoManager = new PomoManager( userData.activatePomodoroReminder );
-
+            SharedLogic.PostInit(OutlineManager, PomoManager);
 
             fsm.PushInNextFrame(new MainMenu(), MainMenu.GetContext(this));
         }

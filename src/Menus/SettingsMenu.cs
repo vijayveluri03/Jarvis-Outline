@@ -26,11 +26,11 @@ namespace Jarvis {
 
         public override void Update() {
 
-            ConsoleWriter.Print("Work in progress!");
+            ConsoleWriter.PrintInRed("Work in progress!");
 
-            Utils.DoAction("Settings Menu options:", ":", "refresh",
+            Utils.DoAction("Settings Menu options:", ":", "x",
 
-                new Utils.ActionParams(true, "x", "x. exit", delegate (string fullmessage) {
+                new Utils.ActionParams( "x", "x. exit", delegate (Utils.IActionParamsContext context) {
                     Exit();
                 })
             );

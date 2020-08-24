@@ -20,7 +20,7 @@ public static class Utils
     }
     public static string GetUserInputString(string message, ConsoleColor color, string defaultInput = "") {
         if (!string.IsNullOrEmpty(defaultInput))
-            message += "( defaults to " + defaultInput + ")";
+            message += "( defaults to '" + defaultInput + "')";
 
         ConsoleWriter.PushColor(color);
 
@@ -109,43 +109,43 @@ public static class Utils
 
         DateTime date = DateTime.MinValue;
         Utils.DoAction(message, ":", "",
-            new Utils.ActionParams(true, "", ". default " + defaultDate.ShortForm(), delegate (string fullmessage) {
+            new Utils.ActionParams( "", ". default " + defaultDate.ShortForm(), delegate (Utils.IActionParamsContext context) {
                 date = defaultDate;
             }),
-            new Utils.ActionParams(true, "x", "x. default " + defaultDate.ShortForm(), delegate (string fullmessage) {
+            new Utils.ActionParams( "x", "x. default " + defaultDate.ShortForm(), delegate (Utils.IActionParamsContext context) {
                 date = defaultDate;
             }),
-            new Utils.ActionParams(true, "r", "r. reset " + DateTime.MinValue.ShortForm(), delegate (string fullmessage) {
+            new Utils.ActionParams( "r", "r. reset " + DateTime.MinValue.ShortForm(), delegate (Utils.IActionParamsContext context) {
                 date = DateTime.MinValue;
             }),
-            new Utils.ActionParams(true, "0", "0. today " + Utils.Now.ShortForm(), delegate (string fullmessage) {
+            new Utils.ActionParams( "0", "0. today " + Utils.Now.ShortForm(), delegate (Utils.IActionParamsContext context) {
                 date = Utils.Now;
             }),
-            new Utils.ActionParams(true, "-1", "-1. yest " + Utils.Now.AddDays(-1).ShortForm(), delegate (string fullmessage) {
+            new Utils.ActionParams( "-1", "-1. yest " + Utils.Now.AddDays(-1).ShortForm(), delegate (Utils.IActionParamsContext context) {
                 date = Utils.Now.AddDays(-1);
             }),
-            new Utils.ActionParams(true, "-2", "-2. " + Utils.Now.AddDays(-2).ShortForm(), delegate (string fullmessage) {
+            new Utils.ActionParams( "-2", "-2. " + Utils.Now.AddDays(-2).ShortForm(), delegate (Utils.IActionParamsContext context) {
                 date = Utils.Now.AddDays(-2);
             }),
-            new Utils.ActionParams(true, "-3", "-3. " + Utils.Now.AddDays(-3).ShortForm(), delegate (string fullmessage) {
+            new Utils.ActionParams( "-3", "-3. " + Utils.Now.AddDays(-3).ShortForm(), delegate (Utils.IActionParamsContext context) {
                 date = Utils.Now.AddDays(-3);
             }),
-            new Utils.ActionParams(true, "1", "1. tomo " + Utils.Now.AddDays(1).ShortForm(), delegate (string fullmessage) {
+            new Utils.ActionParams( "1", "1. tomo " + Utils.Now.AddDays(1).ShortForm(), delegate (Utils.IActionParamsContext context) {
                 date = Utils.Now.AddDays(1);
             }),
-            new Utils.ActionParams(true, "2", "2. " + Utils.Now.AddDays(2).ShortForm(), delegate (string fullmessage) {
+            new Utils.ActionParams( "2", "2. " + Utils.Now.AddDays(2).ShortForm(), delegate (Utils.IActionParamsContext context) {
                 date = Utils.Now.AddDays(2);
             }),
-            new Utils.ActionParams(true, "3", "3. " + Utils.Now.AddDays(3).ShortForm(), delegate (string fullmessage) {
+            new Utils.ActionParams( "3", "3. " + Utils.Now.AddDays(3).ShortForm(), delegate (Utils.IActionParamsContext context) {
                 date = Utils.Now.AddDays(3);
             }),
-            new Utils.ActionParams(true, "4", "4. " + Utils.Now.AddDays(4).ShortForm(), delegate (string fullmessage) {
+            new Utils.ActionParams( "4", "4. " + Utils.Now.AddDays(4).ShortForm(), delegate (Utils.IActionParamsContext context) {
                 date = Utils.Now.AddDays(4);
             }),
-            new Utils.ActionParams(true, "7", "7. " + Utils.Now.AddDays(7).ShortForm(), delegate (string fullmessage) {
+            new Utils.ActionParams( "7", "7. " + Utils.Now.AddDays(7).ShortForm(), delegate (Utils.IActionParamsContext context) {
                 date = Utils.Now.AddDays(7);
             }),
-            new Utils.ActionParams(true, "c", "c. custom ", delegate (string fullmessage) {
+            new Utils.ActionParams( "c", "c. custom ", delegate (Utils.IActionParamsContext context) {
                 date = GetCustomDateFromUser("Enter Date (mm/dd):");
             })
         );
@@ -184,18 +184,22 @@ public static class Utils
     // Select User Action from the possible action list
 
     #region SELECT USER ACTION
+    public class IActionParamsContext {
+        public static bool showThisParam = false;
+        public bool Hide { get { return !showThisParam; } }
+    }
 
     public class ActionParams {
-        public ActionParams(bool show, string userAction, string heading, System.Action<System.String> actionToPerform) {
+        public ActionParams(string userAction, string heading, System.Action<IActionParamsContext> actionToPerform, IActionParamsContext context = null ) {
             this.userAction = userAction;
             this.heading = heading;
             this.actionToPerform = actionToPerform;
-            this.show = show;
+            this.context = context;
         }
         public string userAction;
         public string heading;
-        public System.Action<System.String> actionToPerform;
-        public bool show;
+        public System.Action<IActionParamsContext> actionToPerform;
+        public IActionParamsContext context;
     }
     public static void SetMaxColumnsForOptions(int max) {
         maxColumnsInALine = max;
@@ -217,7 +221,8 @@ public static class Utils
             consoleMsg.Append("" + heading + "\n");
             int shown = 0;
             for (int i = 0; i < prms.Length; i++) {
-                if (!prms[i].show)
+                // If we have context and in the context we are alking not to show this params, then hide it
+                if (prms[i].context != null && prms[i].context.Hide)
                     continue;
                 consoleMsg.Append(string.Format("{0,-" + maxCharLength + "}", prms[i].heading));
                 if ((shown + 1) % maxColumnsInALine == 0 && (shown + 1) < prms.Length)
@@ -254,7 +259,7 @@ public static class Utils
                 ConsoleWriter.Print("Action was invalid. Please try again...");
         }
 
-        selectedAction.actionToPerform(userInput);
+        selectedAction.actionToPerform(selectedAction.context);
     }
     public static string SelectFrom(string heading, string question, string defaultValue, params string[] prms) {
         while (true) {

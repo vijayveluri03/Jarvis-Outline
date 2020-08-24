@@ -26,40 +26,41 @@ namespace Jarvis {
 
         public override void Update() {
 
-            // First time launch
+            // FTUE - First time user experience 
             if (string.IsNullOrEmpty(application.UserData.userName)) {
+                ConsoleWriter.PrintNewLine();
                 ConsoleWriter.PrintInColor("Hello there! Welcome to Jarvis Outline. ", ConsoleColor.Yellow);
                 ConsoleWriter.Print("This is an outline app, which can help u maintain tasks or notes.");
                 application.UserData.userName = Utils.GetUserInputString("Enter your name:");
                 application.UserData.activatePomodoro = Utils.GetConfirmationFromUser("Activate Pomodoro? You can change this in settings:");
-                application.UserData.activatePomodoroReminder = Utils.GetConfirmationFromUser("Activate Pomodoro Reminder? You can change this in settings:");
+                application.UserData.activatePomodoroReminder = application.UserData.activatePomodoro && Utils.GetConfirmationFromUser("Activate Pomodoro Reminder/Chimer? You can change this in settings:");
                 application.UserData.Save();
                 ConsoleWriter.PrintInColor("Awesome. Lets get started", ConsoleColor.Yellow);
             }
             else
                 ConsoleWriter.PrintInColor($"Welcome {application.UserData.userName}.", ConsoleColor.Yellow);
 
-            Utils.DoAction("Main Menu options:", ":", "refresh",
+            Utils.DoAction("Main Menu options:", ":", "o",
 
-                new Utils.ActionParams(true, "o", "o. Outline", delegate (string fullmessage) {
+                new Utils.ActionParams( "o", "o. Outline", delegate (Utils.IActionParamsContext context) {
                     application.FSM.PushInNextFrame(new OutlineMenu(), OutlineMenu.GetContext(application, JConstants.ROOT_ENTRY_ID));
                 }),
 
-                new Utils.ActionParams(true, "r", "r. Reports", delegate (string fullmessage) {
+                new Utils.ActionParams( "r", "r. Reports", delegate (Utils.IActionParamsContext context) {
                     application.FSM.PushInNextFrame(new ReportsMenu(), ReportsMenu.GetContext(application));
                 }),
 
-                new Utils.ActionParams(true, "s", "s. Settings", delegate (string fullmessage) {
+                new Utils.ActionParams( "s", "s. Settings", delegate (Utils.IActionParamsContext context) {
                     application.FSM.PushInNextFrame(new SettingsMenu(), SettingsMenu.GetContext(application));
                 }),
 
-                new Utils.ActionParams(true, "s", "s. save", delegate (string fullmessage) {
+                new Utils.ActionParams( "s", "s. Save", delegate (Utils.IActionParamsContext context) {
                     application.OutlineManager.Save();
                     application.PomoManager.Save();
                     application.UserData.Save();
                 }),
 
-                new Utils.ActionParams(true, "x", "x. exit", delegate (string fullmessage) {
+                new Utils.ActionParams( "x", "x. Exit", delegate (Utils.IActionParamsContext context) {
                     Exit();
                 })
 
