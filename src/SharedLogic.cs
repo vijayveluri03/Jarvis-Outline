@@ -123,47 +123,40 @@ namespace Jarvis {
         #region ACTION PARAMS LOGIC
 
         // Context required for the shared logic to access specific information
-        public class OutlineMenuActionParamsContext : Utils.IActionParamsContext {
+        public class ActionParamsContext : Utils.aActionParamsContext {
 
-            public int parentID;
+            public int parentIDForNewTasks;
             public static List<int> pomoLinks = new List<int>();
         };
 
-        public Utils.ActionParams CreateActionParamsForNewEntry (OutlineMenuActionParamsContext contextAtt) {
+        public Utils.ActionParams CreateActionParamsForNewEntry (ActionParamsContext contextAtt) {
 
-            Utils.ActionParams ap = new Utils.ActionParams( "a", "a. Add new entry", delegate (Utils.IActionParamsContext contextNew) {
-                Utils.Assert(contextNew != null && contextNew is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = contextNew as OutlineMenuActionParamsContext;
+            Utils.ActionParams ap = new Utils.ActionParams( "a", "a. Add new entry", delegate (Utils.aActionParamsContext contextNew) {
+                Utils.Assert(contextNew != null && contextNew is ActionParamsContext);
+                ActionParamsContext contextOutlineMenu = contextNew as ActionParamsContext;
 
-                if (CreateNewEntry( (contextNew as OutlineMenuActionParamsContext).parentID ) != null)
+                if (CreateNewEntry( (contextNew as ActionParamsContext).parentIDForNewTasks ) != null)
                     ConsoleWriter.Print("Added!");
                 else
                     ConsoleWriter.PrintInRed("Not Added");
             });
-            ap.context = contextAtt;
+            ap.SetContext(contextAtt);
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsForTaskCompletion(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "c", "c. Complete", delegate (Utils.IActionParamsContext contextNew) {
-                Utils.Assert(contextNew != null && contextNew is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = contextNew as OutlineMenuActionParamsContext;
-
-                string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):", contextOutlineMenu.parentID.ToString());
+        public Utils.ActionParams CreateActionParamsForTaskCompletion() {
+            Utils.ActionParams ap = new Utils.ActionParams( "c", "c. Complete", delegate (Utils.aActionParamsContext contextNew) {
+                string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):");
                 int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
                 foreach (int id in IDs) {
                     CompleteTask(id);
                 }
             });
-            ap.context = contextAtt;
             return ap;
 
         }
-        public Utils.ActionParams CreateActionParamsToDiscardTask (OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "d", "d. Discard", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
-                int id = Utils.GetUserInputInt("Entry ID:", contextOutlineMenu.parentID);
+        public Utils.ActionParams CreateActionParamsToDiscardTask () {
+            Utils.ActionParams ap = new Utils.ActionParams( "d", "d. Discard", delegate (Utils.aActionParamsContext context) {
+                int id = Utils.GetUserInputInt("Entry ID:");
                 if (IsEntryValidOrPrintError(id)) {
                     EntryData ed = this.outlineManager.GetEntry(id);
                     if (!ed.IsTask)
@@ -172,43 +165,32 @@ namespace Jarvis {
                         ed.SetAsDiscarded(Utils.Now);
                 }
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToRemoveEntry(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "r", "r. Remove", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
+        public Utils.ActionParams CreateActionParamsToRemoveEntry() {
+            Utils.ActionParams ap = new Utils.ActionParams( "r", "r. Remove", delegate (Utils.aActionParamsContext context) {
                 ConsoleWriter.Print("All the links will be broken. and all children will be removed.");
                 bool confirmation = Utils.GetConfirmationFromUser("Do you want to proceed", false);
 
                 if (confirmation) {
-                    int id = Utils.GetUserInputInt("Entry ID:", contextOutlineMenu.parentID);
+                    int id = Utils.GetUserInputInt("Entry ID:");
                     if (IsEntryValidOrPrintError(id)) {
                         EntryData ed = this.outlineManager.GetEntry(id);
                         RemoveTask(ed);
                     }
                 }
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToRefresh(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "refresh", "refresh. Refresh", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
+        public Utils.ActionParams CreateActionParamsToRefresh() {
+            Utils.ActionParams ap = new Utils.ActionParams( "refresh", "refresh. Refresh", delegate (Utils.aActionParamsContext context) {
+                
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToLinkTwoEntries(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "l", "l. link to Task", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
-                int id = Utils.GetUserInputInt("Entry ID:", contextOutlineMenu.parentID);
+        public Utils.ActionParams CreateActionParamsToLinkTwoEntries() {
+            Utils.ActionParams ap = new Utils.ActionParams( "l", "l. link to Task", delegate (Utils.aActionParamsContext context) {
+                int id = Utils.GetUserInputInt("Entry ID:");
                 if (IsEntryValidOrPrintError(id)) {
                     int id2 = Utils.GetUserInputInt("Entry 2 ID:");
                     if (IsEntryValidOrPrintError(id2)) {
@@ -220,43 +202,35 @@ namespace Jarvis {
                     }
                 }
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToCreateANewTask(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "at", "at. Create a Task", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
+        public Utils.ActionParams CreateActionParamsToCreateANewTask(ActionParamsContext contextAtt) {
+            Utils.ActionParams ap = new Utils.ActionParams( "at", "at. Create a Task", delegate (Utils.aActionParamsContext context) {
+                Utils.Assert(context != null && context is ActionParamsContext);
+                ActionParamsContext contextOutlineMenu = context as ActionParamsContext;
 
-                EntryData ed = CreateNewEntry(contextOutlineMenu.parentID);
+                EntryData ed = CreateNewEntry(contextOutlineMenu.parentIDForNewTasks);
                 DateTime dueDate = Utils.GetDateFromUser("Due Date", Utils.Now.AddDays(14));
                 ed.SetAsTask(dueDate);
 
                 ConsoleWriter.Print("Converted to task and date set to today!");
             });
-            ap.context = contextAtt;
+            ap.SetContext(contextAtt);
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToConvertToATask(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "t", "t. Convert to Task", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
-                int id = Utils.GetUserInputInt("Entry ID:", contextOutlineMenu.parentID);
+        public Utils.ActionParams CreateActionParamsToConvertToATask() {
+            Utils.ActionParams ap = new Utils.ActionParams( "t", "t. Convert to Task", delegate (Utils.aActionParamsContext context) {
+                int id = Utils.GetUserInputInt("Entry ID:");
                 if (IsEntryValidOrPrintError(id)) {
                     DateTime dueDate = Utils.GetDateFromUser("Due Date", Utils.Now.AddDays(14));
                     this.outlineManager.GetEntry(id).SetAsTask(dueDate);
                 }
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToEditAnEntry(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "e", "e. Edit", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
-                int id = Utils.GetUserInputInt("Entry ID:", contextOutlineMenu.parentID);
+        public Utils.ActionParams CreateActionParamsToEditAnEntry() {
+            Utils.ActionParams ap = new Utils.ActionParams( "e", "e. Edit", delegate (Utils.aActionParamsContext context) {
+                int id = Utils.GetUserInputInt("Entry ID:");
                 if (IsEntryValidOrPrintError(id)) {
                     EntryData ed = this.outlineManager.GetEntry(id);
 
@@ -266,29 +240,21 @@ namespace Jarvis {
                     ed.title = Utils.GetUserInputString("Enter Title:", ed.title);
                 }
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToConvertToAnEntry(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "-t", "-t. Convert to Note", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
-                int id = Utils.GetUserInputInt("Entry ID:", contextOutlineMenu.parentID);
+        public Utils.ActionParams CreateActionParamsToConvertToAnEntry() {
+            Utils.ActionParams ap = new Utils.ActionParams( "-t", "-t. Convert to Note", delegate (Utils.aActionParamsContext context) {
+                int id = Utils.GetUserInputInt("Entry ID:");
                 if (IsEntryValidOrPrintError(id)) {
                     //DateTime dueDate = Utils.GetDateFromUser("Due Date", Utils.Now.AddDays(14));
                     this.outlineManager.GetEntry(id).ConvertToNotes();
                 }
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToChangeParent(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams("p", "p. Change parent", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
-                int id = Utils.GetUserInputInt("Entry ID:", contextOutlineMenu.parentID);
+        public Utils.ActionParams CreateActionParamsToChangeParent() {
+            Utils.ActionParams ap = new Utils.ActionParams("p", "p. Change parent", delegate (Utils.aActionParamsContext context) {
+                int id = Utils.GetUserInputInt("Entry ID:");
                 if (IsEntryValidOrPrintError(id)) {
                     EntryData ed = outlineManager.GetEntry(id);
                     int parentID = Utils.GetUserInputInt("Parend ID:");
@@ -298,38 +264,34 @@ namespace Jarvis {
                     }
                 }
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToCreateATaskAndLinkItToParent(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "atl", "atl. Create a Task and link to parent", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
+        public Utils.ActionParams CreateActionParamsToCreateATaskAndLinkItToParent(ActionParamsContext contextAtt) {
+            Utils.ActionParams ap = new Utils.ActionParams( "atl", "atl. Create a Task and link to parent", delegate (Utils.aActionParamsContext context) {
+                Utils.Assert(context != null && context is ActionParamsContext);
+                ActionParamsContext contextOutlineMenu = context as ActionParamsContext;
 
-                if (IsEntryValidOrPrintError(contextOutlineMenu.parentID)) {
-                    EntryData ed = CreateNewEntry(contextOutlineMenu.parentID);
+                if (IsEntryValidOrPrintError(contextOutlineMenu.parentIDForNewTasks)) {
+                    EntryData ed = CreateNewEntry(contextOutlineMenu.parentIDForNewTasks);
                     if (ed != null) {
                         DateTime dueDate = Utils.GetDateFromUser("Due Date", Utils.Now.AddDays(14));
                         ed.SetAsTask(dueDate);
-                        EntryData ed2 = this.outlineManager.GetEntry(contextOutlineMenu.parentID);
+                        EntryData ed2 = this.outlineManager.GetEntry(contextOutlineMenu.parentIDForNewTasks);
                         ed.AddLink(ed2.id);
                         ed2.AddLink(ed.id);
                     }
                 }
             });
-            ap.context = contextAtt;
+            ap.SetContext(contextAtt);
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToCloneAnEntry(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "clone", "clone. Clone", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
+        public Utils.ActionParams CreateActionParamsToCloneAnEntry() {
+            Utils.ActionParams ap = new Utils.ActionParams( "clone", "clone. Clone", delegate (Utils.aActionParamsContext context) {
                 ConsoleWriter.Print("Children will not be cloned. links will be maintained!");
                 bool confirmation = true; // Utils.GetConfirmationFromUser("Do you want to proceed", false);
 
                 if (confirmation) {
-                    string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):", contextOutlineMenu.parentID.ToString());
+                    string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):");
                     int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
                     foreach (int id in IDs) {
                         if ( IsEntryValidOrPrintError(id)) {
@@ -341,14 +303,37 @@ namespace Jarvis {
                     }
                 }
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToCloneGroup(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "clonegroup", "clonegroup. Clone a group", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
+        public Utils.ActionParams CreateActionParamsToMarkATask() {
+            return new Utils.ActionParams("mk", "mk. Mark an entry", delegate (Utils.aActionParamsContext context) {
+                string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):");
+                int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
+                foreach (int id in IDs) {
+                    if (IsEntryValidOrPrintError(id)) {
+                        if (!userData.markedTaskIDs.Contains(id)) {
+                            userData.markedTaskIDs.Add(id);
+                            ConsoleWriter.Print("Marked!");
+                        }
+                    }
+                }
+            });
+        }
+        public Utils.ActionParams CreateActionParamsToShowAllCommands(Utils.aActionParamsContext contextAtt) {
+            return new Utils.ActionParams("misc", "misc. Show all commands", delegate (Utils.aActionParamsContext context) {
+                Utils.Assert(context != null );
 
+                //@todo - some dirty code. Clean it.
+                Utils.aActionParamsContext.DisplayAllCommands = !Utils.aActionParamsContext.DisplayAllCommands;
+
+                if (Utils.aActionParamsContext.DisplayAllCommands)
+                    ConsoleWriter.Print("Displaying all commands!");
+                else
+                    ConsoleWriter.Print("Hiding some commands!");
+            }).SetContext(contextAtt) ;
+        }
+        public Utils.ActionParams CreateActionParamsToCloneGroup() {
+            Utils.ActionParams ap = new Utils.ActionParams( "clonegroup", "clonegroup. Clone a group", delegate (Utils.aActionParamsContext context) {
                 String groupName = Utils.SelectFrom("Groups", "Select group", "habits", "habits", "dailys");
 
                 bool confirmation = Utils.GetConfirmationFromUser("Do you want to proceed", false);
@@ -362,14 +347,10 @@ namespace Jarvis {
                         Utils.Assert(false);
                 }
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToStartAPomodoroTimer(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "pomostart", "pomostart. ", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
+        public Utils.ActionParams CreateActionParamsToStartAPomodoroTimer() {
+            Utils.ActionParams ap = new Utils.ActionParams( "pomostart", "pomostart. ", delegate (Utils.aActionParamsContext context) {
                 String timerType = Utils.SelectFrom("Timer type", "Select timer", "MID", "SMALL", "MID", "BIG", "HUGE");
                 ePomoTimer timer;
                 if (Enum.TryParse(timerType, out timer)) {
@@ -378,38 +359,30 @@ namespace Jarvis {
                 else
                     ConsoleWriter.PrintInRed("Failed to create!");
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToLinkTasksToAPomodoroTimer(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "pomolink", "pomolink. ", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
-                int id = Utils.GetUserInputInt("Entry ID:", contextOutlineMenu.parentID);
+        public Utils.ActionParams CreateActionParamsToLinkTasksToAPomodoroTimer() {
+            Utils.ActionParams ap = new Utils.ActionParams( "pomolink", "pomolink. ", delegate (Utils.aActionParamsContext context) {
+                int id = Utils.GetUserInputInt("Entry ID:");
                 if (IsEntryValidOrPrintError(id)) {
-                    if (!OutlineMenuActionParamsContext.pomoLinks.Contains(id))
-                        OutlineMenuActionParamsContext.pomoLinks.Add(id);
+                    if (!ActionParamsContext.pomoLinks.Contains(id))
+                        ActionParamsContext.pomoLinks.Add(id);
                 }
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToEndPomodoroTimer(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "pomoend", "pomoend. ", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
+        public Utils.ActionParams CreateActionParamsToEndPomodoroTimer() {
+            Utils.ActionParams ap = new Utils.ActionParams( "pomoend", "pomoend. ", delegate (Utils.aActionParamsContext context) {
                 if (!pomoManager.IsActiveTimerEnded()) {
                     ConsoleWriter.PrintInRed("Pomo timer hasnt ended!");
                     return;
                 }
-                if (OutlineMenuActionParamsContext.pomoLinks.Count == 0) {
+                if (ActionParamsContext.pomoLinks.Count == 0) {
                     ConsoleWriter.Print("We have no pomos linked");
                 }
-                if (OutlineMenuActionParamsContext.pomoLinks.Count > 0) {
+                if (ActionParamsContext.pomoLinks.Count > 0) {
                     ConsoleWriter.PrintWithOutLineBreak("We have these tasks linked:");
-                    foreach (int id in OutlineMenuActionParamsContext.pomoLinks)
+                    foreach (int id in ActionParamsContext.pomoLinks)
                         ConsoleWriter.PrintWithOutLineBreak(id + "\t");
                     ConsoleWriter.PrintNewLine();
                 }
@@ -417,43 +390,34 @@ namespace Jarvis {
                 bool confirmation = Utils.GetConfirmationFromUser("Is that it ?");
 
                 if (confirmation) {
-                    pomoManager.EndTimer(OutlineMenuActionParamsContext.pomoLinks);
-                    OutlineMenuActionParamsContext.pomoLinks.Clear();
+                    pomoManager.EndTimer(ActionParamsContext.pomoLinks);
+                    ActionParamsContext.pomoLinks.Clear();
                 }
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToPrintPomodoroStatus(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "pomoprint", "pomoprint. ", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
+        public Utils.ActionParams CreateActionParamsToPrintPomodoroStatus() {
+            Utils.ActionParams ap = new Utils.ActionParams( "pomoprint", "pomoprint. ", delegate (Utils.aActionParamsContext context) {
                 ConsoleWriter.PushColor(ConsoleColor.Yellow);
                 ConsoleWriter.Print("Pomos completed today:" + pomoManager.PomosCountToday());
                 ConsoleWriter.PopColor();
 
-                if (OutlineMenuActionParamsContext.pomoLinks.Count == 0) {
+                if (ActionParamsContext.pomoLinks.Count == 0) {
                     ConsoleWriter.Print("We have no pomos linked");
                 }
-                if (OutlineMenuActionParamsContext.pomoLinks.Count > 0) {
+                if (ActionParamsContext.pomoLinks.Count > 0) {
                     ConsoleWriter.PrintWithOutLineBreak("We have these tasks linked:");
-                    foreach (int id in OutlineMenuActionParamsContext.pomoLinks)
+                    foreach (int id in ActionParamsContext.pomoLinks)
                         ConsoleWriter.PrintWithOutLineBreak(id + "\t");
                     ConsoleWriter.PrintNewLine();
                 }
             });
-            ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToSaveAll(OutlineMenuActionParamsContext contextAtt) {
-            Utils.ActionParams ap = new Utils.ActionParams( "s", "s. save", delegate (Utils.IActionParamsContext context) {
-                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
-                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
-
+        public Utils.ActionParams CreateActionParamsToSaveAll() {
+            Utils.ActionParams ap = new Utils.ActionParams( "s", "s. save", delegate (Utils.aActionParamsContext context) {
                 SaveAll();
             });
-            ap.context = contextAtt;
             return ap;
         }
 

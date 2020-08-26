@@ -18,57 +18,69 @@ namespace Jarvis {
         public void Exit() {
             application.FSM.Pop();
         }
-        public override void OnContext(System.Object outlineMenuContext) {
-            Utils.Assert(outlineMenuContext != null && outlineMenuContext is Context, "EntryMenu initialization error");
-            application = (outlineMenuContext as Context).application;
+        public override void OnContext(System.Object markedTaskContext) {
+            Utils.Assert(markedTaskContext != null && markedTaskContext is Context, "EntryMenu initialization error");
+            application = (markedTaskContext as Context).application;
             
             List<Utils.ActionParams> actionParams = new List<Utils.ActionParams>();
 
-            
             actionParams.Add(
-                new Utils.ActionParams("j", "j. Jump to", delegate (Utils.IActionParamsContext context) {
+                new Utils.ActionParams("j", "j. Jump to", delegate (Utils.aActionParamsContext context) {
                     int id = Utils.GetUserInputInt("Entry ID:");
                     if (SharedLogic.IsEntryValidOrPrintError(id)) {
                         application.FSM.PushInNextFrame(new OutlineMenu(), OutlineMenu.GetContext(application, id));
                     }
-                }));
+                }).SetVisible(true));
             actionParams.Add(
-                new Utils.ActionParams("c", "c. Complete", delegate (Utils.IActionParamsContext context) {
-                    int id = Utils.GetUserInputInt("Entry ID:");
-                    if (SharedLogic.IsEntryValidOrPrintError(id)) {
-                        EntryData ed = application.OutlineManager.GetEntry(id);
-                        if (ed.IsTask && !ed.IsTaskClosed)
-                            SharedLogic.CompleteTask(id);
-                        else
-                            ConsoleWriter.PrintInRed("This is either not a task, or was already closed. Action could not be performed");
-                    }
-                }));
+                new Utils.ActionParams("m", "m. Marked Tasks", delegate (Utils.aActionParamsContext context) {
+                    application.FSM.PushInNextFrame(new MarkedTasksMenu(), MarkedTasksMenu.GetContext(application));
+                }).SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsForTaskCompletion().SetVisible(true));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToDiscardTask().SetVisible(false));
+
+            actionParams.Add(application.SharedLogic.CreateActionParamsToRemoveEntry().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToRefresh().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToLinkTwoEntries().SetVisible(false));
+
+            actionParams.Add(application.SharedLogic.CreateActionParamsToConvertToATask().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToEditAnEntry().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToChangeParent().SetVisible(true));
+
+            actionParams.Add(application.SharedLogic.CreateActionParamsToConvertToAnEntry().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToCloneAnEntry().SetVisible(false));
+
+            actionParams.Add(application.SharedLogic.CreateActionParamsToCloneGroup().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToStartAPomodoroTimer().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToLinkTasksToAPomodoroTimer().SetVisible(false));
+
+            actionParams.Add(application.SharedLogic.CreateActionParamsToEndPomodoroTimer().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToPrintPomodoroStatus().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToSaveAll().SetVisible(true));
+
+            actionParams.Add(application.SharedLogic.CreateActionParamsToMarkATask().SetVisible(false));
+
             actionParams.Add(
-                new Utils.ActionParams("clear", "clear.", delegate (Utils.IActionParamsContext context) {
-                    if (Utils.GetConfirmationFromUser("Are you sure:"))
-                        application.UserData.markedTaskIDs.Clear();
-                }));
-            actionParams.Add(
-            new Utils.ActionParams("h", "h. show/hide completed", delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams("h", "h. show/hide completed", delegate (Utils.aActionParamsContext context) {
                 hideCompleted = !hideCompleted;
 
                 if (hideCompleted)
                     ConsoleWriter.Print("Hiding completed!");
                 else
                     ConsoleWriter.Print("showing completed!");
-            }));
+            }).SetVisible(true));
 
-            actionParams.Add(
-                new Utils.ActionParams("s", "s. Save", delegate (Utils.IActionParamsContext context) {
-                    application.SharedLogic.SaveAll();
-                })
-            );
 
+            actionParams.Add(SharedLogic.CreateActionParamsToShowAllCommands(context));
             actionParams.Add(
-                new Utils.ActionParams("x", "x. exit", delegate (Utils.IActionParamsContext context) {
+                new Utils.ActionParams("x", "x. back", delegate (Utils.aActionParamsContext context) {
                     Exit();
-                })
+                }).SetVisible(true)
                 );
+            actionParams.Add(
+                new Utils.ActionParams("clear", "clear.", delegate (Utils.aActionParamsContext context) {
+                    if (Utils.GetConfirmationFromUser("Are you sure:"))
+                        application.UserData.markedTaskIDs.Clear();
+                }).SetVisible(true) );
 
             this.actionParams = actionParams.ToArray();
         }
@@ -122,6 +134,7 @@ namespace Jarvis {
 
         private JApplication application;
         private static bool hideCompleted = true;
+        private static Utils.aActionParamsContext context = new Utils.aActionParamsContext();
         
         private Utils.ActionParams[] actionParams = null;
 

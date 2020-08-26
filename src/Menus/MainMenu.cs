@@ -42,27 +42,27 @@ namespace Jarvis {
 
             Utils.DoAction("Main Menu options:", ":", "o",
 
-                new Utils.ActionParams( "o", "o. Outline", delegate (Utils.IActionParamsContext context) {
+                new Utils.ActionParams( "o", "o. Outline", delegate (Utils.aActionParamsContext context) {
                     application.FSM.PushInNextFrame(new OutlineMenu(), OutlineMenu.GetContext(application, JConstants.ROOT_ENTRY_ID));
                 }),
 
-                new Utils.ActionParams("m", "m. Marked Tasks", delegate (Utils.IActionParamsContext context) {
+                new Utils.ActionParams("m", "m. Marked Tasks", delegate (Utils.aActionParamsContext context) {
                     application.FSM.PushInNextFrame(new MarkedTasksMenu(), MarkedTasksMenu.GetContext(application));
                 }),
 
-                new Utils.ActionParams( "r", "r. Reports", delegate (Utils.IActionParamsContext context) {
+                new Utils.ActionParams( "r", "r. Reports", delegate (Utils.aActionParamsContext context) {
                     application.FSM.PushInNextFrame(new ReportsMenu(), ReportsMenu.GetContext(application));
                 }),
 
-                new Utils.ActionParams( "s", "s. Settings", delegate (Utils.IActionParamsContext context) {
+                new Utils.ActionParams( "s", "s. Settings", delegate (Utils.aActionParamsContext context) {
                     application.FSM.PushInNextFrame(new SettingsMenu(), SettingsMenu.GetContext(application));
                 }),
 
-                new Utils.ActionParams( "s", "s. Save", delegate (Utils.IActionParamsContext context) {
+                new Utils.ActionParams( "s", "s. Save", delegate (Utils.aActionParamsContext context) {
                     application.SharedLogic.SaveAll();
                 }),
 
-                new Utils.ActionParams( "q", "q. Quit", delegate (Utils.IActionParamsContext context) {
+                new Utils.ActionParams( "q", "q. Quit", delegate (Utils.aActionParamsContext context) {
                     Exit();
                 })
 

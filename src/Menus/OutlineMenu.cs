@@ -28,96 +28,76 @@ namespace Jarvis
         {
             Utils.Assert(outlineMenuContext != null && outlineMenuContext is Context, "EntryMenu initialization error");
             application = (outlineMenuContext as Context).application;
-            this.contextOutlineMenu.parentID = (outlineMenuContext as Context).entryID;
+            this.contextOutlineMenu.parentIDForNewTasks = (outlineMenuContext as Context).entryID;
 
             // Making sure the task exists. 
-            Utils.Assert(application.OutlineManager.IsEntryAvailableWithID(this.contextOutlineMenu.parentID));
+            Utils.Assert(application.OutlineManager.IsEntryAvailableWithID(this.contextOutlineMenu.parentIDForNewTasks));
 
             List<Utils.ActionParams> actionParams = new List<Utils.ActionParams>();
 
-            actionParams.Add( application.SharedLogic.CreateActionParamsForNewEntry(this.contextOutlineMenu) );
+            actionParams.Add( application.SharedLogic.CreateActionParamsForNewEntry(this.contextOutlineMenu).SetVisible(true) );
             actionParams.Add(
-                new Utils.ActionParams( "j", "j. Jump to", delegate (Utils.IActionParamsContext context) {
+                new Utils.ActionParams( "j", "j. Jump to", delegate (Utils.aActionParamsContext context) {
                     int id = Utils.GetUserInputInt("Entry ID:");
                     if (SharedLogic.IsEntryValidOrPrintError(id)) {
                         application.FSM.PushInNextFrame(new OutlineMenu(), OutlineMenu.GetContext(application, id));
                     }
-            }) );
+            }).SetVisible(true) );
             actionParams.Add(
-                new Utils.ActionParams("m", "m. Marked Tasks", delegate (Utils.IActionParamsContext context) {
+                new Utils.ActionParams("m", "m. Marked Tasks", delegate (Utils.aActionParamsContext context) {
                     application.FSM.PushInNextFrame(new MarkedTasksMenu(), MarkedTasksMenu.GetContext(application));
-                }));
-            actionParams.Add(application.SharedLogic.CreateActionParamsForTaskCompletion(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToDiscardTask(this.contextOutlineMenu));
+                }).SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsForTaskCompletion().SetVisible(true));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToDiscardTask().SetVisible(false));
 
-            actionParams.Add(application.SharedLogic.CreateActionParamsToRemoveEntry(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToRefresh(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToLinkTwoEntries(this.contextOutlineMenu));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToRemoveEntry().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToRefresh().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToLinkTwoEntries().SetVisible(false));
 
-            actionParams.Add(application.SharedLogic.CreateActionParamsToCreateANewTask(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToConvertToATask(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToEditAnEntry(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToChangeParent(this.contextOutlineMenu));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToCreateANewTask(this.contextOutlineMenu).SetVisible(true));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToConvertToATask().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToEditAnEntry().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToChangeParent().SetVisible(true));
 
-            actionParams.Add(application.SharedLogic.CreateActionParamsToConvertToAnEntry(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToCreateATaskAndLinkItToParent(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToCloneAnEntry(this.contextOutlineMenu));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToConvertToAnEntry().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToCreateATaskAndLinkItToParent(this.contextOutlineMenu).SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToCloneAnEntry().SetVisible(false));
 
-            actionParams.Add(application.SharedLogic.CreateActionParamsToCloneGroup(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToStartAPomodoroTimer(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToLinkTasksToAPomodoroTimer(this.contextOutlineMenu));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToCloneGroup().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToStartAPomodoroTimer().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToLinkTasksToAPomodoroTimer().SetVisible(false));
 
-            actionParams.Add(application.SharedLogic.CreateActionParamsToEndPomodoroTimer(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToPrintPomodoroStatus(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToSaveAll(this.contextOutlineMenu));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToEndPomodoroTimer().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToPrintPomodoroStatus().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToSaveAll().SetVisible(true));
 
-            actionParams.Add(
-                new Utils.ActionParams("mk", "mk. Mark an entry", delegate (Utils.IActionParamsContext context) {
-                string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):", contextOutlineMenu.parentID.ToString());
-                int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
-                    foreach (int id in IDs) {
-                        if (SharedLogic.IsEntryValidOrPrintError(id)) {
-                            if (!application.UserData.markedTaskIDs.Contains(id)) {
-                                application.UserData.markedTaskIDs.Add(id);
-                                ConsoleWriter.Print("Marked!");
-                            }
-                        }
-                    }
-                }));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToMarkATask().SetVisible(false));
 
             actionParams.Add(
-            new Utils.ActionParams("h", "h. show/hide completed", delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams("h", "h. show/hide completed", delegate (Utils.aActionParamsContext context) {
                 hideCompleted = !hideCompleted;
 
                 if (hideCompleted)
                     ConsoleWriter.Print("Hiding completed!");
                 else
                     ConsoleWriter.Print("showing completed!");
-            }));
+            }).SetVisible(true));
 
             actionParams.Add(
-            new Utils.ActionParams( "sort", "sort. by due date", delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "sort", "sort. by due date", delegate (Utils.aActionParamsContext context) {
                 sortByDueDate = !sortByDueDate;
 
                 if (sortByDueDate)
                     ConsoleWriter.Print("Sorting!");
                 else
                     ConsoleWriter.Print("Not sorting!");
-            }));
+            }).SetVisible(false));
 
+            actionParams.Add(SharedLogic.CreateActionParamsToShowAllCommands(this.contextOutlineMenu));
             actionParams.Add(
-                new Utils.ActionParams("misc", "misc. Show all commands", delegate (Utils.IActionParamsContext context) {
-                    SharedLogic.OutlineMenuActionParamsContext.showThisParam = !SharedLogic.OutlineMenuActionParamsContext.showThisParam;
-
-                    if (SharedLogic.OutlineMenuActionParamsContext.showThisParam)
-                        ConsoleWriter.Print("Showing all commands!");
-                    else
-                        ConsoleWriter.Print("Hiding commands!");
-                }));
-            actionParams.Add(
-                new Utils.ActionParams("x", "x. exit", delegate (Utils.IActionParamsContext context) {
+                new Utils.ActionParams("x", "x. back", delegate (Utils.aActionParamsContext context) {
                      Exit();
-                })
+                }).SetVisible(true)
                 );
 
             this.actionParams = actionParams.ToArray();
@@ -138,13 +118,13 @@ namespace Jarvis
             }
             ConsoleWriter.PushColor(ConsoleColor.DarkBlue);
 
-            Utils.Assert(application.OutlineManager.IsEntryAvailableWithID(contextOutlineMenu.parentID), "Error");
-            EntryData entryData = application.OutlineManager.GetEntry(contextOutlineMenu.parentID);
+            Utils.Assert(application.OutlineManager.IsEntryAvailableWithID(contextOutlineMenu.parentIDForNewTasks), "Error");
+            EntryData entryData = application.OutlineManager.GetEntry(contextOutlineMenu.parentIDForNewTasks);
             UICommon.PrintEntry(entryData);
             
             ConsoleWriter.PopColor();
             
-            List<EntryData> entries = application.OutlineManager.outlineData.entries.FindAll(X => (X != null && X.parentID == contextOutlineMenu.parentID ));
+            List<EntryData> entries = application.OutlineManager.outlineData.entries.FindAll(X => (X != null && X.parentID == contextOutlineMenu.parentIDForNewTasks ));
             if (sortByDueDate)
                 entries = entries.OrderBy(o => o.TaskDueDate).ToList();
 
@@ -201,7 +181,7 @@ namespace Jarvis
             );
         }
 
-        SharedLogic.OutlineMenuActionParamsContext contextOutlineMenu = new SharedLogic.OutlineMenuActionParamsContext();
+        SharedLogic.ActionParamsContext contextOutlineMenu = new SharedLogic.ActionParamsContext();
         private JApplication application;
         private static bool hideCompleted = true;
         private static bool sortByDueDate = true;

@@ -30,7 +30,7 @@ namespace Jarvis {
 
             Utils.DoAction("Settings Menu options:", ":", "x",
 
-                new Utils.ActionParams( "x", "x. exit", delegate (Utils.IActionParamsContext context) {
+                new Utils.ActionParams( "x", "x. exit", delegate (Utils.aActionParamsContext context) {
                     Exit();
                 })
             );

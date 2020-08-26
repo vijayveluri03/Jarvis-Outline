@@ -109,49 +109,49 @@ public static class Utils
 
         DateTime date = DateTime.MinValue;
         Utils.DoAction(message, ":", "",
-            new Utils.ActionParams( "", ". default " + defaultDate.ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "", ". default " + defaultDate.ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = defaultDate;
             }),
-            new Utils.ActionParams( "x", "x. default " + defaultDate.ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "x", "x. default " + defaultDate.ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = defaultDate;
             }),
-            new Utils.ActionParams( "r", "r. reset " + DateTime.MinValue.ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "r", "r. reset " + DateTime.MinValue.ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = DateTime.MinValue;
             }),
-            new Utils.ActionParams( "0", "0. today " + Utils.Now.ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "0", "0. today " + Utils.Now.ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = Utils.Now;
             }),
-            new Utils.ActionParams( "-1", "-1. yest " + Utils.Now.AddDays(-1).ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "-1", "-1. yest " + Utils.Now.AddDays(-1).ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = Utils.Now.AddDays(-1);
             }),
-            new Utils.ActionParams( "-2", "-2. " + Utils.Now.AddDays(-2).ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "-2", "-2. " + Utils.Now.AddDays(-2).ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = Utils.Now.AddDays(-2);
             }),
-            new Utils.ActionParams( "-3", "-3. " + Utils.Now.AddDays(-3).ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "-3", "-3. " + Utils.Now.AddDays(-3).ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = Utils.Now.AddDays(-3);
             }),
-            new Utils.ActionParams( "1", "1. tomo " + Utils.Now.AddDays(1).ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "1", "1. tomo " + Utils.Now.AddDays(1).ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = Utils.Now.AddDays(1);
             }),
-            new Utils.ActionParams( "2", "2. " + Utils.Now.AddDays(2).ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "2", "2. " + Utils.Now.AddDays(2).ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = Utils.Now.AddDays(2);
             }),
-            new Utils.ActionParams( "3", "3. " + Utils.Now.AddDays(3).ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "3", "3. " + Utils.Now.AddDays(3).ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = Utils.Now.AddDays(3);
             }),
-            new Utils.ActionParams( "4", "4. " + Utils.Now.AddDays(4).ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "4", "4. " + Utils.Now.AddDays(4).ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = Utils.Now.AddDays(4);
             }),
-            new Utils.ActionParams( "7", "7. " + Utils.Now.AddDays(7).ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "7", "7. " + Utils.Now.AddDays(7).ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = Utils.Now.AddDays(7);
             }),
-            new Utils.ActionParams("14", "14. " + Utils.Now.AddDays(14).ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams("14", "14. " + Utils.Now.AddDays(14).ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = Utils.Now.AddDays(14);
             }),
-            new Utils.ActionParams("30", "30. " + Utils.Now.AddDays(30).ShortForm(), delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams("30", "30. " + Utils.Now.AddDays(30).ShortForm(), delegate (Utils.aActionParamsContext context) {
                 date = Utils.Now.AddDays(30);
             }),
-            new Utils.ActionParams( "c", "c. custom ", delegate (Utils.IActionParamsContext context) {
+            new Utils.ActionParams( "c", "c. custom ", delegate (Utils.aActionParamsContext context) {
                 date = GetCustomDateFromUser("Enter Date (mm/dd):");
             })
         );
@@ -190,22 +190,28 @@ public static class Utils
     // Select User Action from the possible action list
 
     #region SELECT USER ACTION
-    public class IActionParamsContext {
-        public static bool showThisParam = false;
-        public bool Hide { get { return !showThisParam; } }
+    public class aActionParamsContext {
+
+        //@todo - some dirty code. Clean it.
+        private static bool showAllCommands = false;
+        public static bool DisplayAllCommands { get { return showAllCommands; } set { showAllCommands = value; } }
     }
 
     public class ActionParams {
-        public ActionParams(string userAction, string heading, System.Action<IActionParamsContext> actionToPerform, IActionParamsContext context = null ) {
+        public ActionParams(string userAction, string heading, System.Action<aActionParamsContext> actionToPerform, aActionParamsContext context = null ) {
             this.userAction = userAction;
             this.heading = heading;
             this.actionToPerform = actionToPerform;
             this.context = context;
         }
+        public ActionParams SetVisible ( bool visible) { this.visible = visible; return this; }
+        public ActionParams SetContext(aActionParamsContext context) { this.context= context; return this; }
+
         public string userAction;
         public string heading;
-        public System.Action<IActionParamsContext> actionToPerform;
-        public IActionParamsContext context;
+        public System.Action<aActionParamsContext> actionToPerform;
+        public aActionParamsContext context;
+        public bool visible = true;
     }
     public static void SetMaxColumnsForOptions(int max) {
         maxColumnsInALine = max;
@@ -228,8 +234,12 @@ public static class Utils
             int shown = 0;
             for (int i = 0; i < prms.Length; i++) {
                 // If we have context and in the context we are alking not to show this params, then hide it
-                if (prms[i].context != null && prms[i].context.Hide)
-                    continue;
+                if (!prms[i].visible) {
+                    if (aActionParamsContext.DisplayAllCommands) {
+                    }
+                    else
+                        continue;
+                }
                 consoleMsg.Append(string.Format("{0,-" + maxCharLength + "}", prms[i].heading));
                 if ((shown + 1) % maxColumnsInALine == 0 && (shown + 1) < prms.Length)
                     consoleMsg.Append("\n");
