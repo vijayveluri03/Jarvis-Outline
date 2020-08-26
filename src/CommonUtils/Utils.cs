@@ -145,6 +145,12 @@ public static class Utils
             new Utils.ActionParams( "7", "7. " + Utils.Now.AddDays(7).ShortForm(), delegate (Utils.IActionParamsContext context) {
                 date = Utils.Now.AddDays(7);
             }),
+            new Utils.ActionParams("14", "14. " + Utils.Now.AddDays(14).ShortForm(), delegate (Utils.IActionParamsContext context) {
+                date = Utils.Now.AddDays(14);
+            }),
+            new Utils.ActionParams("30", "30. " + Utils.Now.AddDays(30).ShortForm(), delegate (Utils.IActionParamsContext context) {
+                date = Utils.Now.AddDays(30);
+            }),
             new Utils.ActionParams( "c", "c. custom ", delegate (Utils.IActionParamsContext context) {
                 date = GetCustomDateFromUser("Enter Date (mm/dd):");
             })
@@ -329,6 +335,39 @@ public static class Utils
         get {
             return DateTime.Now.ZeroTime();
         }
+    }
+
+    public static int[] ConvertCommaAndHyphenSeperateStringToIDs(string uberText) {
+        string[] IDs = uberText.Split(',');
+        List<int> convertedIDs = new List<int>();
+        foreach (string idStr in IDs) {
+            
+            if ( idStr.Contains('-')) {
+                string[] range = idStr.Split('-');
+                Assert(range != null && range.Length == 2);
+                int num1 = Atoi(range[0], -1);
+                int num2 = Atoi(range[1], -1);
+                if ( num1 != -1 && num2 != -1 && num1 <= num2 ) {
+                    while( num1 <= num2) {
+                        convertedIDs.Add(num1);
+                        num1++;
+                    }
+                }
+            }
+            else {
+                int id = Atoi(idStr, -1);
+                if (id != -1)
+                    convertedIDs.Add(id);
+            }
+        }
+        return convertedIDs.ToArray();
+    }
+
+    public static int Atoi ( string txt, int defaul ) {
+        int num = defaul;
+        if (int.TryParse(txt, out num))
+            return num;
+        return defaul;
     }
 
     public static bool CreateFileIfNotExit ( string path, string templateFile ) {

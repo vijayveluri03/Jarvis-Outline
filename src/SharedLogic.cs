@@ -7,14 +7,13 @@ namespace Jarvis {
 
         public static SharedLogic Load() {
             SharedLogic instance = new SharedLogic();
-
-            
-
             return instance;
         }
-        public void PostInit(OutlineManager outlinemanager, PomoManager pomoManager) {
+        public void PostInit(OutlineManager outlinemanager, PomoManager pomoManager, JUserData userData, JDesignData designData) {
             this.outlineManager = outlinemanager;
             this.pomoManager = pomoManager;
+            this.userData = userData;
+            this.designData = designData;
         }
 
 
@@ -61,6 +60,20 @@ namespace Jarvis {
             outlineManager.RemoveEntry(entryData);
         }
 
+        // Marks a task as complete
+
+        public void CompleteTask(int id) {
+            if (IsEntryValidOrPrintError(id)) {
+                EntryData ed = this.outlineManager.GetEntry(id);
+                if (!ed.IsTask)
+                    ConsoleWriter.PrintInRed("This is not a task");
+                else
+                    ed.SetAsComplete(Utils.Now);
+            }
+            else
+                ConsoleWriter.PrintInRed("Action not complete");
+        }
+
         // Clones. Clones the links and the parent.
         // But children are not cloned.
 
@@ -87,6 +100,12 @@ namespace Jarvis {
             }
         }
 
+        public void SaveAll() {
+            outlineManager.Save();
+            pomoManager.Save();
+            userData.Save();
+        }
+
         public bool IsEntryValidOrPrintError(int id) {
             if (outlineManager.IsEntryAvailableWithID(id)) {
                 return true;
@@ -98,10 +117,12 @@ namespace Jarvis {
 
 
 
+        // UI logic - Hot keys for actions to be performed.
+        // Along with the logic needed to be executed for a Hot key
+
         #region ACTION PARAMS LOGIC
 
         // Context required for the shared logic to access specific information
-
         public class OutlineMenuActionParamsContext : Utils.IActionParamsContext {
 
             public int parentID;
@@ -128,19 +149,9 @@ namespace Jarvis {
                 OutlineMenuActionParamsContext contextOutlineMenu = contextNew as OutlineMenuActionParamsContext;
 
                 string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):", contextOutlineMenu.parentID.ToString());
-                string[] IDs = commaSeperatedID.Split(',');
-                foreach (string idStr in IDs) {
-                    int id = -1;
-
-                    if (int.TryParse(idStr, out id) && IsEntryValidOrPrintError(id)) {
-                        EntryData ed = this.outlineManager.GetEntry(id);
-                        if (!ed.IsTask)
-                            ConsoleWriter.PrintInRed("This is not a task");
-                        else
-                            ed.SetAsComplete(Utils.Now);
-                    }
-                    else
-                        ConsoleWriter.PrintInRed("Action not complete");
+                int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
+                foreach (int id in IDs) {
+                    CompleteTask(id);
                 }
             });
             ap.context = contextAtt;
@@ -272,6 +283,24 @@ namespace Jarvis {
             ap.context = contextAtt;
             return ap;
         }
+        public Utils.ActionParams CreateActionParamsToChangeParent(OutlineMenuActionParamsContext contextAtt) {
+            Utils.ActionParams ap = new Utils.ActionParams("p", "p. Change parent", delegate (Utils.IActionParamsContext context) {
+                Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
+                OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
+
+                int id = Utils.GetUserInputInt("Entry ID:", contextOutlineMenu.parentID);
+                if (IsEntryValidOrPrintError(id)) {
+                    EntryData ed = outlineManager.GetEntry(id);
+                    int parentID = Utils.GetUserInputInt("Parend ID:");
+                    if ( IsEntryValidOrPrintError(parentID)) {
+                        ed.parentID = parentID;
+                        ConsoleWriter.Print("Parent changed");
+                    }
+                }
+            });
+            ap.context = contextAtt;
+            return ap;
+        }
         public Utils.ActionParams CreateActionParamsToCreateATaskAndLinkItToParent(OutlineMenuActionParamsContext contextAtt) {
             Utils.ActionParams ap = new Utils.ActionParams( "atl", "atl. Create a Task and link to parent", delegate (Utils.IActionParamsContext context) {
                 Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
@@ -301,14 +330,11 @@ namespace Jarvis {
 
                 if (confirmation) {
                     string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):", contextOutlineMenu.parentID.ToString());
-                    string[] IDs = commaSeperatedID.Split(',');
-                    foreach (string idStr in IDs) {
-                        int id = -1;
-
-                        if (int.TryParse(idStr, out id) && IsEntryValidOrPrintError(id)) {
+                    int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
+                    foreach (int id in IDs) {
+                        if ( IsEntryValidOrPrintError(id)) {
                             EntryData ed = this.outlineManager.GetEntry(id);
                             CloneAnEntry(ed);
-
                         }
                         else
                             ConsoleWriter.PrintInRed("Action not performed");
@@ -318,7 +344,7 @@ namespace Jarvis {
             ap.context = contextAtt;
             return ap;
         }
-        public Utils.ActionParams CreateActionParamsToChangeParent(OutlineMenuActionParamsContext contextAtt) {
+        public Utils.ActionParams CreateActionParamsToCloneGroup(OutlineMenuActionParamsContext contextAtt) {
             Utils.ActionParams ap = new Utils.ActionParams( "clonegroup", "clonegroup. Clone a group", delegate (Utils.IActionParamsContext context) {
                 Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
                 OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
@@ -425,15 +451,14 @@ namespace Jarvis {
                 Utils.Assert(context != null && context is OutlineMenuActionParamsContext);
                 OutlineMenuActionParamsContext contextOutlineMenu = context as OutlineMenuActionParamsContext;
 
-                this.outlineManager.Save();
-                pomoManager.Save();
+                SaveAll();
             });
             ap.context = contextAtt;
             return ap;
         }
 
 
-        // @todo - Remove thse 
+        // @todo - Hardcoded - Remove these 
         private void CloneHabits() {
             int[] taskIDsToClone = new int[] { 86, 88, 89, 90, 91, 92, 95, 96, 192, 385, 336 };
 
@@ -455,6 +480,8 @@ namespace Jarvis {
 
         private OutlineManager outlineManager;
         private PomoManager pomoManager;
+        private JUserData userData;
+        private JDesignData designData;
 
     }
 }

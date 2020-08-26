@@ -43,6 +43,10 @@ namespace Jarvis
                         application.FSM.PushInNextFrame(new OutlineMenu(), OutlineMenu.GetContext(application, id));
                     }
             }) );
+            actionParams.Add(
+                new Utils.ActionParams("m", "m. Marked Tasks", delegate (Utils.IActionParamsContext context) {
+                    application.FSM.PushInNextFrame(new MarkedTasksMenu(), MarkedTasksMenu.GetContext(application));
+                }));
             actionParams.Add(application.SharedLogic.CreateActionParamsForTaskCompletion(this.contextOutlineMenu));
             actionParams.Add(application.SharedLogic.CreateActionParamsToDiscardTask(this.contextOutlineMenu));
 
@@ -53,12 +57,13 @@ namespace Jarvis
             actionParams.Add(application.SharedLogic.CreateActionParamsToCreateANewTask(this.contextOutlineMenu));
             actionParams.Add(application.SharedLogic.CreateActionParamsToConvertToATask(this.contextOutlineMenu));
             actionParams.Add(application.SharedLogic.CreateActionParamsToEditAnEntry(this.contextOutlineMenu));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToChangeParent(this.contextOutlineMenu));
 
             actionParams.Add(application.SharedLogic.CreateActionParamsToConvertToAnEntry(this.contextOutlineMenu));
             actionParams.Add(application.SharedLogic.CreateActionParamsToCreateATaskAndLinkItToParent(this.contextOutlineMenu));
             actionParams.Add(application.SharedLogic.CreateActionParamsToCloneAnEntry(this.contextOutlineMenu));
 
-            actionParams.Add(application.SharedLogic.CreateActionParamsToChangeParent(this.contextOutlineMenu));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToCloneGroup(this.contextOutlineMenu));
             actionParams.Add(application.SharedLogic.CreateActionParamsToStartAPomodoroTimer(this.contextOutlineMenu));
             actionParams.Add(application.SharedLogic.CreateActionParamsToLinkTasksToAPomodoroTimer(this.contextOutlineMenu));
 
@@ -66,11 +71,29 @@ namespace Jarvis
             actionParams.Add(application.SharedLogic.CreateActionParamsToPrintPomodoroStatus(this.contextOutlineMenu));
             actionParams.Add(application.SharedLogic.CreateActionParamsToSaveAll(this.contextOutlineMenu));
 
-            actionParams.Add(application.SharedLogic.CreateActionParamsToStartAPomodoroTimer(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToStartAPomodoroTimer(this.contextOutlineMenu));
-            actionParams.Add(application.SharedLogic.CreateActionParamsToStartAPomodoroTimer(this.contextOutlineMenu));
+            actionParams.Add(
+                new Utils.ActionParams("mk", "mk. Mark an entry", delegate (Utils.IActionParamsContext context) {
+                string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):", contextOutlineMenu.parentID.ToString());
+                int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
+                    foreach (int id in IDs) {
+                        if (SharedLogic.IsEntryValidOrPrintError(id)) {
+                            if (!application.UserData.markedTaskIDs.Contains(id)) {
+                                application.UserData.markedTaskIDs.Add(id);
+                                ConsoleWriter.Print("Marked!");
+                            }
+                        }
+                    }
+                }));
 
+            actionParams.Add(
+            new Utils.ActionParams("h", "h. show/hide completed", delegate (Utils.IActionParamsContext context) {
+                hideCompleted = !hideCompleted;
 
+                if (hideCompleted)
+                    ConsoleWriter.Print("Hiding completed!");
+                else
+                    ConsoleWriter.Print("showing completed!");
+            }));
 
             actionParams.Add(
             new Utils.ActionParams( "sort", "sort. by due date", delegate (Utils.IActionParamsContext context) {
@@ -93,9 +116,7 @@ namespace Jarvis
                 }));
             actionParams.Add(
                 new Utils.ActionParams("x", "x. exit", delegate (Utils.IActionParamsContext context) {
-                    ConsoleWriter.Print("Exiting");
-                    if (application.FSM.StateCount > 1)
-                        Exit();
+                     Exit();
                 })
                 );
 

@@ -46,6 +46,10 @@ namespace Jarvis {
                     application.FSM.PushInNextFrame(new OutlineMenu(), OutlineMenu.GetContext(application, JConstants.ROOT_ENTRY_ID));
                 }),
 
+                new Utils.ActionParams("m", "m. Marked Tasks", delegate (Utils.IActionParamsContext context) {
+                    application.FSM.PushInNextFrame(new MarkedTasksMenu(), MarkedTasksMenu.GetContext(application));
+                }),
+
                 new Utils.ActionParams( "r", "r. Reports", delegate (Utils.IActionParamsContext context) {
                     application.FSM.PushInNextFrame(new ReportsMenu(), ReportsMenu.GetContext(application));
                 }),
@@ -55,12 +59,10 @@ namespace Jarvis {
                 }),
 
                 new Utils.ActionParams( "s", "s. Save", delegate (Utils.IActionParamsContext context) {
-                    application.OutlineManager.Save();
-                    application.PomoManager.Save();
-                    application.UserData.Save();
+                    application.SharedLogic.SaveAll();
                 }),
 
-                new Utils.ActionParams( "x", "x. Exit", delegate (Utils.IActionParamsContext context) {
+                new Utils.ActionParams( "q", "q. Quit", delegate (Utils.IActionParamsContext context) {
                     Exit();
                 })
 

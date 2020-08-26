@@ -39,7 +39,7 @@ namespace Jarvis {
 
             OutlineManager = new OutlineManager();
             PomoManager = new PomoManager( userData.activatePomodoroReminder );
-            SharedLogic.PostInit(OutlineManager, PomoManager);
+            SharedLogic.PostInit(OutlineManager, PomoManager, userData, designData);
 
             fsm.PushInNextFrame(new MainMenu(), MainMenu.GetContext(this));
         }

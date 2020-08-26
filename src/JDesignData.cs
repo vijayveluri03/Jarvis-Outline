@@ -36,6 +36,7 @@ namespace Jarvis {
         [JsonProperty] public DateTime lastLoginDate = DateTime.MinValue;
         [JsonProperty] public bool activatePomodoro = true;
         [JsonProperty] public bool activatePomodoroReminder = true;
+        [JsonProperty] public List<int> markedTaskIDs = new List<int>();
 
         public static JUserData Load() {
             if (File.Exists(JConstants.PLAYERPREFS_FILENAME)) {
