@@ -48,8 +48,8 @@ namespace Jarvis {
             }
             else {
                 ConsoleWriter.Print("Player prefs file not found. So defaulting it!");
+                return new JUserData();
             }
-            return null;
         }
 
         public void Save() {
