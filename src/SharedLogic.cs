@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Diagnostics;
 
 namespace Jarvis {
     public class SharedLogic {
@@ -148,7 +149,8 @@ namespace Jarvis {
                 string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):");
                 int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
                 foreach (int id in IDs) {
-                    CompleteTask(id);
+                    if (IsEntryValidOrPrintError(id))
+                        CompleteTask(id);
                 }
             });
             return ap;
@@ -156,13 +158,16 @@ namespace Jarvis {
         }
         public Utils.ActionParams CreateActionParamsToDiscardTask () {
             Utils.ActionParams ap = new Utils.ActionParams( "d", "d. Discard", delegate (Utils.aActionParamsContext context) {
-                int id = Utils.GetUserInputInt("Entry ID:");
-                if (IsEntryValidOrPrintError(id)) {
-                    EntryData ed = this.outlineManager.GetEntry(id);
-                    if (!ed.IsTask)
-                        ConsoleWriter.PrintInRed("This is not a task");
-                    else
-                        ed.SetAsDiscarded(Utils.Now);
+                string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):");
+                int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
+                foreach (int id in IDs) {
+                    if (IsEntryValidOrPrintError(id)) {
+                        EntryData ed = this.outlineManager.GetEntry(id);
+                        if (!ed.IsTask)
+                            ConsoleWriter.PrintInRed("This is not a task");
+                        else
+                            ed.SetAsDiscarded(Utils.Now);
+                    }
                 }
             });
             return ap;
@@ -170,13 +175,16 @@ namespace Jarvis {
         public Utils.ActionParams CreateActionParamsToRemoveEntry() {
             Utils.ActionParams ap = new Utils.ActionParams( "r", "r. Remove", delegate (Utils.aActionParamsContext context) {
                 ConsoleWriter.Print("All the links will be broken. and all children will be removed.");
-                bool confirmation = Utils.GetConfirmationFromUser("Do you want to proceed", false);
+                bool confirmation = true;// Utils.GetConfirmationFromUser("Do you want to proceed", false);
 
                 if (confirmation) {
-                    int id = Utils.GetUserInputInt("Entry ID:");
-                    if (IsEntryValidOrPrintError(id)) {
-                        EntryData ed = this.outlineManager.GetEntry(id);
-                        RemoveTask(ed);
+                    string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):");
+                    int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
+                    foreach (int id in IDs) {
+                        if (IsEntryValidOrPrintError(id)) {
+                            EntryData ed = this.outlineManager.GetEntry(id);
+                            RemoveTask(ed);
+                        }
                     }
                 }
             });
@@ -189,16 +197,38 @@ namespace Jarvis {
             return ap;
         }
         public Utils.ActionParams CreateActionParamsToLinkTwoEntries() {
-            Utils.ActionParams ap = new Utils.ActionParams( "l", "l. link to Task", delegate (Utils.aActionParamsContext context) {
-                int id = Utils.GetUserInputInt("Entry ID:");
-                if (IsEntryValidOrPrintError(id)) {
-                    int id2 = Utils.GetUserInputInt("Entry 2 ID:");
-                    if (IsEntryValidOrPrintError(id2)) {
-                        EntryData ed1 = this.outlineManager.GetEntry(id);
-                        EntryData ed2 = this.outlineManager.GetEntry(id2);
+            Utils.ActionParams ap = new Utils.ActionParams("l", "l. link to Task", delegate (Utils.aActionParamsContext context) {
+                string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):");
+                int id2 = Utils.GetUserInputInt("Entry 2 ID:");
+                int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
+                foreach (int id in IDs) {
+                    if (IsEntryValidOrPrintError(id)) {
+                        if (IsEntryValidOrPrintError(id2)) {
+                            EntryData ed1 = this.outlineManager.GetEntry(id);
+                            EntryData ed2 = this.outlineManager.GetEntry(id2);
 
-                        ed1.AddLink(ed2.id);
-                        ed2.AddLink(ed1.id);
+                            ed1.AddLink(ed2.id);
+                            ed2.AddLink(ed1.id);
+                        }
+                    }
+                }
+            });
+            return ap;
+        }
+        public Utils.ActionParams CreateActionParamsToUnLinkTwoEntries() {
+            Utils.ActionParams ap = new Utils.ActionParams("-l", "-l. unlink", delegate (Utils.aActionParamsContext context) {
+                string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):");
+                int id2 = Utils.GetUserInputInt("Entry 2 ID:");
+                int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
+                foreach (int id in IDs) {
+                    if (IsEntryValidOrPrintError(id)) {
+                        if (IsEntryValidOrPrintError(id2)) {
+                            EntryData ed1 = this.outlineManager.GetEntry(id);
+                            EntryData ed2 = this.outlineManager.GetEntry(id2);
+
+                            ed1.UnLink(ed2.id);
+                            ed2.UnLink(ed1.id);
+                        }
                     }
                 }
             });
@@ -247,20 +277,23 @@ namespace Jarvis {
                 int id = Utils.GetUserInputInt("Entry ID:");
                 if (IsEntryValidOrPrintError(id)) {
                     //DateTime dueDate = Utils.GetDateFromUser("Due Date", Utils.Now.AddDays(14));
-                    this.outlineManager.GetEntry(id).ConvertToNotes();
+                    this.outlineManager.GetEntry(id).ConvertToEntry();
                 }
             });
             return ap;
         }
         public Utils.ActionParams CreateActionParamsToChangeParent() {
             Utils.ActionParams ap = new Utils.ActionParams("p", "p. Change parent", delegate (Utils.aActionParamsContext context) {
-                int id = Utils.GetUserInputInt("Entry ID:");
-                if (IsEntryValidOrPrintError(id)) {
-                    EntryData ed = outlineManager.GetEntry(id);
-                    int parentID = Utils.GetUserInputInt("Parend ID:");
-                    if ( IsEntryValidOrPrintError(parentID)) {
-                        ed.parentID = parentID;
-                        ConsoleWriter.Print("Parent changed");
+            string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):");
+                int parentID = Utils.GetUserInputInt("Parend ID:");
+                int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
+                foreach (int id in IDs) {
+                    if (IsEntryValidOrPrintError(id)) {
+                        EntryData ed = outlineManager.GetEntry(id);
+                        if (IsEntryValidOrPrintError(parentID)) {
+                            ed.parentID = parentID;
+                            ConsoleWriter.Print("Parent changed");
+                        }
                     }
                 }
             });
@@ -306,7 +339,7 @@ namespace Jarvis {
             return ap;
         }
         public Utils.ActionParams CreateActionParamsToMarkATask() {
-            return new Utils.ActionParams("mk", "mk. Mark an entry", delegate (Utils.aActionParamsContext context) {
+            return new Utils.ActionParams("mark", "mark. Toggle Mark an entry", delegate (Utils.aActionParamsContext context) {
                 string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):");
                 int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
                 foreach (int id in IDs) {
@@ -314,6 +347,28 @@ namespace Jarvis {
                         if (!userData.markedTaskIDs.Contains(id)) {
                             userData.markedTaskIDs.Add(id);
                             ConsoleWriter.Print("Marked!");
+                        }
+                        else {
+                            userData.markedTaskIDs.Remove(id);
+                            ConsoleWriter.Print("Un Marked!");
+                        }
+                    }
+                }
+            });
+        }
+        public Utils.ActionParams CreateActionParamsToPinAnEntry() {
+            return new Utils.ActionParams("pin", "pin. Toggle Pin an entry", delegate (Utils.aActionParamsContext context) {
+                string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):");
+                int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
+                foreach (int id in IDs) {
+                    if (IsEntryValidOrPrintError(id)) {
+                        if (!userData.pinnedTaskIDs.Contains(id)) {
+                            userData.pinnedTaskIDs.Add(id);
+                            ConsoleWriter.Print("Pinned!");
+                        }
+                        else {
+                            userData.pinnedTaskIDs.Remove(id);
+                            ConsoleWriter.Print("Un Pinned!");
                         }
                     }
                 }
@@ -422,9 +477,59 @@ namespace Jarvis {
         }
 
 
+        public Utils.ActionParams CreateActionParamsToSetURL() {
+            Utils.ActionParams ap = new Utils.ActionParams("seturl", "seturl", delegate (Utils.aActionParamsContext context) {
+                int id = Utils.GetUserInputInt("Entry ID:");
+                if (IsEntryValidOrPrintError(id)) {
+                    //DateTime dueDate = Utils.GetDateFromUser("Due Date", Utils.Now.AddDays(14));
+                    string url = Utils.GetUserInputString("Enter URL:");
+                    this.outlineManager.GetEntry(id).URLToOpen = url;
+                }
+            });
+            return ap;
+        }
+        public Utils.ActionParams CreateActionParamsToClearURL() {
+            Utils.ActionParams ap = new Utils.ActionParams("clearurl", "clearurl", delegate (Utils.aActionParamsContext context) {
+                int id = Utils.GetUserInputInt("Entry ID:");
+                if (IsEntryValidOrPrintError(id)) {
+                    //DateTime dueDate = Utils.GetDateFromUser("Due Date", Utils.Now.AddDays(14));
+                    this.outlineManager.GetEntry(id).URLToOpen = "";
+                }
+            });
+            return ap;
+        }
+        public Utils.ActionParams CreateActionParamsToPrintURL() {
+            Utils.ActionParams ap = new Utils.ActionParams("printurl", "printurl", delegate (Utils.aActionParamsContext context) {
+                int id = Utils.GetUserInputInt("Entry ID:");
+                if (IsEntryValidOrPrintError(id)) {
+                    ConsoleWriter.Print("URL is " + this.outlineManager.GetEntry(id).URLToOpen);
+                }
+            });
+            return ap;
+        }
+        public Utils.ActionParams CreateActionParamsToOpenURL() {
+            Utils.ActionParams ap = new Utils.ActionParams("openurl", "openurl", delegate (Utils.aActionParamsContext context) {
+                int id = Utils.GetUserInputInt("Entry ID:");
+                if (IsEntryValidOrPrintError(id)) {
+                    EntryData ed = this.outlineManager.GetEntry(id);
+                    if (ed.DoesUrlExist) {
+                        ConsoleWriter.PrintURL("Opening " + ed.URLToOpen);
+                        // if mac
+                        string command = "open \'" + ed.URLToOpen + "\'";
+                        // else @todo
+                        Utils.ExecuteCommandInConsole(command);
+                    }
+                    else
+                        ConsoleWriter.Print("No URL present");
+                }
+            });
+            return ap;
+        }
+        
+
         // @todo - Hardcoded - Remove these 
         private void CloneHabits() {
-            int[] taskIDsToClone = new int[] { 86, 88, 89, 90, 91, 92, 95, 96, 192, 385, 336 };
+            int[] taskIDsToClone = new int[] { 86, 88, 89, 90, 91, 92, 95, 96, 192, 385, 531 };
 
             foreach (int habitTaskID in taskIDsToClone) {
                 EntryData ed = this.outlineManager.GetEntry(habitTaskID);

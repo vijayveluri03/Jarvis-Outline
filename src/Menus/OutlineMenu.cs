@@ -45,14 +45,20 @@ namespace Jarvis
             }).SetVisible(true) );
             actionParams.Add(
                 new Utils.ActionParams("m", "m. Marked Tasks", delegate (Utils.aActionParamsContext context) {
-                    application.FSM.PushInNextFrame(new MarkedTasksMenu(), MarkedTasksMenu.GetContext(application));
+                    application.FSM.PushInNextFrame(new FilteredTasksMenu(), FilteredTasksMenu.GetContext(application, FilteredTasksMenu.eFilter.MARKED_TASKS));
                 }).SetVisible(false));
+            actionParams.Add(
+                new Utils.ActionParams("d", "d. Due Tasks", delegate (Utils.aActionParamsContext context) {
+                    application.FSM.PushInNextFrame(new FilteredTasksMenu(), FilteredTasksMenu.GetContext(application, FilteredTasksMenu.eFilter.DUE_TASKS));
+                }).SetVisible(false));
+
             actionParams.Add(application.SharedLogic.CreateActionParamsForTaskCompletion().SetVisible(true));
             actionParams.Add(application.SharedLogic.CreateActionParamsToDiscardTask().SetVisible(false));
 
             actionParams.Add(application.SharedLogic.CreateActionParamsToRemoveEntry().SetVisible(false));
             actionParams.Add(application.SharedLogic.CreateActionParamsToRefresh().SetVisible(false));
             actionParams.Add(application.SharedLogic.CreateActionParamsToLinkTwoEntries().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToUnLinkTwoEntries().SetVisible(false));
 
             actionParams.Add(application.SharedLogic.CreateActionParamsToCreateANewTask(this.contextOutlineMenu).SetVisible(true));
             actionParams.Add(application.SharedLogic.CreateActionParamsToConvertToATask().SetVisible(false));
@@ -71,7 +77,13 @@ namespace Jarvis
             actionParams.Add(application.SharedLogic.CreateActionParamsToPrintPomodoroStatus().SetVisible(false));
             actionParams.Add(application.SharedLogic.CreateActionParamsToSaveAll().SetVisible(true));
 
+            actionParams.Add(application.SharedLogic.CreateActionParamsToClearURL().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToOpenURL().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToSetURL().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToPrintURL().SetVisible(false));
+
             actionParams.Add(application.SharedLogic.CreateActionParamsToMarkATask().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToPinAnEntry().SetVisible(false));
 
             actionParams.Add(
             new Utils.ActionParams("h", "h. show/hide completed", delegate (Utils.aActionParamsContext context) {

@@ -26,14 +26,20 @@ namespace Jarvis {
         public int TaskStatus = 0;  
 
         // Task only properties
-        [JsonRequired]
+        [JsonProperty]
         private DateTime taskDueDate = DateTime.MinValue;
 
-        [JsonRequired]
+        [JsonProperty]
         private DateTime taskClosedDate = DateTime.MinValue;
 
-        // Task and notes properties 
-        [JsonRequired] private DateTime createdDate = DateTime.MinValue;
+        // Task and Entry properties 
+        [JsonProperty] private DateTime createdDate = DateTime.MinValue;
+
+        // Notes Text file
+        [JsonProperty] private bool hasNotes = false;
+
+        // Enternal link
+        [JsonProperty] private string urlToOpen = "";
 
         // Getters 
 
@@ -44,13 +50,16 @@ namespace Jarvis {
         [JsonIgnore] public DateTime TaskDueDate { get { return taskDueDate.ZeroTime(); } set { taskDueDate = value.ZeroTime(); } }
         [JsonIgnore] public DateTime TaskClosedDate { get { return taskClosedDate.ZeroTime(); } set { taskClosedDate = value.ZeroTime(); } }
         [JsonIgnore] public DateTime CreatedDate { get { return createdDate.ZeroTime(); } set { createdDate = value.ZeroTime(); } }
+        [JsonIgnore] public string URLToOpen { get { return urlToOpen; } set { urlToOpen = value; } }
+        [JsonIgnore] public bool DoesUrlExist { get { return !string.IsNullOrEmpty(urlToOpen); } }
+        [JsonIgnore] public int DaysRemainingFromDueDate {  get { return (TaskDueDate - Utils.Now).Days; } }
 
         // Setters ( kinda )
 
         public void SetAsTask(DateTime time) { TaskStatus |= 1; taskDueDate = time.ZeroTime(); }
         public void SetAsComplete(DateTime completedDate) { Utils.Assert(IsTask); TaskStatus |= 2; taskClosedDate = completedDate.ZeroTime(); }
         public void SetAsDiscarded(DateTime discardedDate) { Utils.Assert(IsTask); TaskStatus |= 4; taskClosedDate = discardedDate.ZeroTime(); }
-        public void ConvertToNotes() { TaskStatus = 0; taskDueDate = DateTime.MinValue; }
+        public void ConvertToEntry() { TaskStatus = 0; taskDueDate = DateTime.MinValue; }
         public void AddLink(int id) { if (!links.Contains(id)) links.Add(id); }
         public void UnLink(int id) { if (links.Contains(id)) links.Remove(id); }
     }

@@ -36,28 +36,31 @@ namespace Jarvis {
 
             childrenText += $"{pendingTasks}/{totalTasks}/{totalNotes}";
 
+            string tags = "";
+            string endingInfo = "";
             if (entry.IsTask) {
-                string tags = "";
-                string endingInfo = "";
                 if (entry.IsTaskDiscarded) {
-                    tags = "D";
+                    tags = "[D]";
                     endingInfo = entry.TaskClosedDate.ToShortDateString();
                 }
                 else if (entry.IsTaskComplete) {
-                    tags = "C";
+                    tags = "[C]";
                     endingInfo = entry.TaskClosedDate.ToShortDateString();
                 }
                 else if (entry.IsTask) {
-                    tags = "T";
-                    endingInfo = (entry.TaskDueDate - Utils.Now).Days.ToString();
+                    tags = "[T]";
+                    endingInfo = entry.DaysRemainingFromDueDate.ToString();
                 }
-
-                ConsoleWriter.Print($"{entry.id,-10}{"[" + tags + "] " + entry.title,-200}{childrenText,-15}{endingInfo,-10} ");
             }
             else {
-                string endingInfo = entry.CreatedDate.ToShortDateString();
-                ConsoleWriter.Print($"{entry.id,-10}{entry.title,-200}{childrenText,-15}{endingInfo,-10}");
+                endingInfo = entry.CreatedDate.ToShortDateString();
             }
+
+            if ( entry.DoesUrlExist) { tags += "[U]"; }
+
+            if (!string.IsNullOrEmpty(tags))
+                tags += " ";
+            ConsoleWriter.Print($"{entry.id,-10}{ tags + entry.title,-200}{childrenText,-15}{endingInfo,-10} ");
         }
 
         public static void PrintEntryWithColor(EntryData entry) {

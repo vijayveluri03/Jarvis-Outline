@@ -3,25 +3,33 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace Jarvis {
-    public class MarkedTasksMenu : QUtils.FSMBaseState {
-        public SharedLogic SharedLogic { get { return application.SharedLogic; } }
-        public class Context {
-            public Context(JApplication application) { this.application = application; }
-            public JApplication application;
+    public class FilteredTasksMenu : QUtils.FSMBaseState {
+
+        public enum eFilter {
+            MARKED_TASKS,
+            DUE_TASKS
         };
 
-        public static Context GetContext(JApplication application) {
-            Context contxt = new Context(application);
+        public SharedLogic SharedLogic { get { return application.SharedLogic; } }
+        public class Context {
+            public Context(JApplication application, eFilter filter) { this.application = application; this.filter = filter; }
+            public JApplication application;
+            public eFilter filter;
+        };
+
+        public static Context GetContext(JApplication application, eFilter filter ) {
+            Context contxt = new Context(application, filter);
             return contxt;
         }
 
         public void Exit() {
             application.FSM.Pop();
         }
-        public override void OnContext(System.Object markedTaskContext) {
-            Utils.Assert(markedTaskContext != null && markedTaskContext is Context, "EntryMenu initialization error");
-            application = (markedTaskContext as Context).application;
-            
+        public override void OnContext(System.Object filteredMenuContext) {
+            Utils.Assert(filteredMenuContext != null && filteredMenuContext is Context, "EntryMenu initialization error");
+            application = (filteredMenuContext as Context).application;
+            filterApplied = (filteredMenuContext as Context).filter;
+
             List<Utils.ActionParams> actionParams = new List<Utils.ActionParams>();
 
             actionParams.Add(
@@ -33,7 +41,11 @@ namespace Jarvis {
                 }).SetVisible(true));
             actionParams.Add(
                 new Utils.ActionParams("m", "m. Marked Tasks", delegate (Utils.aActionParamsContext context) {
-                    application.FSM.PushInNextFrame(new MarkedTasksMenu(), MarkedTasksMenu.GetContext(application));
+                    application.FSM.PushInNextFrame(new FilteredTasksMenu(), FilteredTasksMenu.GetContext(application, eFilter.MARKED_TASKS));
+                }).SetVisible(false));
+            actionParams.Add(
+                new Utils.ActionParams("d", "d. Due Tasks", delegate (Utils.aActionParamsContext context) {
+                    application.FSM.PushInNextFrame(new FilteredTasksMenu(), FilteredTasksMenu.GetContext(application, eFilter.DUE_TASKS));
                 }).SetVisible(false));
             actionParams.Add(application.SharedLogic.CreateActionParamsForTaskCompletion().SetVisible(true));
             actionParams.Add(application.SharedLogic.CreateActionParamsToDiscardTask().SetVisible(false));
@@ -57,16 +69,29 @@ namespace Jarvis {
             actionParams.Add(application.SharedLogic.CreateActionParamsToPrintPomodoroStatus().SetVisible(false));
             actionParams.Add(application.SharedLogic.CreateActionParamsToSaveAll().SetVisible(true));
 
+            actionParams.Add(application.SharedLogic.CreateActionParamsToClearURL().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToOpenURL().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToSetURL().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToPrintURL().SetVisible(false));
+
             actionParams.Add(application.SharedLogic.CreateActionParamsToMarkATask().SetVisible(false));
+            actionParams.Add(application.SharedLogic.CreateActionParamsToPinAnEntry().SetVisible(false));
 
             actionParams.Add(
             new Utils.ActionParams("h", "h. show/hide completed", delegate (Utils.aActionParamsContext context) {
                 hideCompleted = !hideCompleted;
-
                 if (hideCompleted)
                     ConsoleWriter.Print("Hiding completed!");
                 else
                     ConsoleWriter.Print("showing completed!");
+            }).SetVisible(true));
+            actionParams.Add(
+            new Utils.ActionParams("switch", "switch. show/hide Duedates", delegate (Utils.aActionParamsContext context) {
+                filterApplied = ((filterApplied == eFilter.DUE_TASKS) ? eFilter.MARKED_TASKS : eFilter.DUE_TASKS);
+                if (filterApplied == eFilter.DUE_TASKS)
+                    ConsoleWriter.Print("Showing tasks with due dates");
+                else
+                    ConsoleWriter.Print("Showing marked tasks!");
             }).SetVisible(true));
 
 
@@ -77,10 +102,15 @@ namespace Jarvis {
                 }).SetVisible(true)
                 );
             actionParams.Add(
-                new Utils.ActionParams("clear", "clear.", delegate (Utils.aActionParamsContext context) {
+                new Utils.ActionParams("clearmarked", "clearmarked. marked tasks", delegate (Utils.aActionParamsContext context) {
                     if (Utils.GetConfirmationFromUser("Are you sure:"))
                         application.UserData.markedTaskIDs.Clear();
                 }).SetVisible(true) );
+            actionParams.Add(
+                new Utils.ActionParams("clearpinned", "clearpinned. pinned tasks", delegate (Utils.aActionParamsContext context) {
+                    if (Utils.GetConfirmationFromUser("Are you sure:"))
+                        application.UserData.pinnedTaskIDs.Clear();
+                }).SetVisible(true));
 
             this.actionParams = actionParams.ToArray();
         }
@@ -101,16 +131,33 @@ namespace Jarvis {
             
             ConsoleWriter.PopColor();
 
-            List<EntryData> entries = new List<EntryData>();
+            List<EntryData> markedorPendingEntries = new List<EntryData>();
+            List<EntryData> pinnedEntries = new List<EntryData>();
 
-            foreach( int id in application.UserData.markedTaskIDs ) {
-                if (application.OutlineManager.IsEntryAvailableWithID(id))
-                    entries.Add(application.OutlineManager.GetEntry(id));
+            foreach (int id in application.UserData.pinnedTaskIDs) {
+                if (application.OutlineManager.IsEntryAvailableWithID(id)) {
+                    EntryData ed = application.OutlineManager.GetEntry(id);
+                    pinnedEntries.Add(ed);
+                }
             }
+
+            if (filterApplied == eFilter.MARKED_TASKS) {
+                foreach (int id in application.UserData.markedTaskIDs) {
+                    if (application.OutlineManager.IsEntryAvailableWithID(id)) {
+                        EntryData ed = application.OutlineManager.GetEntry(id);
+                            markedorPendingEntries.Add(ed);
+                    }
+                }
+            }
+            else {
+                markedorPendingEntries = application.OutlineManager.outlineData.entries.FindAll(X => (X != null && X.IsTask && !X.IsTaskClosed && X.DaysRemainingFromDueDate <= 0 ));
+            }
+
+
             
-            if (entries.Count > 0) {
+            if (markedorPendingEntries.Count > 0) {
                 int lineCount = 0;
-                foreach (EntryData entry in entries) {
+                foreach (EntryData entry in markedorPendingEntries) {
                     if (!hideCompleted || (hideCompleted && !entry.IsTaskClosed)) {
                         UICommon.PrintEntryWithColor(entry);
                         lineCount++;
@@ -125,6 +172,20 @@ namespace Jarvis {
                 ConsoleWriter.Print("<Empty>");
             }
 
+            if (pinnedEntries.Count > 0) {
+                ConsoleWriter.PrintNewLine();
+                ConsoleWriter.PrintInColor("PINNED NOTES", ConsoleColor.DarkYellow);
+                int lineCount = 0;
+                foreach (EntryData entry in pinnedEntries) {
+                    UICommon.PrintEntryWithColor(entry);
+                    lineCount++;
+                    if (lineCount == 3) {
+                        ConsoleWriter.PrintNewLine();
+                        lineCount = 0;
+                    }
+                }
+            }
+
             ConsoleWriter.PrintNewLine();
 
             Utils.DoAction("Outline Menu options:", ":", "refresh",
@@ -134,6 +195,7 @@ namespace Jarvis {
 
         private JApplication application;
         private static bool hideCompleted = true;
+        private static eFilter filterApplied = eFilter.MARKED_TASKS;
         private static Utils.aActionParamsContext context = new Utils.aActionParamsContext();
         
         private Utils.ActionParams[] actionParams = null;

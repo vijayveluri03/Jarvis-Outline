@@ -47,14 +47,18 @@ namespace Jarvis {
                 }),
 
                 new Utils.ActionParams("m", "m. Marked Tasks", delegate (Utils.aActionParamsContext context) {
-                    application.FSM.PushInNextFrame(new MarkedTasksMenu(), MarkedTasksMenu.GetContext(application));
+                    application.FSM.PushInNextFrame(new FilteredTasksMenu(), FilteredTasksMenu.GetContext(application, FilteredTasksMenu.eFilter.MARKED_TASKS));
+                }),
+
+                new Utils.ActionParams("d", "d. Due Tasks", delegate (Utils.aActionParamsContext context) {
+                    application.FSM.PushInNextFrame(new FilteredTasksMenu(), FilteredTasksMenu.GetContext(application, FilteredTasksMenu.eFilter.DUE_TASKS));
                 }),
 
                 new Utils.ActionParams( "r", "r. Reports", delegate (Utils.aActionParamsContext context) {
                     application.FSM.PushInNextFrame(new ReportsMenu(), ReportsMenu.GetContext(application));
                 }),
 
-                new Utils.ActionParams( "s", "s. Settings", delegate (Utils.aActionParamsContext context) {
+                new Utils.ActionParams( "settings", "settings", delegate (Utils.aActionParamsContext context) {
                     application.FSM.PushInNextFrame(new SettingsMenu(), SettingsMenu.GetContext(application));
                 }),
 

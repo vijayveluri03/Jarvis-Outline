@@ -388,6 +388,20 @@ public static class Utils
         }
         return false;
     }
+    //Execute a command in console. 
+    public static void ExecuteCommandInConsole(string command) {
+        Process proc = new System.Diagnostics.Process();
+        proc.StartInfo.FileName = "/bin/bash";
+        proc.StartInfo.Arguments = "-c \" " + command + " \"";
+        //ConsoleWriter.PrintInRed(proc.StartInfo.Arguments);
+        proc.StartInfo.UseShellExecute = false;
+        proc.StartInfo.RedirectStandardOutput = true;
+        proc.Start();
+
+        while (!proc.StandardOutput.EndOfStream) {
+            Console.WriteLine(proc.StandardOutput.ReadLine());
+        }
+    }
 }
 
 // Date Utils

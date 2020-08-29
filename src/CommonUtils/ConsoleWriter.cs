@@ -19,6 +19,12 @@ public static class ConsoleWriter {
 
     // Print message in console
 
+    public static void PrintURL(string message) {
+        Console.ForegroundColor = foregroundTextColorStack.Peek();
+
+        Console.Write(message + "\n");
+        System.Threading.Thread.Sleep(SLEEP_TIME_IN_MS);
+    }
     public static void Print(string message, params object[] parms) {
         Console.ForegroundColor = foregroundTextColorStack.Peek();
 

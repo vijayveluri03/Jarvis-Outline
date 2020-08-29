@@ -10,17 +10,19 @@ namespace Jarvis {
     public static class JConstants {
         public const int ROOT_ENTRY_ID = 0;
         public const string PATH_TO_SOLUTION = "./../../../";
+        public const string PATH_TO_DATA = "./../../../" + "data/";
+        public const string PATH_TO_NOTES = "./../../../" + "data/Notes/";
 
-        public const string DESIGNDATA_FILENAME = JConstants.PATH_TO_SOLUTION + ("data/Design.json");
-        public const string PLAYERPREFS_FILENAME = JConstants.PATH_TO_SOLUTION + ("data/PlayerPrefs.json");
-        public const string OUTLINE_FILENAME = JConstants.PATH_TO_SOLUTION + ("data/Outline.json");
-        public const string POMO_FILENAME = JConstants.PATH_TO_SOLUTION + ("data/Pomo.json");
+        public const string DESIGNDATA_FILENAME = JConstants.PATH_TO_DATA + ("Design.json");
+        public const string PLAYERPREFS_FILENAME = JConstants.PATH_TO_DATA + ("PlayerPrefs.json");
+        public const string OUTLINE_FILENAME = JConstants.PATH_TO_DATA + ("Outline.json");
+        public const string POMO_FILENAME = JConstants.PATH_TO_DATA + ("Pomo.json");
 
-        public const string DESIGNDATA_TEMPLATE_FILENAME = JConstants.PATH_TO_SOLUTION + ("data/Design-Template.json");
-        public const string OUTLINE_TEMPLATE_FILENAME = JConstants.PATH_TO_SOLUTION + ("data/Outline-Template.json");
-        public const string POMO_TEMPLATE_FILENAME = JConstants.PATH_TO_SOLUTION + ("data/Pomo-Template.json");
+        public const string DESIGNDATA_TEMPLATE_FILENAME = JConstants.PATH_TO_DATA + ("Design-Template.json");
+        public const string OUTLINE_TEMPLATE_FILENAME = JConstants.PATH_TO_DATA + ("Outline-Template.json");
+        public const string POMO_TEMPLATE_FILENAME = JConstants.PATH_TO_DATA + ("Pomo-Template.json");
 
-        public const string POMO_NOTIFICATION_SOUND = JConstants.PATH_TO_SOLUTION + ("data/Notification.mp3");
+        public const string POMO_NOTIFICATION_SOUND = JConstants.PATH_TO_DATA + ("Notification.mp3");
         public const int POMO_SMALL_DURATION_IN_MINS = 25;
         public const int POMO_MID_DURATION_IN_MINS = 50;
         public const int POMO_LARGE_DURATION_IN_MINS = 75;
@@ -37,6 +39,7 @@ namespace Jarvis {
         [JsonProperty] public bool activatePomodoro = true;
         [JsonProperty] public bool activatePomodoroReminder = true;
         [JsonProperty] public List<int> markedTaskIDs = new List<int>();
+        [JsonProperty] public List<int> pinnedTaskIDs = new List<int>();
 
         public static JUserData Load() {
             if (File.Exists(JConstants.PLAYERPREFS_FILENAME)) {
