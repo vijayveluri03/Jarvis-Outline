@@ -250,10 +250,14 @@ namespace Jarvis {
         }
         public Utils.ActionParams CreateActionParamsToConvertToATask() {
             Utils.ActionParams ap = new Utils.ActionParams( "t", "t. Convert to Task", delegate (Utils.aActionParamsContext context) {
-                int id = Utils.GetUserInputInt("Entry ID:");
-                if (IsEntryValidOrPrintError(id)) {
-                    DateTime dueDate = Utils.GetDateFromUser("Due Date", Utils.Now.AddDays(14));
-                    this.outlineManager.GetEntry(id).SetAsTask(dueDate);
+
+            string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):");
+            int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
+                foreach (int id in IDs) {
+                    if (IsEntryValidOrPrintError(id)) {
+                        DateTime dueDate = Utils.GetDateFromUser("Due Date", Utils.Now.AddDays(0));
+                        this.outlineManager.GetEntry(id).SetAsTask(dueDate);
+                    }
                 }
             });
             return ap;
@@ -274,10 +278,13 @@ namespace Jarvis {
         }
         public Utils.ActionParams CreateActionParamsToConvertToAnEntry() {
             Utils.ActionParams ap = new Utils.ActionParams( "-t", "-t. Convert to Note", delegate (Utils.aActionParamsContext context) {
-                int id = Utils.GetUserInputInt("Entry ID:");
-                if (IsEntryValidOrPrintError(id)) {
-                    //DateTime dueDate = Utils.GetDateFromUser("Due Date", Utils.Now.AddDays(14));
-                    this.outlineManager.GetEntry(id).ConvertToEntry();
+            string commaSeperatedID = Utils.GetUserInputString("Entry ID (comma seperated):");
+            int[] IDs = Utils.ConvertCommaAndHyphenSeperateStringToIDs(commaSeperatedID);
+                foreach (int id in IDs) {
+                    if (IsEntryValidOrPrintError(id)) {
+                        //DateTime dueDate = Utils.GetDateFromUser("Due Date", Utils.Now.AddDays(14));
+                        this.outlineManager.GetEntry(id).ConvertToEntry();
+                    }
                 }
             });
             return ap;

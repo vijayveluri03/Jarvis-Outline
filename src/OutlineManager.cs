@@ -35,9 +35,6 @@ namespace Jarvis {
         // Task and Entry properties 
         [JsonProperty] private DateTime createdDate = DateTime.MinValue;
 
-        // Notes Text file
-        [JsonProperty] private bool hasNotes = false;
-
         // Enternal link
         [JsonProperty] private string urlToOpen = "";
 
