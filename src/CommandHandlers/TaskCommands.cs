@@ -216,7 +216,7 @@ public class TaskListCommand : ICommand
             Console.Out.WriteLine("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
                 entry.id,
                 (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
-                entry.title,
+                entry.title.TruncateWithVisualFeedback(titleArea - 3/*for the ...*/),
                 (isInProgress ? "In Progress" : entry.StatusString),
                 (isInProgress ? timeInProgress + " + " : "" ) + ("("+application.logManager.GetTotalTimeSpentToday(entry.id) + "," +  application.logManager.GetTotalTimeSpent(entry.id)+")")
                 );

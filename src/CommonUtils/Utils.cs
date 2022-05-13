@@ -113,79 +113,6 @@ public static class Utils
 
         return isYes;
     }
-    public static DateTime GetDateFromUser(string message)
-    {
-        return GetDateFromUser(message, DateTime.MinValue);
-    }
-    public static DateTime GetDateFromUser(string message, DateTime defaultDate)
-    {
-        message += "( default or x to " + defaultDate.ShortForm() + ")";
-
-        DateTime date = DateTime.MinValue;
-        Utils.DoAction(message, ":", "",
-            new Utils.ActionParams("", ". default " + defaultDate.ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = defaultDate;
-            }),
-            new Utils.ActionParams("x", "x. default " + defaultDate.ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = defaultDate;
-            }),
-            new Utils.ActionParams("r", "r. reset " + DateTime.MinValue.ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = DateTime.MinValue;
-            }),
-            new Utils.ActionParams("0", "0. today " + Utils.Now.ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = Utils.Now;
-            }),
-            new Utils.ActionParams("-1", "-1. yest " + Utils.Now.AddDays(-1).ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = Utils.Now.AddDays(-1);
-            }),
-            new Utils.ActionParams("-2", "-2. " + Utils.Now.AddDays(-2).ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = Utils.Now.AddDays(-2);
-            }),
-            new Utils.ActionParams("-3", "-3. " + Utils.Now.AddDays(-3).ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = Utils.Now.AddDays(-3);
-            }),
-            new Utils.ActionParams("1", "1. tomo " + Utils.Now.AddDays(1).ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = Utils.Now.AddDays(1);
-            }),
-            new Utils.ActionParams("2", "2. " + Utils.Now.AddDays(2).ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = Utils.Now.AddDays(2);
-            }),
-            new Utils.ActionParams("3", "3. " + Utils.Now.AddDays(3).ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = Utils.Now.AddDays(3);
-            }),
-            new Utils.ActionParams("4", "4. " + Utils.Now.AddDays(4).ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = Utils.Now.AddDays(4);
-            }),
-            new Utils.ActionParams("7", "7. " + Utils.Now.AddDays(7).ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = Utils.Now.AddDays(7);
-            }),
-            new Utils.ActionParams("14", "14. " + Utils.Now.AddDays(14).ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = Utils.Now.AddDays(14);
-            }),
-            new Utils.ActionParams("30", "30. " + Utils.Now.AddDays(30).ShortForm(), delegate (Utils.aActionParamsContext context)
-            {
-                date = Utils.Now.AddDays(30);
-            }),
-            new Utils.ActionParams("c", "c. custom ", delegate (Utils.aActionParamsContext context)
-            {
-                date = GetCustomDateFromUser("Enter Date (mm/dd):");
-            })
-        );
-        return date;
-    }
     public static DateTime GetCustomDateFromUser(string message)
     {
         ConsoleWriter.PrintWithOutLineBreak(message);
@@ -243,7 +170,7 @@ public static class Utils
 
         return sb.ToString();
     }
-        
+
     // Utils
 
     public static int Clamp(int value, int min, int max)
@@ -259,14 +186,6 @@ public static class Utils
         if (!condition)
             ConsoleWriter.Print("==== ASSERT here =======");
         Debug.Assert(condition, message);
-    }
-    public static bool IsThisToday(DateTime date)
-    {
-        if (date.Day == Utils.Now.Day &&
-            date.Month == Utils.Now.Month &&
-            date.Year == Utils.Now.Year)
-            return true;
-        return false;
     }
     public static int ConvertRange(int min, int max, int newMin, int newMax, int value)
     {
@@ -366,17 +285,6 @@ public static class DateExt
     {
         return date.Month + "/" + date.Date;
     }
-}
-
-// utilities
-
-public static class StringExt
-{
-    public static string Truncate(this string value, int maxLength)
-    {
-        if (string.IsNullOrEmpty(value)) return value;
-        return value.Length <= maxLength ? value : value.Substring(0, maxLength);
-    }
     public static DateTime ZeroTime(this DateTime date)
     {
         return new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
@@ -396,6 +304,23 @@ public static class StringExt
     public static bool IsThisMinDate(this DateTime date)
     {
         return date == DateTime.MinValue;
+    }
+}
+
+// utilities
+
+public static class StringExt
+{
+    public static string Truncate(this string value, int maxLength)
+    {
+        if (string.IsNullOrEmpty(value)) return value;
+        return value.Length <= maxLength ? value : value.Substring(0, maxLength);
+    }
+
+    public static string TruncateWithVisualFeedback(this string value, int maxLength)
+    {
+        if (string.IsNullOrEmpty(value)) return value;
+        return value.Length <= maxLength ? value : value.Substring(0, maxLength) + "...";
     }
 }
 

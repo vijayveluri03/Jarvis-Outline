@@ -79,7 +79,7 @@ namespace Jarvis
 
         public void Save()
         {
-            string serializedUserData = JsonConvert.SerializeObject(this);
+            string serializedUserData = JsonConvert.SerializeObject(this, Formatting.Indented);
             File.WriteAllText(JConstants.PLAYERPREFS_FILENAME, serializedUserData);
         }
     }
