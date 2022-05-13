@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using CommandLine;
 using Jarvis; //@todo 
 
@@ -42,6 +41,9 @@ public class TaskHandler : ICommand
                 break;
             case "stop":
                 selectedHander = new TaskStopCommand();
+                break;
+            case "show":
+                selectedHander = new TaskShowCommand();
                 break;
             default:
                 Console.Out.WriteLine("unknown action");
@@ -207,10 +209,19 @@ public class TaskListCommand : ICommand
     public override bool Run(List<string> command, Jarvis.JApplication application)
     {
         int lineCount = 0;
+            int titleArea = 40;
+
+        // output Heading 
+        if ( application.taskManager.outlineData.entries.Count() > 0 )
+        {
+            Console.Out.WriteLine("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
+                "ID", "DEPT", "TITLE", "STATUS", "TIME SPENT"
+                );
+        }
+
         foreach (var entry in application.taskManager.outlineData.entries)
         {
-            int titleArea = 40;
-            bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id ;
+            bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id;
             int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
 
             Console.Out.WriteLine("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
@@ -218,7 +229,7 @@ public class TaskListCommand : ICommand
                 (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
                 entry.title.TruncateWithVisualFeedback(titleArea - 3/*for the ...*/),
                 (isInProgress ? "In Progress" : entry.StatusString),
-                (isInProgress ? timeInProgress + " + " : "" ) + ("("+application.logManager.GetTotalTimeSpentToday(entry.id) + "," +  application.logManager.GetTotalTimeSpent(entry.id)+")")
+                (isInProgress ? timeInProgress + " + " : "") + ("(" + application.logManager.GetTotalTimeSpentToday(entry.id) + "," + application.logManager.GetTotalTimeSpent(entry.id) + ")")
                 );
 
             lineCount++;
@@ -227,6 +238,52 @@ public class TaskListCommand : ICommand
             if (lineCount % 5 == 0)
                 Console.Out.WriteLine();
         }
+
+        return true;
+    }
+}
+
+
+public class TaskShowCommand : ICommand
+{
+    public TaskShowCommand()
+    {
+
+    }
+
+    public override bool Run(List<string> command, Jarvis.JApplication application)
+    {
+        if (command.Count != 1)
+        {
+            Console.Out.WriteLine("Invalid parameters for task Show. Append with Task ID.");
+            return true;
+        }
+
+        int id = Utils.Atoi(command[0]);
+
+        if (application.taskManager.IsEntryAvailableWithID(id))
+        {
+            bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == id;
+            int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
+            Task entry = application.taskManager.GetEntry(id);
+
+            // Heading
+            Console.Out.WriteLine("{0, -4} {1,-15} {2}",
+                "ID", "DEPT", "TITLE"
+                );
+
+            Console.Out.WriteLine("{0, -4} {1,-15} {2}",
+                entry.id,
+                (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
+                entry.title);
+
+            Console.Out.WriteLine("STATUS : {0, -15}\nTIME SPENT : {1,-15}",
+                (isInProgress ? "In Progress" : entry.StatusString),
+                (isInProgress ? timeInProgress + " + " : "") + ("(" + application.logManager.GetTotalTimeSpentToday(entry.id) + "," + application.logManager.GetTotalTimeSpent(entry.id) + ")")
+                );
+        }
+        else
+            Console.Out.WriteLine("Entry not found with id : " + id);
 
         return true;
     }
