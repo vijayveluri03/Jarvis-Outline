@@ -1,4 +1,5 @@
 # Jarvis-Outline
-Create tasks, notes and stuff. Similar to workflowy. Outline structured. Can be perfectly used for GTD. 
+A CLI tool, which has a huge potential to be anything. 
 
-An outline, also called a hierarchical outline, is a list arranged to show hierarchical relationships and is a type of tree structure. An outline is used to present the main points or topics of a given subject. Each item in an outline may be divided into additional sub-items.
+For now, you can use it as a taskmanager or a reminder. 
+It can also track time spend doing a task and give you a time-spent report by end of the week! You can see where your time has gone.
