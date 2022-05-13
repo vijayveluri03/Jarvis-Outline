@@ -18,7 +18,9 @@ public class CommandSelector : ICommand
     {
         if (command.Count < 1)
         {
-            Console.Out.WriteLine("Invalid parameters! Append the Jarvis command with sub-commands like task, habit etc");
+            Console.Out.WriteLine("Invalid arguments! \n");
+            Console.Out.WriteLine("USAGE : \n" +
+                "Jarvis task <arguments>. For more info on arguments, try \"Jarvis task\"");
             return false;
         }
 

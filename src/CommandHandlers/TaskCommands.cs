@@ -17,7 +17,15 @@ public class TaskHandler : ICommand
     {
         if (command.Count < 1)
         {
-            Console.Out.WriteLine("Invalid parameters for task. Use actions like add, list, delete, start, stop, complete, later, discard etc");
+            Console.Out.WriteLine("Invalid arguments! \n");
+            Console.Out.WriteLine("USAGE : \n" +
+                "Jarvis task add  // To add a task\n" +
+                "Jarvis task list // to list all the tasks\n" +
+                "Jarvis task delete // to remove a task\n" +
+                "Jarvis task start // to track the time of a task\n" +
+                "Jarvis task stop // to stop time tracking\n" +
+                "Jarvis task show // to show a task\n");
+
             return false;
         }
 
@@ -74,7 +82,11 @@ public class TaskAddCommand : ICommand
     {
         if (command.Count != 2)
         {
-            Console.Out.WriteLine("Invalid parameters for task add. Append add with categories(seperated by comma) and title.");
+            Console.Out.WriteLine("Invalid arguments! \n");
+            Console.Out.WriteLine("USAGE : \n" +
+                "jarvis task add <category> <title>\n" +
+                "Category can be office,learn,chores,health. you can add more in the design data as per your need."
+                );
             return true;
         }
 
@@ -83,7 +95,8 @@ public class TaskAddCommand : ICommand
 
         if (!application.DesignData.DoesCategoryExist(categories))
         {
-            Console.Out.WriteLine("Invalid categories. if you need a new one create, add them in designdata file");
+            Console.Out.WriteLine("Invalid categories.\n" + 
+                "Category can be office,learn,chores,health. you can add more in the design data as per your need.");
             return true;
         }
 
@@ -107,7 +120,10 @@ public class TaskRemoveCommand : ICommand
     {
         if (command.Count != 1)
         {
-            Console.Out.WriteLine("Invalid parameters for task remove. Append with Task ID which needs to be removed.");
+            Console.Out.WriteLine("Invalid arguments! \n");
+            Console.Out.WriteLine("USAGE : \n" +
+                "jarvis task remove <taskID>  // task id is the ID of the task you are trying to remove\n"                 
+                );
             return true;
         }
 
@@ -137,7 +153,10 @@ public class TaskStartCommand : ICommand
     {
         if (command.Count != 1)
         {
-            Console.Out.WriteLine("Invalid parameters for task start. Append with Task ID which needs to be started.");
+            Console.Out.WriteLine("Invalid arguments! \n");
+            Console.Out.WriteLine("USAGE : \n" +
+                "jarvis task start <taskID> // task id is the ID of the task you are trying to start time tracking\n"                 
+                );
             return true;
         }
 
@@ -171,7 +190,10 @@ public class TaskStopCommand : ICommand
     {
         if (command.Count != 1)
         {
-            Console.Out.WriteLine("Invalid parameters for task stop. Stop does one parameter, which is the comments for the task stopped. It will auto stop a task which is in progress");
+            Console.Out.WriteLine("Invalid arguments! \n");
+            Console.Out.WriteLine("USAGE : \n" +
+                "jarvis task stop <comments> "
+                );
             return true;
         }
 
@@ -211,8 +233,17 @@ public class TaskListCommand : ICommand
 
     public override bool Run(List<string> command, Jarvis.JApplication application)
     {
+        if (command.Count != 0)
+        {
+            Console.Out.WriteLine("Invalid arguments! \n");
+            Console.Out.WriteLine("USAGE : \n" +
+                "jarvis task list   // lists all the tasks"
+                );
+            return true;
+        }
+
         int lineCount = 0;
-            int titleArea = 40;
+        int titleArea = 40;
 
         // output Heading 
         if ( application.taskManager.outlineData.entries.Count() > 0 )
@@ -258,7 +289,10 @@ public class TaskShowCommand : ICommand
     {
         if (command.Count != 1)
         {
-            Console.Out.WriteLine("Invalid parameters for task Show. Append with Task ID.");
+            Console.Out.WriteLine("Invalid arguments! \n");
+            Console.Out.WriteLine("USAGE : \n" +
+                "jarvis task show <taskID> // task id is the ID of the task you are trying to see\n"                 
+                );
             return true;
         }
 
@@ -311,7 +345,10 @@ public class TaskAddSubTaskCommand : ICommand
     {
         if (command.Count != 2)
         {
-            Console.Out.WriteLine("Invalid parameters for task addsubtask. \n Usage : addsubtask <id> \"Sub task title\"");
+            Console.Out.WriteLine("Invalid arguments! \n");
+            Console.Out.WriteLine("USAGE : \n" +
+                "jarvis task addsubtask <taskID> <subtasktitle>  // task id is the ID of the task under which the subtask would be created\n"                 
+                );
             return true;
         }
 
