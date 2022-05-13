@@ -23,6 +23,8 @@ namespace Jarvis
         // Unique ID
         public int id;
 
+        public string[] subTasks;
+
         public Status taskStatus = Status.Open;
 
         // Getters 
@@ -49,6 +51,13 @@ namespace Jarvis
         public void SetAsComplete() { taskStatus = Status.Complete; }
         public void SetAsDiscarded() { taskStatus = Status.Discard; }
         public void SetAsLater() { taskStatus = Status.Later; }
+        public void AddSubTask( string subTask )
+        {
+            // TODO - optimize this 
+            List<string> tasks = subTasks != null ? new List<string> (subTasks) : new List<string>();
+            tasks.Add(subTask);
+            subTasks = tasks.ToArray();
+        }
     }
 
     // List of all the Entries

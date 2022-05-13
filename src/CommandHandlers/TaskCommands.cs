@@ -45,6 +45,9 @@ public class TaskHandler : ICommand
             case "show":
                 selectedHander = new TaskShowCommand();
                 break;
+            case "addsubtask":
+                selectedHander = new TaskAddSubTaskCommand();
+                break;
             default:
                 Console.Out.WriteLine("unknown action");
                 break;
@@ -227,7 +230,7 @@ public class TaskListCommand : ICommand
             Console.Out.WriteLine("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
                 entry.id,
                 (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
-                entry.title.TruncateWithVisualFeedback(titleArea - 3/*for the ...*/),
+                entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + ( entry.subTasks != null && entry.subTasks.Length > 0 ? "+(" + entry.subTasks.Length + ")" : "" ),
                 (isInProgress ? "In Progress" : entry.StatusString),
                 (isInProgress ? timeInProgress + " + " : "") + ("(" + application.logManager.GetTotalTimeSpentToday(entry.id) + "," + application.logManager.GetTotalTimeSpent(entry.id) + ")")
                 );
@@ -277,10 +280,49 @@ public class TaskShowCommand : ICommand
                 (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
                 entry.title);
 
+            Console.Out.WriteLine();
+
             Console.Out.WriteLine("STATUS : {0, -15}\nTIME SPENT : {1,-15}",
                 (isInProgress ? "In Progress" : entry.StatusString),
                 (isInProgress ? timeInProgress + " + " : "") + ("(" + application.logManager.GetTotalTimeSpentToday(entry.id) + "," + application.logManager.GetTotalTimeSpent(entry.id) + ")")
                 );
+
+            Console.Out.WriteLine();
+
+            foreach( string subTask in entry.subTasks)
+            {
+                Console.Out.WriteLine(subTask);
+            }
+        }
+        else
+            Console.Out.WriteLine("Entry not found with id : " + id);
+
+        return true;
+    }
+}
+
+public class TaskAddSubTaskCommand : ICommand
+{
+    public TaskAddSubTaskCommand()
+    {
+    }
+
+    public override bool Run(List<string> command, Jarvis.JApplication application)
+    {
+        if (command.Count != 2)
+        {
+            Console.Out.WriteLine("Invalid parameters for task addsubtask. \n Usage : addsubtask <id> \"Sub task title\"");
+            return true;
+        }
+
+        int id = Utils.Atoi(command[0]);
+        string title = command[1];
+
+        
+        if (application.taskManager.IsEntryAvailableWithID(id))
+        {
+            application.taskManager.GetEntry(id).AddSubTask(title);
+            Console.Out.WriteLine("Subtask added to entry with id : " + id);
         }
         else
             Console.Out.WriteLine("Entry not found with id : " + id);

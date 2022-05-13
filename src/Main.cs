@@ -12,13 +12,14 @@ class Program
     {
 
 #if DEBUG
-        string command = "hello hello2 \"hello 4\"";
+        string command = "task list";
         args = command.Split(' ');
 #endif
         Jarvis.JApplication app = new Jarvis.JApplication();
         app.Initialize();
 
-        //Console.Out.WriteLine("Welcome Captain!");
+        // A bit of space at the head
+        Console.Out.WriteLine(" ");
         //Console.Out.WriteLine("Number of arguments" + args.Length);
 
 #if DEBUG
@@ -43,5 +44,8 @@ class Program
         //.WithNotParsed(HandleParseError);
 
         app.Save();
+
+        // A bit of space at the tail
+        Console.Out.WriteLine(" ");
     }
 }
