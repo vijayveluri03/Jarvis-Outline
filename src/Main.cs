@@ -33,8 +33,25 @@ class Program
         Console.Out.WriteLine("****** DEBUG ******" );
 #endif
 
+        List<string> valueArguments = new List<string>(args);
+        List<string> optionalArguments = new List<string>();
+
+        // Seperating arguments into Value and Optional. 
+        // optional are the ones with -- or - before an argument
+        {
+        for( int i = 0; i < valueArguments.Count; i++ )
+        {
+            if(valueArguments[i].StartsWith("-"))
+            {
+                optionalArguments.Add(valueArguments[i]);
+                valueArguments.RemoveAt(i);
+                i--;
+            }
+        }
+        }
+
         CommandSelector commandHandler = new CommandSelector();
-        commandHandler.Run(new List<string>(args), app);
+        commandHandler.Run(valueArguments, optionalArguments, app);
 
         //CommandLine.Parser.Default.ParseArguments<BaseCommand>(args)
         //.WithParsed<BaseCommand>(option => option.Run(null))

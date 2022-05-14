@@ -14,9 +14,9 @@ public class CommandSelector : ICommand
 
     }
 
-    public override bool Run(List<string> command, Jarvis.JApplication application)
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
     {
-        if (command.Count < 1)
+        if (arguments.Count < 1)
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
@@ -24,7 +24,7 @@ public class CommandSelector : ICommand
             return false;
         }
 
-        string task = command[0];
+        string task = arguments[0];
         ICommand selectedHander = null;
 
         switch (task)
@@ -42,8 +42,8 @@ public class CommandSelector : ICommand
 
         if (selectedHander != null)
         {
-            command.RemoveAt(0);
-            selectedHander.Run(command, application);
+            arguments.RemoveAt(0);
+            selectedHander.Run(arguments, optionalArguments,  application);
         }
         return true;
     }

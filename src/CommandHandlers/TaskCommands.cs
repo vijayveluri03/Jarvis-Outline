@@ -13,15 +13,16 @@ public class TaskHandler : ICommand
 
     }
 
-    public override bool Run(List<string> command, Jarvis.JApplication application)
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
     {
 
-        if (command.Count < 1)
+        if (arguments.Count < 1)
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
                 "Jarvis task add  // To add a task\n" +
                 "Jarvis task list // to list all the tasks\n" +
+                "Jarvis task list --all // to list all the tasks\n" +
                 "\n" +
                 "Jarvis task delete // to remove a task\n" +
                 "Jarvis task complete // to complete a task\n" +
@@ -40,7 +41,7 @@ public class TaskHandler : ICommand
             return false;
         }
 
-        string action = command[0];
+        string action = arguments[0];
         ICommand selectedHander = null;
 
         switch (action)
@@ -88,8 +89,8 @@ public class TaskHandler : ICommand
 
         if (selectedHander != null)
         {
-            command.RemoveAt(0);
-            selectedHander.Run(command, application);
+            arguments.RemoveAt(0);
+            selectedHander.Run(arguments, optionalArguments, application);
         }
         return true;
     }
@@ -103,9 +104,9 @@ public class TaskAddCommand : ICommand
 
     }
 
-    public override bool Run(List<string> command, Jarvis.JApplication application)
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
     {
-        if (command.Count != 2)
+        if (arguments.Count != 2)
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
@@ -115,8 +116,8 @@ public class TaskAddCommand : ICommand
             return true;
         }
 
-        string[] categories = command[0].Split(',');
-        string title = command[1];
+        string[] categories = arguments[0].Split(',');
+        string title = arguments[1];
 
         if (!application.DesignData.DoesCategoryExist(categories))
         {
@@ -141,9 +142,9 @@ public class TaskRemoveCommand : ICommand
 
     }
 
-    public override bool Run(List<string> command, Jarvis.JApplication application)
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
     {
-        if (command.Count != 1)
+        if (arguments.Count != 1)
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
@@ -152,7 +153,7 @@ public class TaskRemoveCommand : ICommand
             return true;
         }
 
-        string[] ids = command[0].Split(',');
+        string[] ids = arguments[0].Split(',');
 
         foreach (var idStr in ids)
         {
@@ -174,9 +175,9 @@ public class TaskStartCommand : ICommand
 
     }
 
-    public override bool Run(List<string> command, Jarvis.JApplication application)
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
     {
-        if (command.Count != 1)
+        if (arguments.Count != 1)
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
@@ -185,7 +186,7 @@ public class TaskStartCommand : ICommand
             return true;
         }
 
-        int id = Utils.Atoi(command[0]);
+        int id = Utils.Atoi(arguments[0]);
 
         if (application.UserData.IsTaskInProgress())
         {
@@ -211,9 +212,9 @@ public class TaskStopCommand : ICommand
     {
     }
 
-    public override bool Run(List<string> command, Jarvis.JApplication application)
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
     {
-        if (command.Count != 1)
+        if (arguments.Count != 1)
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
@@ -228,7 +229,7 @@ public class TaskStopCommand : ICommand
             return true;
         }
 
-        string comments = command[0];
+        string comments = arguments[0];
         int id = application.UserData.taskProgress.taskIDInProgress;
         int timeTakenInMinutes = (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes;
         application.UserData.StopTask();
@@ -256,19 +257,22 @@ public class TaskListCommand : ICommand
 
     }
 
-    public override bool Run(List<string> command, Jarvis.JApplication application)
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
     {
-        if (command.Count != 0)
+        if (arguments.Count != 0)
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
-                "jarvis task list   // lists all the tasks"
+                "jarvis task list   // lists all the tasks\n"
+                 +
+                "jarvis task list --all // Shows all the tasks including archieved and completed"
                 );
             return true;
         }
 
         int lineCount = 0;
         int titleArea = 40;
+        bool showAll = optionalArguments.Contains("--all") || optionalArguments.Contains("-a");
 
         // output Heading 
         if (application.taskManager.outlineData.entries.Count() > 0)
@@ -280,6 +284,9 @@ public class TaskListCommand : ICommand
 
             foreach (var entry in application.taskManager.outlineData.entries)
             {
+                if( !entry.IsOpen && !showAll )
+                    continue;
+
                 bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id;
                 int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
 
@@ -313,9 +320,9 @@ public class TaskShowCommand : ICommand
 
     }
 
-    public override bool Run(List<string> command, Jarvis.JApplication application)
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
     {
-        if (command.Count != 1)
+        if (arguments.Count != 1)
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
@@ -324,7 +331,7 @@ public class TaskShowCommand : ICommand
             return true;
         }
 
-        int id = Utils.Atoi(command[0]);
+        int id = Utils.Atoi(arguments[0]);
 
         if (application.taskManager.DoesTaskExist(id))
         {
@@ -369,9 +376,9 @@ public class TaskAddSubTaskCommand : ICommand
     {
     }
 
-    public override bool Run(List<string> command, Jarvis.JApplication application)
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
     {
-        if (command.Count != 2)
+        if (arguments.Count != 2)
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
@@ -380,8 +387,8 @@ public class TaskAddSubTaskCommand : ICommand
             return true;
         }
 
-        int id = Utils.Atoi(command[0]);
-        string title = command[1];
+        int id = Utils.Atoi(arguments[0]);
+        string title = arguments[1];
 
 
         if (application.taskManager.DoesTaskExist(id))
@@ -403,9 +410,9 @@ public class TaskSetStatusCommand : ICommand
         this.status = status;
     }
 
-    public override bool Run(List<string> command, Jarvis.JApplication application)
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
     {
-        if (command.Count != 1)
+        if (arguments.Count != 1)
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
@@ -416,7 +423,7 @@ public class TaskSetStatusCommand : ICommand
             return true;
         }
 
-        int id = Utils.Atoi(command[0]);
+        int id = Utils.Atoi(arguments[0]);
 
         if (application.taskManager.DoesTaskExist(id))
         {
@@ -439,9 +446,9 @@ public class TaskRecordTimeLogCommand : ICommand
     {
     }
 
-    public override bool Run(List<string> command, Jarvis.JApplication application)
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
     {
-        if (command.Count < 2)
+        if (arguments.Count < 2)
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
@@ -450,9 +457,9 @@ public class TaskRecordTimeLogCommand : ICommand
             return true;
         }
 
-        int id = Utils.Atoi(command[0]);
-        int timeTakenInMinutes = Utils.Atoi(command[1]);
-        string comments = command.Count() > 2 ? command[2] : "";
+        int id = Utils.Atoi(arguments[0]);
+        int timeTakenInMinutes = Utils.Atoi(arguments[1]);
+        string comments = arguments.Count() > 2 ? arguments[2] : "";
 
         if (application.taskManager.DoesTaskExist(id))
         {

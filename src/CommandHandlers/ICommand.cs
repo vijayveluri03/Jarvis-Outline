@@ -7,7 +7,7 @@ using CommandLine;
 
 public class ICommand
 {
-    public virtual bool Run(List<string> command, Jarvis.JApplication application )
+    public virtual bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
     {
         Console.Out.WriteLine("Incorrect usage");
         return false;
