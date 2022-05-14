@@ -84,6 +84,9 @@ public class TaskHandler : ICommand
             case "archieve":
                 selectedHander = new TaskSetStatusCommand(Task.Status.Archieve);
                 break;
+            case "report":
+                selectedHander = new TaskReportCommand();
+                break;
 
             default:
                 Console.Out.WriteLine("unknown action");
@@ -481,6 +484,86 @@ public class TaskRecordTimeLogCommand : ICommand
         }
         else
             Console.Out.WriteLine("Task not found with id : " + id);
+
+        return true;
+    }
+}
+
+public class TaskReportCommand : ICommand
+{
+    public TaskReportCommand()
+    {
+    }
+
+    private Dictionary<string, int> GetReportFor( TaskManager taskManager, List<LogEntry> logs, int pastDays )
+    {
+        Dictionary<string, int> report = new Dictionary<string, int>();
+        foreach( var log in logs)
+        {
+            Task task =  taskManager.GetTask(log.id);
+
+            if ( task == null ) 
+                continue;
+
+            if(log.date.ZeroTime() >= ( DateTime.Now.AddDays(-1 * pastDays).ZeroTime() ))
+            {
+                foreach( var taskCategory in task.categories )
+                {
+                    if( !report.ContainsKey(taskCategory) )
+                        report[taskCategory] = 0;
+                    report[taskCategory] += log.timeTakenInMinutes;
+                }
+            }
+        }
+        return report;
+    }
+
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
+    {
+        if (arguments.Count != 0)
+        {
+            Console.Out.WriteLine("Invalid arguments! \n");
+            Console.Out.WriteLine("USAGE : \n" +
+                "jarvis task report"
+                );
+            return true;
+        }
+
+        if (application.taskManager.outlineData.entries.Count() > 0)
+        {
+            Dictionary<string, int> categoryTimeMap = GetReportFor( application.taskManager, application.logManager.logs.entries, 0);
+
+            Console.Out.WriteLine("FOR TODAY");
+            if (categoryTimeMap.Count > 0)
+            {
+                foreach (var timeMap in categoryTimeMap)
+                {
+                    Console.Out.WriteLine("{0,-20} {1,-7} hours", timeMap.Key, String.Format("{0:0.00}", timeMap.Value/60.0f));
+                }
+            }
+            else
+            {
+                Console.Out.WriteLine("Found no records");
+            }
+
+            Console.Out.WriteLine();
+
+            categoryTimeMap = GetReportFor( application.taskManager, application.logManager.logs.entries, 6);
+            Console.Out.WriteLine("FOR LAST 7 DAYS");
+            if (categoryTimeMap.Count > 0)
+            {
+                foreach (var timeMap in categoryTimeMap)
+                {
+                    Console.Out.WriteLine("{0,-20} {1,-7} hours", timeMap.Key, String.Format("{0:0.00}", timeMap.Value/60.0f));
+                }
+            }
+            else
+            {
+                Console.Out.WriteLine("Found no records");
+            }
+        }
+        else
+            Console.Out.WriteLine("Tasks not found");
 
         return true;
     }
