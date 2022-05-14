@@ -37,7 +37,8 @@ public class TaskHandler : ICommand
                 "\n" +
                 "ADVANCED\n" +
                 "jarvis task addsubtask // to add subtasks to a task\n" +
-                "jarvis task recordtimelog // to record an offline task\n");
+                "jarvis task recordtimelog // to record an offline task\n" + 
+                "jarvis task report // to show all the work done in the last day/week\n");
 
             return false;
         }
