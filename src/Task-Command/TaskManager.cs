@@ -30,8 +30,8 @@ namespace Jarvis
         // Getters 
         [JsonIgnore] public bool IsOpen { get { return taskStatus == Status.Open; } }
         [JsonIgnore] public bool IsComplete { get { return taskStatus == Status.Complete; } }
-        [JsonIgnore] public bool IsDiscarded { get { return taskStatus == Status.Complete; } }
-        [JsonIgnore] public bool IsArchieved { get { return taskStatus == Status.Complete; } }
+        [JsonIgnore] public bool IsDiscarded { get { return taskStatus == Status.Discard; } }
+        [JsonIgnore] public bool IsArchieved { get { return taskStatus == Status.Archieve; } }
         [JsonIgnore] public bool IsClosed { get { return IsDiscarded || IsComplete; } }
         [JsonIgnore]
         public string StatusString
@@ -41,7 +41,7 @@ namespace Jarvis
                 if (IsOpen) return "Open";
                 if (IsComplete) return "Completed";
                 if (IsDiscarded) return "Discarded";
-                if (IsArchieved) return "Later";
+                if (IsArchieved) return "Archieved";
                 Utils.Assert(false);
                 return "Unknown";
             }

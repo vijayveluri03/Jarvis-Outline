@@ -28,6 +28,7 @@ public class TaskHandler : ICommand
                 "Jarvis task complete // to complete a task\n" +
                 "Jarvis task discard // to discard a task\n" +
                 "Jarvis task archieve // to archieve a task\n" +
+                "Jarvis task open // to re-open a task\n" +
                 "\n" +
                 "Jarvis task start // to track the time of a task\n" +
                 "Jarvis task stop // to stop time tracking\n" +
@@ -77,7 +78,9 @@ public class TaskHandler : ICommand
             case "discard":
                 selectedHander = new TaskSetStatusCommand(Task.Status.Discard);
                 break;
-
+            case "open":
+                selectedHander = new TaskSetStatusCommand(Task.Status.Open);
+                break;
             case "archieve":
                 selectedHander = new TaskSetStatusCommand(Task.Status.Archieve);
                 break;
