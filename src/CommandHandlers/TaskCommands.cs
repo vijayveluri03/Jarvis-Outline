@@ -496,9 +496,11 @@ public class TaskReportCommand : ICommand
     {
     }
 
-    private Dictionary<string, int> GetReportFor( TaskManager taskManager, List<LogEntry> logs, int pastDays )
+    private Dictionary<string, int> GetReportFor( TaskManager taskManager, List<LogEntry> logs, int pastDays, out int totalMinutes )
     {
         Dictionary<string, int> report = new Dictionary<string, int>();
+        totalMinutes = 0;
+
         foreach( var log in logs)
         {
             Task task =  taskManager.GetTask(log.id);
@@ -513,6 +515,7 @@ public class TaskReportCommand : ICommand
                     if( !report.ContainsKey(taskCategory) )
                         report[taskCategory] = 0;
                     report[taskCategory] += log.timeTakenInMinutes;
+                    totalMinutes += log.timeTakenInMinutes;
                 }
             }
         }
@@ -530,11 +533,16 @@ public class TaskReportCommand : ICommand
             return true;
         }
 
+        ConsoleColor defaultColor = Console.ForegroundColor;
         if (application.taskManager.outlineData.entries.Count() > 0)
         {
-            Dictionary<string, int> categoryTimeMap = GetReportFor( application.taskManager, application.logManager.logs.entries, 0);
+            int totalMinutes = 0;
+            Dictionary<string, int> categoryTimeMap = GetReportFor( application.taskManager, application.logManager.logs.entries, 0, out totalMinutes);
 
-            Console.Out.WriteLine("FOR TODAY");
+            Console.ForegroundColor = (ConsoleColor.DarkBlue);
+            Console.Out.WriteLine("{0,-20} {1,-7} hours", "FOR TODAY", String.Format("{0:0.00}", totalMinutes/60.0f));
+            Console.ForegroundColor = defaultColor;
+
             if (categoryTimeMap.Count > 0)
             {
                 foreach (var timeMap in categoryTimeMap)
@@ -549,8 +557,12 @@ public class TaskReportCommand : ICommand
 
             Console.Out.WriteLine();
 
-            categoryTimeMap = GetReportFor( application.taskManager, application.logManager.logs.entries, 6);
-            Console.Out.WriteLine("FOR LAST 7 DAYS");
+            categoryTimeMap = GetReportFor( application.taskManager, application.logManager.logs.entries, 6, out totalMinutes);
+
+            Console.ForegroundColor = (ConsoleColor.DarkBlue);
+            Console.Out.WriteLine("{0,-20} {1,-7} hours(avg)", "FOR LAST 7 DAYS", String.Format("{0:0.00}", totalMinutes/(60.0f*7)));
+            Console.ForegroundColor = defaultColor;
+
             if (categoryTimeMap.Count > 0)
             {
                 foreach (var timeMap in categoryTimeMap)
