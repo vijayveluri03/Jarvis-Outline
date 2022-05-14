@@ -11,7 +11,7 @@ namespace Jarvis
         {
             Open,
             Complete,
-            Later,
+            Archieve,
             Discard
         }
 
@@ -31,7 +31,7 @@ namespace Jarvis
         [JsonIgnore] public bool IsOpen { get { return taskStatus == Status.Open; } }
         [JsonIgnore] public bool IsComplete { get { return taskStatus == Status.Complete; } }
         [JsonIgnore] public bool IsDiscarded { get { return taskStatus == Status.Complete; } }
-        [JsonIgnore] public bool IsLater { get { return taskStatus == Status.Complete; } }
+        [JsonIgnore] public bool IsArchieved { get { return taskStatus == Status.Complete; } }
         [JsonIgnore] public bool IsClosed { get { return IsDiscarded || IsComplete; } }
         [JsonIgnore]
         public string StatusString
@@ -41,7 +41,7 @@ namespace Jarvis
                 if (IsOpen) return "Open";
                 if (IsComplete) return "Completed";
                 if (IsDiscarded) return "Discarded";
-                if (IsLater) return "Later";
+                if (IsArchieved) return "Later";
                 Utils.Assert(false);
                 return "Unknown";
             }
@@ -50,7 +50,8 @@ namespace Jarvis
         // Setters ( kinda )
         public void SetAsComplete() { taskStatus = Status.Complete; }
         public void SetAsDiscarded() { taskStatus = Status.Discard; }
-        public void SetAsLater() { taskStatus = Status.Later; }
+        public void SetAsArchive() { taskStatus = Status.Archieve; }
+        public void SetStatus(Status status) { taskStatus = status; }
         public void AddSubTask( string subTask )
         {
             // TODO - optimize this 
@@ -82,11 +83,11 @@ namespace Jarvis
             Load(JConstants.OUTLINE_FILENAME);
         }
 
-        public void AddEntry(Task ed)
+        public void AddTask(Task ed)
         {
             outlineData.entries.Add(ed);
         }
-        public bool RemoveEntry(Task ed)
+        public bool RemoveTask(Task ed)
         {
             return outlineData.entries.Remove(ed);
         }

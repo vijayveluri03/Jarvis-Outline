@@ -15,21 +15,28 @@ public class TaskHandler : ICommand
 
     public override bool Run(List<string> command, Jarvis.JApplication application)
     {
+
         if (command.Count < 1)
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
                 "Jarvis task add  // To add a task\n" +
                 "Jarvis task list // to list all the tasks\n" +
+                "\n" +
                 "Jarvis task delete // to remove a task\n" +
+                "Jarvis task complete // to complete a task\n" +
+                "Jarvis task discard // to discard a task\n" +
+                "Jarvis task archieve // to archieve a task\n" +
+                "\n" +
                 "Jarvis task start // to track the time of a task\n" +
                 "Jarvis task stop // to stop time tracking\n" +
+                "\n" +
                 "Jarvis task show // to show a task\n" +
                 "\n" +
                 "ADVANCED\n" +
                 "jarvis task addsubtask // to add subtasks to a task\n" +
                 "jarvis task recordtimelog // to record an offline task\n");
-            
+
             return false;
         }
 
@@ -63,6 +70,17 @@ public class TaskHandler : ICommand
             case "recordtimelog":
                 selectedHander = new TaskRecordTimeLogCommand();
                 break;
+            case "complete":
+                selectedHander = new TaskSetStatusCommand(Task.Status.Complete);
+                break;
+            case "discard":
+                selectedHander = new TaskSetStatusCommand(Task.Status.Discard);
+                break;
+
+            case "archieve":
+                selectedHander = new TaskSetStatusCommand(Task.Status.Archieve);
+                break;
+
             default:
                 Console.Out.WriteLine("unknown action");
                 break;
@@ -108,7 +126,7 @@ public class TaskAddCommand : ICommand
         }
 
         var entry = SharedLogic.CreateNewEntry(application.taskManager, categories, title);
-        application.taskManager.AddEntry(entry);
+        application.taskManager.AddTask(entry);
 
         Console.Out.WriteLine("New task added with id : " + entry.id);
         return true;
@@ -377,6 +395,43 @@ public class TaskAddSubTaskCommand : ICommand
         return true;
     }
 }
+
+public class TaskSetStatusCommand : ICommand
+{
+    public TaskSetStatusCommand(Task.Status status)
+    {
+        this.status = status;
+    }
+
+    public override bool Run(List<string> command, Jarvis.JApplication application)
+    {
+        if (command.Count != 1)
+        {
+            Console.Out.WriteLine("Invalid arguments! \n");
+            Console.Out.WriteLine("USAGE : \n" +
+                "jarvis task complete <taskID>  // task id is the ID of the task under which the subtask would be created\n" +
+                "jarvis task archieve <taskID>  // task id is the ID of the task under which the subtask would be created\n" +
+                "jarvis task discard <taskID>  // task id is the ID of the task under which the subtask would be created\n"
+                );
+            return true;
+        }
+
+        int id = Utils.Atoi(command[0]);
+
+        if (application.taskManager.DoesTaskExist(id))
+        {
+            application.taskManager.GetTask(id).SetStatus(this.status);
+            Console.Out.WriteLine("Task with id : {0} marked as {1}", id, application.taskManager.GetTask(id).StatusString);
+        }
+        else
+            Console.Out.WriteLine("Task not found with id : " + id);
+
+        return true;
+    }
+
+    private Task.Status status;
+}
+
 
 public class TaskRecordTimeLogCommand : ICommand
 {
