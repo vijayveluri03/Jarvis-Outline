@@ -24,8 +24,12 @@ public class TaskHandler : ICommand
                 "Jarvis task delete // to remove a task\n" +
                 "Jarvis task start // to track the time of a task\n" +
                 "Jarvis task stop // to stop time tracking\n" +
-                "Jarvis task show // to show a task\n");
-
+                "Jarvis task show // to show a task\n" +
+                "\n" +
+                "ADVANCED\n" +
+                "jarvis task addsubtask // to add subtasks to a task\n" +
+                "jarvis task recordtimelog // to record an offline task\n");
+            
             return false;
         }
 
@@ -55,6 +59,9 @@ public class TaskHandler : ICommand
                 break;
             case "addsubtask":
                 selectedHander = new TaskAddSubTaskCommand();
+                break;
+            case "recordtimelog":
+                selectedHander = new TaskRecordTimeLogCommand();
                 break;
             default:
                 Console.Out.WriteLine("unknown action");
@@ -95,7 +102,7 @@ public class TaskAddCommand : ICommand
 
         if (!application.DesignData.DoesCategoryExist(categories))
         {
-            Console.Out.WriteLine("Invalid categories.\n" + 
+            Console.Out.WriteLine("Invalid categories.\n" +
                 "Category can be office,learn,chores,health. you can add more in the design data as per your need.");
             return true;
         }
@@ -103,7 +110,7 @@ public class TaskAddCommand : ICommand
         var entry = SharedLogic.CreateNewEntry(application.taskManager, categories, title);
         application.taskManager.AddEntry(entry);
 
-        Console.Out.WriteLine("New entry added with id : " + entry.id);
+        Console.Out.WriteLine("New task added with id : " + entry.id);
         return true;
     }
 }
@@ -122,7 +129,7 @@ public class TaskRemoveCommand : ICommand
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
-                "jarvis task remove <taskID>  // task id is the ID of the task you are trying to remove\n"                 
+                "jarvis task remove <taskID>  // task id is the ID of the task you are trying to remove\n"
                 );
             return true;
         }
@@ -132,10 +139,10 @@ public class TaskRemoveCommand : ICommand
         foreach (var idStr in ids)
         {
             int id = Utils.Atoi(idStr, -1);
-            if (application.taskManager.RemoveEntryIfExists(id))
-                Console.Out.WriteLine("Entry removed with id : " + id);
+            if (application.taskManager.RemoveTaskIfExists(id))
+                Console.Out.WriteLine("Task removed with id : " + id);
             else
-                Console.Out.WriteLine("Entry not found with id : " + id);
+                Console.Out.WriteLine("Task not found with id : " + id);
         }
 
         return true;
@@ -155,7 +162,7 @@ public class TaskStartCommand : ICommand
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
-                "jarvis task start <taskID> // task id is the ID of the task you are trying to start time tracking\n"                 
+                "jarvis task start <taskID> // task id is the ID of the task you are trying to start time tracking\n"
                 );
             return true;
         }
@@ -168,13 +175,13 @@ public class TaskStartCommand : ICommand
             return true;
         }
 
-        if (application.taskManager.IsEntryAvailableWithID(id))
+        if (application.taskManager.DoesTaskExist(id))
         {
             application.UserData.StartTask(id, DateTime.Now);
-            Console.Out.WriteLine("Started progress on entry with id : " + id);
+            Console.Out.WriteLine("Started progress on Task with id : " + id);
         }
         else
-            Console.Out.WriteLine("Entry not found with id : " + id);
+            Console.Out.WriteLine("Task not found with id : " + id);
 
         return true;
     }
@@ -219,7 +226,7 @@ public class TaskStopCommand : ICommand
             application.logManager.AddEntry(le);
         }
 
-        Console.Out.WriteLine("Stopped progress on entry with id : " + id);
+        Console.Out.WriteLine("Stopped progress on Task with id : " + id);
         return true;
     }
 }
@@ -246,32 +253,35 @@ public class TaskListCommand : ICommand
         int titleArea = 40;
 
         // output Heading 
-        if ( application.taskManager.outlineData.entries.Count() > 0 )
+        if (application.taskManager.outlineData.entries.Count() > 0)
         {
             Console.Out.WriteLine("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
                 "ID", "DEPT", "TITLE", "STATUS", "TIME SPENT"
                 );
+
+
+            foreach (var entry in application.taskManager.outlineData.entries)
+            {
+                bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id;
+                int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
+
+                Console.Out.WriteLine("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
+                    entry.id,
+                    (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
+                    entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (entry.subTasks != null && entry.subTasks.Length > 0 ? "+(" + entry.subTasks.Length + ")" : ""),
+                    (isInProgress ? "In Progress" : entry.StatusString),
+                    (isInProgress ? timeInProgress + " + " : "") + ("(" + application.logManager.GetTotalTimeSpentToday(entry.id) + "," + application.logManager.GetTotalTimeSpent(entry.id) + ")")
+                    );
+
+                lineCount++;
+
+                //@todo
+                if (lineCount % 5 == 0)
+                    Console.Out.WriteLine();
+            }
         }
-
-        foreach (var entry in application.taskManager.outlineData.entries)
-        {
-            bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id;
-            int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
-
-            Console.Out.WriteLine("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
-                entry.id,
-                (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
-                entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + ( entry.subTasks != null && entry.subTasks.Length > 0 ? "+(" + entry.subTasks.Length + ")" : "" ),
-                (isInProgress ? "In Progress" : entry.StatusString),
-                (isInProgress ? timeInProgress + " + " : "") + ("(" + application.logManager.GetTotalTimeSpentToday(entry.id) + "," + application.logManager.GetTotalTimeSpent(entry.id) + ")")
-                );
-
-            lineCount++;
-
-            //@todo
-            if (lineCount % 5 == 0)
-                Console.Out.WriteLine();
-        }
+        else
+            Console.Out.WriteLine("No tasks found! Try adding a few using \"jarvis add\"");
 
         return true;
     }
@@ -291,18 +301,18 @@ public class TaskShowCommand : ICommand
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
-                "jarvis task show <taskID> // task id is the ID of the task you are trying to see\n"                 
+                "jarvis task show <taskID> // task id is the ID of the task you are trying to see\n"
                 );
             return true;
         }
 
         int id = Utils.Atoi(command[0]);
 
-        if (application.taskManager.IsEntryAvailableWithID(id))
+        if (application.taskManager.DoesTaskExist(id))
         {
             bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == id;
             int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
-            Task entry = application.taskManager.GetEntry(id);
+            Task entry = application.taskManager.GetTask(id);
 
             // Heading
             Console.Out.WriteLine("{0, -4} {1,-15} {2}",
@@ -323,13 +333,13 @@ public class TaskShowCommand : ICommand
 
             Console.Out.WriteLine();
 
-            foreach( string subTask in entry.subTasks)
+            foreach (string subTask in entry.subTasks)
             {
                 Console.Out.WriteLine(subTask);
             }
         }
         else
-            Console.Out.WriteLine("Entry not found with id : " + id);
+            Console.Out.WriteLine("Task not found with id : " + id);
 
         return true;
     }
@@ -347,7 +357,7 @@ public class TaskAddSubTaskCommand : ICommand
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
-                "jarvis task addsubtask <taskID> <subtasktitle>  // task id is the ID of the task under which the subtask would be created\n"                 
+                "jarvis task addsubtask <taskID> <subtasktitle>  // task id is the ID of the task under which the subtask would be created\n"
                 );
             return true;
         }
@@ -355,14 +365,57 @@ public class TaskAddSubTaskCommand : ICommand
         int id = Utils.Atoi(command[0]);
         string title = command[1];
 
-        
-        if (application.taskManager.IsEntryAvailableWithID(id))
+
+        if (application.taskManager.DoesTaskExist(id))
         {
-            application.taskManager.GetEntry(id).AddSubTask(title);
-            Console.Out.WriteLine("Subtask added to entry with id : " + id);
+            application.taskManager.GetTask(id).AddSubTask(title);
+            Console.Out.WriteLine("Subtask added to Task with id : " + id);
         }
         else
-            Console.Out.WriteLine("Entry not found with id : " + id);
+            Console.Out.WriteLine("Task not found with id : " + id);
+
+        return true;
+    }
+}
+
+public class TaskRecordTimeLogCommand : ICommand
+{
+    public TaskRecordTimeLogCommand()
+    {
+    }
+
+    public override bool Run(List<string> command, Jarvis.JApplication application)
+    {
+        if (command.Count < 2)
+        {
+            Console.Out.WriteLine("Invalid arguments! \n");
+            Console.Out.WriteLine("USAGE : \n" +
+                "jarvis task recordtimelog <taskID> <time in mins> <comments>"
+                );
+            return true;
+        }
+
+        int id = Utils.Atoi(command[0]);
+        int timeTakenInMinutes = Utils.Atoi(command[1]);
+        string comments = command.Count() > 2 ? command[2] : "";
+
+        if (application.taskManager.DoesTaskExist(id))
+        {
+            // Add record to log manager
+            {
+                LogEntry le = new LogEntry();
+                le.id = id;
+                le.date = DateTime.Now;
+                le.comment = comments;
+                le.timeTakenInMinutes = timeTakenInMinutes;
+
+                application.logManager.AddEntry(le);
+            }
+
+            Console.Out.WriteLine("New timelog added for task : " + id);
+        }
+        else
+            Console.Out.WriteLine("Task not found with id : " + id);
 
         return true;
     }

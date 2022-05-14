@@ -90,9 +90,9 @@ namespace Jarvis
         {
             return outlineData.entries.Remove(ed);
         }
-        public bool RemoveEntryIfExists(int id)
+        public bool RemoveTaskIfExists(int id)
         {
-            Task ed = GetEntry(id);
+            Task ed = GetTask(id);
             if (ed != null)
                 return outlineData.entries.Remove(ed);
             return false;
@@ -111,8 +111,8 @@ namespace Jarvis
 
             foreach (Task ed in outlineData.entries)
             {
-                if (ed.id >= freeID)
-                    freeID = ed.id + 1;
+                if (ed.id >= availableID)
+                    availableID = ed.id + 1;
             }
         }
         public void Save()
@@ -123,7 +123,7 @@ namespace Jarvis
 
         // Getters
 
-        public bool IsEntryAvailableWithID(int id)
+        public bool DoesTaskExist(int id)
         {
             foreach (Task ed in outlineData.entries)
             {
@@ -132,7 +132,7 @@ namespace Jarvis
             }
             return false;
         }
-        public Task GetEntry(int id)
+        public Task GetTask(int id)
         {
             foreach (Task ed in outlineData.entries)
             {
@@ -142,13 +142,13 @@ namespace Jarvis
             return null;
         }
 
-        public int GetNewID()
+        public int GetAvailableID()
         {
-            return freeID++;
+            return availableID++;
         }
 
         // Private 
-        private int freeID = 1;
+        private int availableID = 1;
     }
 
 }

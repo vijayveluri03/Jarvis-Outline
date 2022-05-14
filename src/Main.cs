@@ -12,7 +12,8 @@ class Program
     {
 
 #if DEBUG
-        string command = "task list";
+        //string command = "task list";
+        string command = "task recordtimelog 8 90 \"\"";
         args = command.Split(' ');
 #endif
         Jarvis.JApplication app = new Jarvis.JApplication();
