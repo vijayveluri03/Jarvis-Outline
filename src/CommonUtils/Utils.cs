@@ -340,6 +340,21 @@ public static class StringExt
     }
 }
 
+public static class List
+{
+    public static string FindItemWithSubstring(this List<string> list, string substring)
+    {
+        foreach( var value in list)
+        {
+            if ( value.Contains(substring))
+            {
+                return value;
+            }
+        }
+        return string.Empty;
+    }
+}
+
 public class Pair<T, U>
 {
     public Pair()

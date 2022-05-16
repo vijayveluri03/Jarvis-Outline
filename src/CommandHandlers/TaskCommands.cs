@@ -279,7 +279,8 @@ public class TaskListCommand : ICommand
                 "jarvis task list --completed // Shows all the tasks completed\n" +
                 "jarvis task list --discarded // Shows all the tasks discarded\n" +
                 "jarvis task list --story // Shows only stories\n" +
-                "jarvis task list --task // Shows only tasks\n"
+                "jarvis task list --task // Shows only tasks\n" +
+                "jarvis task list --cat:<category> // Shows only those category\n"
                 );
             return true;
         }
@@ -294,17 +295,32 @@ public class TaskListCommand : ICommand
         bool story = optionalArguments.Contains("--story");
         bool task = optionalArguments.Contains("--task");
 
+        string categoryListItem = optionalArguments.FindItemWithSubstring("--cat:");
+        string categoryFilter = string.Empty;
+        if (categoryListItem != string.Empty)
+        {
+            string[] allCategories = categoryListItem.Split(':');
+            if (!application.DesignData.DoesCategoryExist(allCategories[1]))
+            {
+                Console.WriteLine("Invalid category");
+            }
+            else
+            {
+                categoryFilter = allCategories[1];
+            }
+        }
+
         // By default all are shown
-        if ( !story && !task )
+        if (!story && !task)
             story = task = true;
 
         // by default only open ones are shown, unless specified in which case open ones are not shown. 
         bool open = true;
 
-        if ( archieved || completed || discarded )
+        if (archieved || completed || discarded)
             open = false;
 
-        if( optionalArguments.Contains("--all") || optionalArguments.Contains("-a") )
+        if (optionalArguments.Contains("--all") || optionalArguments.Contains("-a"))
         {
             archieved = completed = discarded = open = true;
         }
@@ -319,22 +335,25 @@ public class TaskListCommand : ICommand
 
             foreach (var entry in application.taskManager.outlineData.entries)
             {
-                if ( entry.IsOpen && !open )
+                if (entry.IsOpen && !open)
                     continue;
 
-                if ( entry.IsComplete && !completed )
+                if (entry.IsComplete && !completed)
                     continue;
 
-                if ( entry.IsDiscarded && !discarded )
+                if (entry.IsDiscarded && !discarded)
                     continue;
 
-                if ( entry.IsArchieved && !archieved )
+                if (entry.IsArchieved && !archieved)
                     continue;
 
-                if ( entry.IsTask && !task)
+                if (entry.IsTask && !task)
                     continue;
 
-                if ( entry.IsStory && !story)
+                if (entry.IsStory && !story)
+                    continue;
+
+                if (categoryFilter != string.Empty && !entry.categories.Contains(categoryFilter))
                     continue;
 
                 bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id;
@@ -345,7 +364,7 @@ public class TaskListCommand : ICommand
                     (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
                     entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (entry.subTasks != null && entry.subTasks.Length > 0 ? "+(" + entry.subTasks.Length + ")" : ""),
                     (isInProgress ? "In Progress" : entry.StatusString),
-                    (isInProgress ? Utils.MinutesToHoursString( timeInProgress ) + " + " : "") + ("( " + Utils.MinutesToHoursString( application.logManager.GetTotalTimeSpentToday(entry.id)) + " , " + Utils.MinutesToHoursString( application.logManager.GetTotalTimeSpent(entry.id)) + " )")
+                    (isInProgress ? Utils.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(entry.id)) + " , " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpent(entry.id)) + " )")
                     );
 
                 lineCount++;
