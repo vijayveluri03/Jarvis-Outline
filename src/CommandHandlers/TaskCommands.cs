@@ -560,14 +560,14 @@ public class TaskReportCommand : ICommand
             categoryTimeMap = GetReportFor( application.taskManager, application.logManager.logs.entries, 6, out totalMinutes);
 
             Console.ForegroundColor = (ConsoleColor.DarkBlue);
-            Console.Out.WriteLine("{0,-20} {1,-7} hours(avg)", "FOR LAST 7 DAYS", String.Format("{0:0.00}", totalMinutes/(60.0f*7)));
+            Console.Out.WriteLine("{0,-20} {1,-7} hours {2,-7} {3, -7} hours(avg)", "FOR LAST 7 DAYS", String.Format("{0:0.00}", totalMinutes/(60.0f)), " ", String.Format("{0:0.00}", totalMinutes/(60.0f * 7)));
             Console.ForegroundColor = defaultColor;
 
             if (categoryTimeMap.Count > 0)
             {
                 foreach (var timeMap in categoryTimeMap)
                 {
-                    Console.Out.WriteLine("{0,-20} {1,-7} hours", timeMap.Key, String.Format("{0:0.00}", timeMap.Value/60.0f));
+                    Console.Out.WriteLine("{0,-20} {1,-7} hours {2,-7} {3,-7} hours(avg)", timeMap.Key, String.Format("{0:0.00}", timeMap.Value/60.0f), " " , String.Format("{0:0.00}", timeMap.Value/(60.0f*7)));
                 }
             }
             else

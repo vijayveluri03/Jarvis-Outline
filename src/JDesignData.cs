@@ -57,7 +57,7 @@ namespace Jarvis
             }
             else
             {
-                ConsoleWriter.Print("Player prefs file not found. So defaulting it!");
+                Console.WriteLine("Player prefs file not found. So defaulting it!");
                 return new JUserData();
             }
         }

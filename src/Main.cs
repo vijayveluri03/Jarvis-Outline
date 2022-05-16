@@ -12,8 +12,8 @@ class Program
     {
 
 #if DEBUG
-        //string command = "task list";
-        string command = "task report";
+        string command = "task list";
+        //string command = "task report";
         args = command.Split(' ');
 #endif
         Jarvis.JApplication app = new Jarvis.JApplication();
