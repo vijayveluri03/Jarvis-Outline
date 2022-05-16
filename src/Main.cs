@@ -12,9 +12,9 @@ class Program
     {
 
 #if DEBUG
-        string command = "task list";
+        string debugCommand = "task list & task report";
         //string command = "task report";
-        args = command.Split(' ');
+        args = debugCommand.Split(' ');
 #endif
         Jarvis.JApplication app = new Jarvis.JApplication();
         app.Initialize();
@@ -33,25 +33,54 @@ class Program
         Console.Out.WriteLine("****** DEBUG ******" );
 #endif
 
-        List<string> valueArguments = new List<string>(args);
-        List<string> optionalArguments = new List<string>();
+        #region Splitting multiple commands
+        List<List<string>> commands = new List<List<string>>();
+        commands.Add(new List<string>());
 
-        // Seperating arguments into Value and Optional. 
-        // optional are the ones with -- or - before an argument
+        int commandIndex = 0; 
+        foreach( var arg in args )
         {
-        for( int i = 0; i < valueArguments.Count; i++ )
-        {
-            if(valueArguments[i].StartsWith("-"))
+            if(arg =="&" || arg =="+")
             {
-                optionalArguments.Add(valueArguments[i]);
-                valueArguments.RemoveAt(i);
-                i--;
+                commandIndex++;
+                commands.Add(new List<string>());
+                continue;
             }
-        }
-        }
 
-        CommandSelector commandHandler = new CommandSelector();
-        commandHandler.Run(valueArguments, optionalArguments, app);
+            commands[commandIndex].Add(arg);
+        }
+        #endregion
+
+        for( commandIndex = 0; commandIndex < commands.Count; commandIndex++ )
+        {
+            var command = commands[commandIndex];
+
+            List<string> valueArguments = new List<string>(command);
+            List<string> optionalArguments = new List<string>();
+
+            // Seperating arguments into Value and Optional. 
+            // optional are the ones with -- or - before an argument
+            {
+            for( int i = 0; i < valueArguments.Count; i++ )
+            {
+                if(valueArguments[i].StartsWith("-"))
+                {
+                    optionalArguments.Add(valueArguments[i]);
+                    valueArguments.RemoveAt(i);
+                    i--;
+                }
+            }
+            }
+
+            CommandSelector commandHandler = new CommandSelector();
+            commandHandler.Run(valueArguments, optionalArguments, app);
+
+            
+            // A bit of space in between commands 
+            if( commandIndex < commands.Count - 1 )
+                Console.Out.WriteLine(" ");
+
+        }
 
         //CommandLine.Parser.Default.ParseArguments<BaseCommand>(args)
         //.WithParsed<BaseCommand>(option => option.Run(null))
