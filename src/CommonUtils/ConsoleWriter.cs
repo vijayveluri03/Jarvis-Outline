@@ -5,8 +5,17 @@ using System.Diagnostics;
 public static class ConsoleWriter
 {
     public const int SLEEP_TIME_IN_MS = 30;
-
+    private static ConsoleColor previousColor = ConsoleColor.Black;
     // Foreground Colors for the text
+
+    public static void OnAppLaunched()
+    {
+        previousColor = Console.ForegroundColor;
+    }
+    public static void OnAppKilled()
+    {
+        Console.ForegroundColor = previousColor;
+    }
 
     public static void PushColor(ConsoleColor color)
     {
@@ -18,7 +27,6 @@ public static class ConsoleWriter
         Utils.Assert(foregroundTextColorStack.Count > 0);
         foregroundTextColorStack.Pop();
     }
-
 
     // Print message in console
 

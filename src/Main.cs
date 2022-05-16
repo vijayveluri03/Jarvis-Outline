@@ -17,6 +17,7 @@ class Program
         string debugCommand = "task list --cat:asdf:fefe";
         args = debugCommand.Split(' ');
 #endif
+        ConsoleWriter.OnAppLaunched();
         Jarvis.JApplication app = new Jarvis.JApplication();
         app.Initialize();
 
@@ -95,5 +96,6 @@ class Program
 
         // A bit of space at the tail
         ConsoleWriter.Print(" ");
+        ConsoleWriter.OnAppKilled();
     }
 }
