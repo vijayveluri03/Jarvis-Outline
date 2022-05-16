@@ -70,8 +70,8 @@ namespace Jarvis
 
     public class TaskManager
     {
-
         public TaskCollection outlineData { get; private set; }
+        private bool dirty = false;
 
         public TaskManager()
         {
@@ -86,14 +86,18 @@ namespace Jarvis
         public void AddTask(Task ed)
         {
             outlineData.entries.Add(ed);
+            dirty = true;
         }
         public bool RemoveTask(Task ed)
         {
+            dirty = true;
             return outlineData.entries.Remove(ed);
         }
         public bool RemoveTaskIfExists(int id)
         {
-            Task ed = GetTask(id);
+            dirty = true;
+
+            Task ed = GetTask_ReadOnly(id);
             if (ed != null)
                 return outlineData.entries.Remove(ed);
             return false;
@@ -102,7 +106,6 @@ namespace Jarvis
 
         private void Load(string fileName)
         {
-
             using (StreamReader r = new StreamReader(fileName))
             {
                 string json = r.ReadToEnd();
@@ -118,8 +121,16 @@ namespace Jarvis
         }
         public void Save()
         {
+            if(!dirty)
+                return;
+
             string serializedData = JsonConvert.SerializeObject(outlineData, Formatting.Indented);
             File.WriteAllText(JConstants.OUTLINE_FILENAME, serializedData);
+            dirty = false;
+
+            #if RELEASE_LOG
+            Console.WriteLine("Tasks saved");
+            #endif
         }
 
         // Getters
@@ -133,7 +144,9 @@ namespace Jarvis
             }
             return false;
         }
-        public Task GetTask(int id)
+        
+        // Because C# doesnt in const (-|-)
+        public Task GetTask_ReadOnly(int id)
         {
             foreach (Task ed in outlineData.entries)
             {
@@ -141,6 +154,12 @@ namespace Jarvis
                     return ed;
             }
             return null;
+        }
+
+        public Task GetTask_Editable(int id)
+        {
+            dirty = true;
+            return GetTask_ReadOnly(id);
         }
 
         public int GetAvailableID()

@@ -43,6 +43,7 @@ namespace Jarvis
         [JsonProperty] public DateTime lastLoginDate = DateTime.MinValue;
         [JsonProperty] public TaskProgress taskProgress = new TaskProgress();
 
+        [JsonIgnore] private bool dirty = false;
 
         public static JUserData Load()
         {
@@ -66,10 +67,14 @@ namespace Jarvis
         {
             taskProgress.taskIDInProgress = id;
             taskProgress.startTime = time;
+
+            dirty = true;
         }
         public void StopTask()
         {
             taskProgress.taskIDInProgress = -1;
+
+            dirty = true;
         }
         public bool IsTaskInProgress()
         {
@@ -79,8 +84,16 @@ namespace Jarvis
 
         public void Save()
         {
+            if (!dirty)
+                return;
+
             string serializedUserData = JsonConvert.SerializeObject(this, Formatting.Indented);
             File.WriteAllText(JConstants.PLAYERPREFS_FILENAME, serializedUserData);
+            dirty = false;
+
+            #if RELEASE_LOG
+            Console.WriteLine("Userdata saved");
+            #endif
         }
     }
 

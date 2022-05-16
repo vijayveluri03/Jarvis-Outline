@@ -21,6 +21,8 @@ namespace Jarvis
     public class TaskTimeManagement
     {
         public LogCollection logs { get; private set; }
+        private bool dirty = false;
+
         public TaskTimeManagement()
         {
             if (Utils.CreateFileIfNotExit(JConstants.TASK_LOG_FILENAME, JConstants.TASK_LOG_TEMPLATE_FILENAME))
@@ -36,6 +38,8 @@ namespace Jarvis
         public void AddEntry(LogEntry ed)
         {
             logs.entries.Add(ed);
+
+            dirty = true;
         }
         public int GetTotalTimeSpentToday(int id)
         {
@@ -73,8 +77,16 @@ namespace Jarvis
         }
         public void Save()
         {
+            if(!dirty)
+                return;
+
             string serializedData = JsonConvert.SerializeObject(logs, Formatting.Indented);
             File.WriteAllText(JConstants.TASK_LOG_FILENAME, serializedData);
+            dirty = false;
+
+            #if RELEASE_LOG
+            Console.WriteLine("Logs saved");
+            #endif
         }
     }
 }

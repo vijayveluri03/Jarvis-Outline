@@ -344,7 +344,7 @@ public class TaskShowCommand : ICommand
         {
             bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == id;
             int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
-            Task entry = application.taskManager.GetTask(id);
+            Task entry = application.taskManager.GetTask_ReadOnly(id);
 
             // Heading
             Console.Out.WriteLine("{0, -4} {1,-15} {2}",
@@ -365,9 +365,12 @@ public class TaskShowCommand : ICommand
 
             Console.Out.WriteLine();
 
-            foreach (string subTask in entry.subTasks)
+            if (entry.subTasks != null)
             {
-                Console.Out.WriteLine(subTask);
+                foreach (string subTask in entry.subTasks)
+                {
+                    Console.Out.WriteLine(subTask);
+                }
             }
         }
         else
@@ -400,7 +403,7 @@ public class TaskAddSubTaskCommand : ICommand
 
         if (application.taskManager.DoesTaskExist(id))
         {
-            application.taskManager.GetTask(id).AddSubTask(title);
+            application.taskManager.GetTask_Editable(id).AddSubTask(title);
             Console.Out.WriteLine("Subtask added to Task with id : " + id);
         }
         else
@@ -434,8 +437,8 @@ public class TaskSetStatusCommand : ICommand
 
         if (application.taskManager.DoesTaskExist(id))
         {
-            application.taskManager.GetTask(id).SetStatus(this.status);
-            Console.Out.WriteLine("Task with id : {0} marked as {1}", id, application.taskManager.GetTask(id).StatusString);
+            application.taskManager.GetTask_Editable(id).SetStatus(this.status);
+            Console.Out.WriteLine("Task with id : {0} marked as {1}", id, application.taskManager.GetTask_Editable(id).StatusString);
         }
         else
             Console.Out.WriteLine("Task not found with id : " + id);
@@ -503,7 +506,7 @@ public class TaskReportCommand : ICommand
 
         foreach( var log in logs)
         {
-            Task task =  taskManager.GetTask(log.id);
+            Task task =  taskManager.GetTask_ReadOnly(log.id);
 
             if ( task == null ) 
                 continue;
