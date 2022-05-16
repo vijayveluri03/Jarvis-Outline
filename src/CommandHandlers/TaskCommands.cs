@@ -13,7 +13,7 @@ public class TaskHandler : ICommand
 
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
     {
 
         if (arguments.Count < 1)
@@ -37,7 +37,7 @@ public class TaskHandler : ICommand
                 "\n" +
                 "ADVANCED\n" +
                 "jarvis task addsubtask // to add subtasks to a task\n" +
-                "jarvis task recordtimelog // to record an offline task\n" + 
+                "jarvis task recordtimelog // to record an offline task\n" +
                 "jarvis task report // to show all the work done in the last day/week\n");
 
             return false;
@@ -111,7 +111,7 @@ public class TaskAddCommand : ICommand
 
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
     {
         if (arguments.Count != 2)
         {
@@ -149,7 +149,7 @@ public class TaskRemoveCommand : ICommand
 
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
     {
         if (arguments.Count != 1)
         {
@@ -182,7 +182,7 @@ public class TaskStartCommand : ICommand
 
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
     {
         if (arguments.Count != 1)
         {
@@ -219,7 +219,7 @@ public class TaskStopCommand : ICommand
     {
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
     {
         if (arguments.Count != 1)
         {
@@ -264,7 +264,7 @@ public class TaskListCommand : ICommand
 
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
     {
         if (arguments.Count != 0)
         {
@@ -291,7 +291,7 @@ public class TaskListCommand : ICommand
 
             foreach (var entry in application.taskManager.outlineData.entries)
             {
-                if( !entry.IsOpen && !showAll )
+                if (!entry.IsOpen && !showAll)
                     continue;
 
                 bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id;
@@ -302,7 +302,7 @@ public class TaskListCommand : ICommand
                     (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
                     entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (entry.subTasks != null && entry.subTasks.Length > 0 ? "+(" + entry.subTasks.Length + ")" : ""),
                     (isInProgress ? "In Progress" : entry.StatusString),
-                    (isInProgress ? timeInProgress + " + " : "") + ("(" + application.logManager.GetTotalTimeSpentToday(entry.id) + "," + application.logManager.GetTotalTimeSpent(entry.id) + ")")
+                    (isInProgress ? Utils.MinutesToHoursString( timeInProgress ) + " + " : "") + ("( " + Utils.MinutesToHoursString( application.logManager.GetTotalTimeSpentToday(entry.id)) + " , " + Utils.MinutesToHoursString( application.logManager.GetTotalTimeSpent(entry.id)) + " )")
                     );
 
                 lineCount++;
@@ -327,7 +327,7 @@ public class TaskShowCommand : ICommand
 
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
     {
         if (arguments.Count != 1)
         {
@@ -386,7 +386,7 @@ public class TaskAddSubTaskCommand : ICommand
     {
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
     {
         if (arguments.Count != 2)
         {
@@ -420,7 +420,7 @@ public class TaskSetStatusCommand : ICommand
         this.status = status;
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
     {
         if (arguments.Count != 1)
         {
@@ -456,7 +456,7 @@ public class TaskRecordTimeLogCommand : ICommand
     {
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
     {
         if (arguments.Count < 2)
         {
@@ -499,23 +499,23 @@ public class TaskReportCommand : ICommand
     {
     }
 
-    private Dictionary<string, int> GetReportFor( TaskManager taskManager, List<LogEntry> logs, int pastDays, out int totalMinutes )
+    private Dictionary<string, int> GetReportFor(TaskManager taskManager, List<LogEntry> logs, int pastDays, out int totalMinutes)
     {
         Dictionary<string, int> report = new Dictionary<string, int>();
         totalMinutes = 0;
 
-        foreach( var log in logs)
+        foreach (var log in logs)
         {
-            Task task =  taskManager.GetTask_ReadOnly(log.id);
+            Task task = taskManager.GetTask_ReadOnly(log.id);
 
-            if ( task == null ) 
+            if (task == null)
                 continue;
 
-            if(log.date.ZeroTime() >= ( DateTime.Now.AddDays(-1 * pastDays).ZeroTime() ))
+            if (log.date.ZeroTime() >= (DateTime.Now.AddDays(-1 * pastDays).ZeroTime()))
             {
-                foreach( var taskCategory in task.categories )
+                foreach (var taskCategory in task.categories)
                 {
-                    if( !report.ContainsKey(taskCategory) )
+                    if (!report.ContainsKey(taskCategory))
                         report[taskCategory] = 0;
                     report[taskCategory] += log.timeTakenInMinutes;
                     totalMinutes += log.timeTakenInMinutes;
@@ -525,7 +525,7 @@ public class TaskReportCommand : ICommand
         return report;
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
     {
         if (arguments.Count != 0)
         {
@@ -540,17 +540,17 @@ public class TaskReportCommand : ICommand
         if (application.taskManager.outlineData.entries.Count() > 0)
         {
             int totalMinutes = 0;
-            Dictionary<string, int> categoryTimeMap = GetReportFor( application.taskManager, application.logManager.logs.entries, 0, out totalMinutes);
+            Dictionary<string, int> categoryTimeMap = GetReportFor(application.taskManager, application.logManager.logs.entries, 0, out totalMinutes);
 
             Console.ForegroundColor = (ConsoleColor.DarkBlue);
-            Console.Out.WriteLine("{0,-20} {1,-7} hours", "FOR TODAY", String.Format("{0:0.00}", totalMinutes/60.0f));
+            Console.Out.WriteLine("{0,-20} {1,-7} hours", "FOR TODAY", Utils.MinutesToHoursString(totalMinutes));
             Console.ForegroundColor = defaultColor;
 
             if (categoryTimeMap.Count > 0)
             {
                 foreach (var timeMap in categoryTimeMap)
                 {
-                    Console.Out.WriteLine("{0,-20} {1,-7} hours", timeMap.Key, String.Format("{0:0.00}", timeMap.Value/60.0f));
+                    Console.Out.WriteLine("{0,-20} {1,-7} hours", timeMap.Key, Utils.MinutesToHoursString(timeMap.Value));
                 }
             }
             else
@@ -560,17 +560,17 @@ public class TaskReportCommand : ICommand
 
             Console.Out.WriteLine();
 
-            categoryTimeMap = GetReportFor( application.taskManager, application.logManager.logs.entries, 6, out totalMinutes);
+            categoryTimeMap = GetReportFor(application.taskManager, application.logManager.logs.entries, 6, out totalMinutes);
 
             Console.ForegroundColor = (ConsoleColor.DarkBlue);
-            Console.Out.WriteLine("{0,-20} {1,-7} hours {2,-7} {3, -7} hours(avg)", "FOR LAST 7 DAYS", String.Format("{0:0.00}", totalMinutes/(60.0f)), " ", String.Format("{0:0.00}", totalMinutes/(60.0f * 7)));
+            Console.Out.WriteLine("{0,-20} {1,-7} hours {2,-7} {3, -7} hours(avg)", "FOR LAST 7 DAYS", Utils.MinutesToHoursString(totalMinutes), " ", Utils.HoursToHoursString(Utils.MinutesToHours(totalMinutes) / 7));
             Console.ForegroundColor = defaultColor;
 
             if (categoryTimeMap.Count > 0)
             {
                 foreach (var timeMap in categoryTimeMap)
                 {
-                    Console.Out.WriteLine("{0,-20} {1,-7} hours {2,-7} {3,-7} hours(avg)", timeMap.Key, String.Format("{0:0.00}", timeMap.Value/60.0f), " " , String.Format("{0:0.00}", timeMap.Value/(60.0f*7)));
+                    Console.Out.WriteLine("{0,-20} {1,-7} hours {2,-7} {3,-7} hours(avg)", timeMap.Key, Utils.MinutesToHoursString(timeMap.Value), " ", Utils.HoursToHoursString(Utils.MinutesToHours(timeMap.Value / 7)));
                 }
             }
             else

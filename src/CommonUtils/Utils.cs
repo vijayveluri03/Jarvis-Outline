@@ -143,6 +143,22 @@ public static class Utils
     }
     #endregion
 
+
+    public static float MinutesToHours (int minutes)
+    {
+        return (float)(minutes/60.0);
+    }
+
+    public static string MinutesToHoursString (int minutes)
+    {
+        return String.Format("{0:0.0}", MinutesToHours(minutes));
+    }
+
+    public static string HoursToHoursString (float hours)
+    {
+        return String.Format("{0:0.0}", hours);
+    }
+
     public static string ArrayToString(List<string> array, bool useDelimitter, char delimitter = ',')
     {
         StringBuilder sb = new StringBuilder();
