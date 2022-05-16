@@ -270,16 +270,32 @@ public class TaskListCommand : ICommand
         {
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
-                "jarvis task list   // lists all the tasks\n"
+                "jarvis task list   // lists all the tasks which are open\n"
                  +
-                "jarvis task list --all // Shows all the tasks including archieved and completed"
+                "jarvis task list --all // Shows all the tasks including archieved, discarded and completed\n" +
+                "jarvis task list --archieve // Shows all the tasks archieved\n" +
+                "jarvis task list --completed // Shows all the tasks completed\n" +
+                "jarvis task list --discarded // Shows all the tasks discarded\n"
                 );
             return true;
         }
 
         int lineCount = 0;
         int titleArea = 40;
-        bool showAll = optionalArguments.Contains("--all") || optionalArguments.Contains("-a");
+
+        bool archieved = optionalArguments.Contains("--archieved");
+        bool completed = optionalArguments.Contains("--completed");
+        bool discarded = optionalArguments.Contains("--discarded");
+
+        bool open = true;
+
+        if ( archieved || completed || discarded )
+            open = false;
+
+        if( optionalArguments.Contains("--all") || optionalArguments.Contains("-a") )
+        {
+            archieved = completed = discarded = open = true;
+        }
 
         // output Heading 
         if (application.taskManager.outlineData.entries.Count() > 0)
@@ -291,7 +307,17 @@ public class TaskListCommand : ICommand
 
             foreach (var entry in application.taskManager.outlineData.entries)
             {
-                if (!entry.IsOpen && !showAll)
+
+                if ( entry.IsOpen && !open )
+                    continue;
+
+                if ( entry.IsComplete && !completed )
+                    continue;
+
+                if ( entry.IsDiscarded && !discarded )
+                    continue;
+
+                if ( entry.IsArchieved && !archieved )
                     continue;
 
                 bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id;
