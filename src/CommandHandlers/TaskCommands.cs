@@ -118,13 +118,15 @@ public class TaskAddCommand : ICommand
             Console.Out.WriteLine("Invalid arguments! \n");
             Console.Out.WriteLine("USAGE : \n" +
                 "jarvis task add <category> <title>\n" +
-                "Category can be office,learn,chores,health. you can add more in the design data as per your need."
+                "Category can be office,learn,chores,health. you can add more in the design data as per your need.\n\n" +
+                "use --story or -s to create a story"
                 );
             return true;
         }
 
         string[] categories = arguments[0].Split(',');
         string title = arguments[1];
+        bool isStory = optionalArguments.Contains("--story") || optionalArguments.Contains("-s");
 
         if (!application.DesignData.DoesCategoryExist(categories))
         {
@@ -133,7 +135,7 @@ public class TaskAddCommand : ICommand
             return true;
         }
 
-        var entry = SharedLogic.CreateNewEntry(application.taskManager, categories, title);
+        var entry = SharedLogic.CreateNewEntry(application.taskManager, categories, title, isStory ? Task.Type.Story : Task.Type.Task);
         application.taskManager.AddTask(entry);
 
         Console.Out.WriteLine("New task added with id : " + entry.id);
@@ -275,7 +277,9 @@ public class TaskListCommand : ICommand
                 "jarvis task list --all // Shows all the tasks including archieved, discarded and completed\n" +
                 "jarvis task list --archieve // Shows all the tasks archieved\n" +
                 "jarvis task list --completed // Shows all the tasks completed\n" +
-                "jarvis task list --discarded // Shows all the tasks discarded\n"
+                "jarvis task list --discarded // Shows all the tasks discarded\n" +
+                "jarvis task list --story // Shows only stories\n" +
+                "jarvis task list --task // Shows only tasks\n"
                 );
             return true;
         }
@@ -287,6 +291,14 @@ public class TaskListCommand : ICommand
         bool completed = optionalArguments.Contains("--completed");
         bool discarded = optionalArguments.Contains("--discarded");
 
+        bool story = optionalArguments.Contains("--story");
+        bool task = optionalArguments.Contains("--task");
+
+        // By default all are shown
+        if ( !story && !task )
+            story = task = true;
+
+        // by default only open ones are shown, unless specified in which case open ones are not shown. 
         bool open = true;
 
         if ( archieved || completed || discarded )
@@ -307,7 +319,6 @@ public class TaskListCommand : ICommand
 
             foreach (var entry in application.taskManager.outlineData.entries)
             {
-
                 if ( entry.IsOpen && !open )
                     continue;
 
@@ -318,6 +329,12 @@ public class TaskListCommand : ICommand
                     continue;
 
                 if ( entry.IsArchieved && !archieved )
+                    continue;
+
+                if ( entry.IsTask && !task)
+                    continue;
+
+                if ( entry.IsStory && !story)
                     continue;
 
                 bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id;

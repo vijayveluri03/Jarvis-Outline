@@ -14,12 +14,13 @@ namespace Jarvis
             return ed;
         }
 
-        public static Task CreateNewEntry(TaskManager taskManager, string[] category, string title)
+        public static Task CreateNewEntry(TaskManager taskManager, string[] category, string title, Task.Type type)
         {
             Task ed = new Task();
             ed.id = taskManager.GetAvailableID();
             ed.categories = category;
             ed.title = title;
+            ed.type = type;
             return ed;
         }
 

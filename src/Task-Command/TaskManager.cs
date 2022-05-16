@@ -15,6 +15,12 @@ namespace Jarvis
             Discard
         }
 
+        public enum Type
+        {
+            Task, 
+            Story
+        }
+
         public string[] categories;
 
         // The name or the title for an entry 
@@ -27,12 +33,17 @@ namespace Jarvis
 
         public Status taskStatus = Status.Open;
 
+        public Type type = Type.Task;
+
         // Getters 
         [JsonIgnore] public bool IsOpen { get { return taskStatus == Status.Open; } }
         [JsonIgnore] public bool IsComplete { get { return taskStatus == Status.Complete; } }
         [JsonIgnore] public bool IsDiscarded { get { return taskStatus == Status.Discard; } }
         [JsonIgnore] public bool IsArchieved { get { return taskStatus == Status.Archieve; } }
         [JsonIgnore] public bool IsClosed { get { return IsDiscarded || IsComplete; } }
+        [JsonIgnore] public bool IsTask { get { return type == Type.Task; } }
+        [JsonIgnore] public bool IsStory { get { return type == Type.Story; } }
+
         [JsonIgnore]
         public string StatusString
         {
@@ -42,6 +53,17 @@ namespace Jarvis
                 if (IsComplete) return "Completed";
                 if (IsDiscarded) return "Discarded";
                 if (IsArchieved) return "Archieved";
+                Utils.Assert(false);
+                return "Unknown";
+            }
+        }
+        [JsonIgnore]
+        public string TypeString
+        {
+            get
+            {
+                if (IsTask) return "Task";
+                if (IsStory) return "Story";
                 Utils.Assert(false);
                 return "Unknown";
             }
