@@ -1,0 +1,17 @@
+{
+  "lookAndFeel": {
+    // Options are "White, Black, DarkBlue, DarkGreen, DarkCyan, DarkRed, DardMagenta, DarkYellow, Gray, Blue, Green, Cyan, Red, Magenta, Yellow
+    "defaultColorForText": "White",
+    "HighlightColorForText": "DarkBlue",
+    "HighlightColorForText_2": "Yellow"
+  },
+  "categories": {
+    "listOfCategories": [
+      "health",
+      "office",
+      "learn",
+      "chores",
+      "fun"
+    ]
+  }
+}
