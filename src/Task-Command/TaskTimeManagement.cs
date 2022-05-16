@@ -27,7 +27,7 @@ namespace Jarvis
         {
             if (Utils.CreateFileIfNotExit(JConstants.TASK_LOG_FILENAME, JConstants.TASK_LOG_TEMPLATE_FILENAME))
             {
-                Console.Out.WriteLine("Task Log data copied from Template. This happens on the first launch.");
+                ConsoleWriter.Print("Task Log data copied from Template. This happens on the first launch.");
             }
 
             Load(JConstants.TASK_LOG_FILENAME);
@@ -85,7 +85,7 @@ namespace Jarvis
             dirty = false;
 
             #if RELEASE_LOG
-            Console.WriteLine("Logs saved");
+            ConsoleWriter.Print("Logs saved");
             #endif
         }
     }

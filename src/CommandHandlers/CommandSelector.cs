@@ -18,8 +18,8 @@ public class CommandSelector : ICommand
     {
         if (arguments.Count < 1)
         {
-            Console.Out.WriteLine("Invalid arguments! \n");
-            Console.Out.WriteLine("USAGE : \n" +
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ConsoleWriter.Print("USAGE : \n" +
                 "Jarvis task <arguments>. For more info on arguments, try \"Jarvis task\"");
             return false;
         }
@@ -33,10 +33,10 @@ public class CommandSelector : ICommand
                 selectedHander = (new TaskHandler());
                 break;
             case "habit":
-                Console.Out.WriteLine("NYI");
+                ConsoleWriter.Print("NYI");
                 break;
             default:
-                Console.Out.WriteLine("unknown task");
+                ConsoleWriter.Print("unknown task");
                 break;
         }
 

@@ -21,17 +21,17 @@ class Program
         app.Initialize();
 
         // A bit of space at the head
-        Console.Out.WriteLine(" ");
-        //Console.Out.WriteLine("Number of arguments" + args.Length);
+        ConsoleWriter.Print(" ");
+        //ConsoleWriter.Print("Number of arguments" + args.Length);
 
 #if DEBUG
-        Console.Out.WriteLine("****** DEBUG ******" );
-        Console.Out.WriteLine("List of parameters:");
+        ConsoleWriter.Print("****** DEBUG ******" );
+        ConsoleWriter.Print("List of parameters:");
         foreach(string arg in args)
         {
-            Console.Out.WriteLine(arg);
+            ConsoleWriter.Print(arg);
         }
-        Console.Out.WriteLine("****** DEBUG ******" );
+        ConsoleWriter.Print("****** DEBUG ******" );
 #endif
 
         #region Splitting multiple commands
@@ -79,7 +79,7 @@ class Program
             
             // A bit of space in between commands 
             if( commandIndex < commands.Count - 1 )
-                Console.Out.WriteLine(" ");
+                ConsoleWriter.Print(" ");
 
         }
 
@@ -94,6 +94,6 @@ class Program
         app.Save();
 
         // A bit of space at the tail
-        Console.Out.WriteLine(" ");
+        ConsoleWriter.Print(" ");
     }
 }

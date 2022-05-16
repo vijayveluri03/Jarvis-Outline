@@ -18,8 +18,8 @@ public class TaskHandler : ICommand
 
         if (arguments.Count < 1)
         {
-            Console.Out.WriteLine("Invalid arguments! \n");
-            Console.Out.WriteLine("USAGE : \n" +
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ConsoleWriter.Print("USAGE : \n" +
                 "Jarvis task add  // To add a task\n" +
                 "Jarvis task list // to list all the tasks\n" +
                 "Jarvis task list --all // to list all the tasks\n" +
@@ -90,7 +90,7 @@ public class TaskHandler : ICommand
                 break;
 
             default:
-                Console.Out.WriteLine("unknown action");
+                ConsoleWriter.Print("unknown action");
                 break;
         }
 
@@ -115,8 +115,8 @@ public class TaskAddCommand : ICommand
     {
         if (arguments.Count != 2)
         {
-            Console.Out.WriteLine("Invalid arguments! \n");
-            Console.Out.WriteLine("USAGE : \n" +
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ConsoleWriter.Print("USAGE : \n" +
                 "jarvis task add <category> <title>\n" +
                 "Category can be office,learn,chores,health. you can add more in the design data as per your need.\n\n" +
                 "use --story or -s to create a story"
@@ -130,7 +130,7 @@ public class TaskAddCommand : ICommand
 
         if (!application.DesignData.DoesCategoryExist(categories))
         {
-            Console.Out.WriteLine("Invalid categories.\n" +
+            ConsoleWriter.Print("Invalid categories.\n" +
                 "Category can be office,learn,chores,health. you can add more in the design data as per your need.");
             return true;
         }
@@ -138,7 +138,7 @@ public class TaskAddCommand : ICommand
         var entry = SharedLogic.CreateNewEntry(application.taskManager, categories, title, isStory ? Task.Type.Story : Task.Type.Task);
         application.taskManager.AddTask(entry);
 
-        Console.Out.WriteLine("New task added with id : " + entry.id);
+        ConsoleWriter.Print("New task added with id : " + entry.id);
         return true;
     }
 }
@@ -155,8 +155,8 @@ public class TaskRemoveCommand : ICommand
     {
         if (arguments.Count != 1)
         {
-            Console.Out.WriteLine("Invalid arguments! \n");
-            Console.Out.WriteLine("USAGE : \n" +
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ConsoleWriter.Print("USAGE : \n" +
                 "jarvis task remove <taskID>  // task id is the ID of the task you are trying to remove\n"
                 );
             return true;
@@ -168,9 +168,9 @@ public class TaskRemoveCommand : ICommand
         {
             int id = Utils.Atoi(idStr, -1);
             if (application.taskManager.RemoveTaskIfExists(id))
-                Console.Out.WriteLine("Task removed with id : " + id);
+                ConsoleWriter.Print("Task removed with id : " + id);
             else
-                Console.Out.WriteLine("Task not found with id : " + id);
+                ConsoleWriter.Print("Task not found with id : " + id);
         }
 
         return true;
@@ -188,8 +188,8 @@ public class TaskStartCommand : ICommand
     {
         if (arguments.Count != 1)
         {
-            Console.Out.WriteLine("Invalid arguments! \n");
-            Console.Out.WriteLine("USAGE : \n" +
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ConsoleWriter.Print("USAGE : \n" +
                 "jarvis task start <taskID> // task id is the ID of the task you are trying to start time tracking\n"
                 );
             return true;
@@ -199,17 +199,17 @@ public class TaskStartCommand : ICommand
 
         if (application.UserData.IsTaskInProgress())
         {
-            Console.Out.WriteLine("There is already a task with ID : {0} in progress.", application.UserData.taskProgress.taskIDInProgress);
+            ConsoleWriter.Print("There is already a task with ID : {0} in progress.", application.UserData.taskProgress.taskIDInProgress);
             return true;
         }
 
         if (application.taskManager.DoesTaskExist(id))
         {
             application.UserData.StartTask(id, DateTime.Now);
-            Console.Out.WriteLine("Started progress on Task with id : " + id);
+            ConsoleWriter.Print("Started progress on Task with id : " + id);
         }
         else
-            Console.Out.WriteLine("Task not found with id : " + id);
+            ConsoleWriter.Print("Task not found with id : " + id);
 
         return true;
     }
@@ -225,8 +225,8 @@ public class TaskStopCommand : ICommand
     {
         if (arguments.Count != 1)
         {
-            Console.Out.WriteLine("Invalid arguments! \n");
-            Console.Out.WriteLine("USAGE : \n" +
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ConsoleWriter.Print("USAGE : \n" +
                 "jarvis task stop <comments> "
                 );
             return true;
@@ -234,7 +234,7 @@ public class TaskStopCommand : ICommand
 
         if (!application.UserData.IsTaskInProgress())
         {
-            Console.Out.WriteLine("There is no task in progress.");
+            ConsoleWriter.Print("There is no task in progress.");
             return true;
         }
 
@@ -254,7 +254,7 @@ public class TaskStopCommand : ICommand
             application.logManager.AddEntry(le);
         }
 
-        Console.Out.WriteLine("Stopped progress on Task with id : " + id);
+        ConsoleWriter.Print("Stopped progress on Task with id : " + id);
         return true;
     }
 }
@@ -270,8 +270,8 @@ public class TaskListCommand : ICommand
     {
         if (arguments.Count != 0)
         {
-            Console.Out.WriteLine("Invalid arguments! \n");
-            Console.Out.WriteLine("USAGE : \n" +
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ConsoleWriter.Print("USAGE : \n" +
                 "jarvis task list   // lists all the tasks which are open\n"
                  +
                 "jarvis task list --all // Shows all the tasks including archieved, discarded and completed\n" +
@@ -302,7 +302,7 @@ public class TaskListCommand : ICommand
             string[] allCategories = categoryListItem.Split(':');
             if (!application.DesignData.DoesCategoryExist(allCategories[1]))
             {
-                Console.WriteLine("Invalid category");
+                ConsoleWriter.Print("Invalid category");
             }
             else
             {
@@ -328,7 +328,7 @@ public class TaskListCommand : ICommand
         // output Heading 
         if (application.taskManager.outlineData.entries.Count() > 0)
         {
-            Console.Out.WriteLine("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
+            ConsoleWriter.Print("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
                 "ID", "DEPT", "TITLE", "STATUS", "TIME SPENT"
                 );
 
@@ -358,8 +358,9 @@ public class TaskListCommand : ICommand
 
                 bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id;
                 int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
-
-                Console.Out.WriteLine("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
+                
+                ConsoleWriter.PrintInColor("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
+                    entry.IsStory ? application.DesignData.HighlightColorForText_2: application.DesignData.DefaultColorForText,
                     entry.id,
                     (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
                     entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (entry.subTasks != null && entry.subTasks.Length > 0 ? "+(" + entry.subTasks.Length + ")" : ""),
@@ -371,11 +372,11 @@ public class TaskListCommand : ICommand
 
                 //@todo
                 if (lineCount % 5 == 0)
-                    Console.Out.WriteLine();
+                    ConsoleWriter.Print();
             }
         }
         else
-            Console.Out.WriteLine("No tasks found! Try adding a few using \"jarvis add\"");
+            ConsoleWriter.Print("No tasks found! Try adding a few using \"jarvis add\"");
 
         return true;
     }
@@ -393,8 +394,8 @@ public class TaskShowCommand : ICommand
     {
         if (arguments.Count != 1)
         {
-            Console.Out.WriteLine("Invalid arguments! \n");
-            Console.Out.WriteLine("USAGE : \n" +
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ConsoleWriter.Print("USAGE : \n" +
                 "jarvis task show <taskID> // task id is the ID of the task you are trying to see\n"
                 );
             return true;
@@ -409,34 +410,34 @@ public class TaskShowCommand : ICommand
             Task entry = application.taskManager.GetTask_ReadOnly(id);
 
             // Heading
-            Console.Out.WriteLine("{0, -4} {1,-15} {2}",
+            ConsoleWriter.Print("{0, -4} {1,-15} {2}",
                 "ID", "DEPT", "TITLE"
                 );
 
-            Console.Out.WriteLine("{0, -4} {1,-15} {2}",
+            ConsoleWriter.Print("{0, -4} {1,-15} {2}",
                 entry.id,
                 (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
                 entry.title);
 
-            Console.Out.WriteLine();
+            ConsoleWriter.Print();
 
-            Console.Out.WriteLine("STATUS : {0, -15}\nTIME SPENT : {1,-15}",
+            ConsoleWriter.Print("STATUS : {0, -15}\nTIME SPENT : {1,-15}",
                 (isInProgress ? "In Progress" : entry.StatusString),
                 (isInProgress ? timeInProgress + " + " : "") + ("(" + application.logManager.GetTotalTimeSpentToday(entry.id) + "," + application.logManager.GetTotalTimeSpent(entry.id) + ")")
                 );
 
-            Console.Out.WriteLine();
+            ConsoleWriter.Print();
 
             if (entry.subTasks != null)
             {
                 foreach (string subTask in entry.subTasks)
                 {
-                    Console.Out.WriteLine(subTask);
+                    ConsoleWriter.Print(subTask);
                 }
             }
         }
         else
-            Console.Out.WriteLine("Task not found with id : " + id);
+            ConsoleWriter.Print("Task not found with id : " + id);
 
         return true;
     }
@@ -452,8 +453,8 @@ public class TaskAddSubTaskCommand : ICommand
     {
         if (arguments.Count != 2)
         {
-            Console.Out.WriteLine("Invalid arguments! \n");
-            Console.Out.WriteLine("USAGE : \n" +
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ConsoleWriter.Print("USAGE : \n" +
                 "jarvis task addsubtask <taskID> <subtasktitle>  // task id is the ID of the task under which the subtask would be created\n"
                 );
             return true;
@@ -466,10 +467,10 @@ public class TaskAddSubTaskCommand : ICommand
         if (application.taskManager.DoesTaskExist(id))
         {
             application.taskManager.GetTask_Editable(id).AddSubTask(title);
-            Console.Out.WriteLine("Subtask added to Task with id : " + id);
+            ConsoleWriter.Print("Subtask added to Task with id : " + id);
         }
         else
-            Console.Out.WriteLine("Task not found with id : " + id);
+            ConsoleWriter.Print("Task not found with id : " + id);
 
         return true;
     }
@@ -486,8 +487,8 @@ public class TaskSetStatusCommand : ICommand
     {
         if (arguments.Count != 1)
         {
-            Console.Out.WriteLine("Invalid arguments! \n");
-            Console.Out.WriteLine("USAGE : \n" +
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ConsoleWriter.Print("USAGE : \n" +
                 "jarvis task complete <taskID>  // task id is the ID of the task under which the subtask would be created\n" +
                 "jarvis task archieve <taskID>  // task id is the ID of the task under which the subtask would be created\n" +
                 "jarvis task discard <taskID>  // task id is the ID of the task under which the subtask would be created\n"
@@ -500,10 +501,10 @@ public class TaskSetStatusCommand : ICommand
         if (application.taskManager.DoesTaskExist(id))
         {
             application.taskManager.GetTask_Editable(id).SetStatus(this.status);
-            Console.Out.WriteLine("Task with id : {0} marked as {1}", id, application.taskManager.GetTask_Editable(id).StatusString);
+            ConsoleWriter.Print("Task with id : {0} marked as {1}", id, application.taskManager.GetTask_Editable(id).StatusString);
         }
         else
-            Console.Out.WriteLine("Task not found with id : " + id);
+            ConsoleWriter.Print("Task not found with id : " + id);
 
         return true;
     }
@@ -522,8 +523,8 @@ public class TaskRecordTimeLogCommand : ICommand
     {
         if (arguments.Count < 2)
         {
-            Console.Out.WriteLine("Invalid arguments! \n");
-            Console.Out.WriteLine("USAGE : \n" +
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ConsoleWriter.Print("USAGE : \n" +
                 "jarvis task recordtimelog <taskID> <time in mins> <comments>"
                 );
             return true;
@@ -546,10 +547,10 @@ public class TaskRecordTimeLogCommand : ICommand
                 application.logManager.AddEntry(le);
             }
 
-            Console.Out.WriteLine("New timelog added for task : " + id);
+            ConsoleWriter.Print("New timelog added for task : " + id);
         }
         else
-            Console.Out.WriteLine("Task not found with id : " + id);
+            ConsoleWriter.Print("Task not found with id : " + id);
 
         return true;
     }
@@ -591,57 +592,58 @@ public class TaskReportCommand : ICommand
     {
         if (arguments.Count != 0)
         {
-            Console.Out.WriteLine("Invalid arguments! \n");
-            Console.Out.WriteLine("USAGE : \n" +
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ConsoleWriter.Print("USAGE : \n" +
                 "jarvis task report"
                 );
             return true;
         }
 
-        ConsoleColor defaultColor = Console.ForegroundColor;
         if (application.taskManager.outlineData.entries.Count() > 0)
         {
             int totalMinutes = 0;
             Dictionary<string, int> categoryTimeMap = GetReportFor(application.taskManager, application.logManager.logs.entries, 0, out totalMinutes);
 
-            Console.ForegroundColor = (ConsoleColor.DarkBlue);
-            Console.Out.WriteLine("{0,-20} {1,-7} hours", "FOR TODAY", Utils.MinutesToHoursString(totalMinutes));
-            Console.ForegroundColor = defaultColor;
+            ConsoleWriter.PrintInColor("{0,-20} {1,-7} hours", 
+                application.DesignData.HighlightColorForText, 
+                "FOR TODAY", 
+                Utils.MinutesToHoursString(totalMinutes));
 
             if (categoryTimeMap.Count > 0)
             {
                 foreach (var timeMap in categoryTimeMap)
                 {
-                    Console.Out.WriteLine("{0,-20} {1,-7} hours", timeMap.Key, Utils.MinutesToHoursString(timeMap.Value));
+                    ConsoleWriter.Print("{0,-20} {1,-7} hours", timeMap.Key, Utils.MinutesToHoursString(timeMap.Value));
                 }
             }
             else
             {
-                Console.Out.WriteLine("Found no records");
+                ConsoleWriter.Print("Found no records");
             }
 
-            Console.Out.WriteLine();
+            ConsoleWriter.Print();
 
             categoryTimeMap = GetReportFor(application.taskManager, application.logManager.logs.entries, 6, out totalMinutes);
 
-            Console.ForegroundColor = (ConsoleColor.DarkBlue);
-            Console.Out.WriteLine("{0,-20} {1,-7} hours {2,-7} {3, -7} hours(avg)", "FOR LAST 7 DAYS", Utils.MinutesToHoursString(totalMinutes), " ", Utils.HoursToHoursString(Utils.MinutesToHours(totalMinutes) / 7));
-            Console.ForegroundColor = defaultColor;
+            ConsoleWriter.PrintInColor("{0,-20} {1,-7} hours {2,-7} {3, -7} hours(avg)", 
+                application.DesignData.HighlightColorForText, 
+                "FOR LAST 7 DAYS", 
+                Utils.MinutesToHoursString(totalMinutes), " ", Utils.HoursToHoursString(Utils.MinutesToHours(totalMinutes) / 7));
 
             if (categoryTimeMap.Count > 0)
             {
                 foreach (var timeMap in categoryTimeMap)
                 {
-                    Console.Out.WriteLine("{0,-20} {1,-7} hours {2,-7} {3,-7} hours(avg)", timeMap.Key, Utils.MinutesToHoursString(timeMap.Value), " ", Utils.HoursToHoursString(Utils.MinutesToHours(timeMap.Value / 7)));
+                    ConsoleWriter.Print("{0,-20} {1,-7} hours {2,-7} {3,-7} hours(avg)", timeMap.Key, Utils.MinutesToHoursString(timeMap.Value), " ", Utils.HoursToHoursString(Utils.MinutesToHours(timeMap.Value / 7)));
                 }
             }
             else
             {
-                Console.Out.WriteLine("Found no records");
+                ConsoleWriter.Print("Found no records");
             }
         }
         else
-            Console.Out.WriteLine("Tasks not found");
+            ConsoleWriter.Print("Tasks not found");
 
         return true;
     }

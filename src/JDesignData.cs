@@ -58,7 +58,7 @@ namespace Jarvis
             }
             else
             {
-                Console.WriteLine("Player prefs file not found. So defaulting it!");
+                ConsoleWriter.Print("Player prefs file not found. So defaulting it!");
                 return new JUserData();
             }
         }
@@ -92,7 +92,7 @@ namespace Jarvis
             dirty = false;
 
             #if RELEASE_LOG
-            Console.WriteLine("Userdata saved");
+            ConsoleWriter.Print("Userdata saved");
             #endif
         }
     }
@@ -105,9 +105,9 @@ namespace Jarvis
         [Serializable]
         public class LookAndFeelProperties
         {
-            [JsonProperty] public int maxColumnsForOptions = 3;
             [JsonProperty] public string defaultColorForText = "White";
-            [JsonProperty] public string dueHighlightColorForText = "Red";
+            [JsonProperty] public string highlightColorForText = "White";
+            [JsonProperty] public string highlightColorForText_2 = "White";
         }
         [Serializable]
         public class Categories
@@ -121,10 +121,9 @@ namespace Jarvis
         [JsonProperty] public Categories categories;
 
         // Getters        
-
-        [JsonIgnore] public int ColumnCountForOptions { get { return lookAndFeel.maxColumnsForOptions; } }
-        [JsonIgnore] public ConsoleColor defaultColorForText { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.defaultColorForText); } }
-        [JsonIgnore] public ConsoleColor dueHighlightColorForText { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.dueHighlightColorForText); } }
+        [JsonIgnore] public ConsoleColor DefaultColorForText { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.defaultColorForText); } }
+        [JsonIgnore] public ConsoleColor HighlightColorForText { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText); } }
+        [JsonIgnore] public ConsoleColor HighlightColorForText_2 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_2); } }
 
         public static JDesignData Load()
         {

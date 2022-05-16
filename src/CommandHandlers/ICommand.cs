@@ -9,7 +9,7 @@ public class ICommand
 {
     public virtual bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
     {
-        Console.Out.WriteLine("Incorrect usage");
+        ConsoleWriter.Print("Incorrect usage");
         return false;
     }
 }

@@ -99,7 +99,7 @@ namespace Jarvis
         {
             if (Utils.CreateFileIfNotExit(JConstants.OUTLINE_FILENAME, JConstants.OUTLINE_TEMPLATE_FILENAME))
             {
-                Console.Out.WriteLine("outline data copied from Template. This happens on the first launch.");
+                ConsoleWriter.Print("outline data copied from Template. This happens on the first launch.");
             }
 
             Load(JConstants.OUTLINE_FILENAME);
@@ -151,7 +151,7 @@ namespace Jarvis
             dirty = false;
 
             #if RELEASE_LOG
-            Console.WriteLine("Tasks saved");
+            ConsoleWriter.Print("Tasks saved");
             #endif
         }
 
