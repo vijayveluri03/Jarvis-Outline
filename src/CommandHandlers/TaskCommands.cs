@@ -562,9 +562,9 @@ public class TaskReportCommand : ICommand
     {
     }
 
-    private Dictionary<string, int> GetReportFor(TaskManager taskManager, List<LogEntry> logs, int pastDays, out int totalMinutes)
+    private IDictionary<string, int> GetReportFor(TaskManager taskManager, List<LogEntry> logs, int pastDays, out int totalMinutes)
     {
-        Dictionary<string, int> report = new Dictionary<string, int>();
+        SortedDictionary<string, int> report = new SortedDictionary<string, int>();
         totalMinutes = 0;
 
         foreach (var log in logs)
@@ -602,7 +602,7 @@ public class TaskReportCommand : ICommand
         if (application.taskManager.outlineData.entries.Count() > 0)
         {
             int totalMinutes = 0;
-            Dictionary<string, int> categoryTimeMap = GetReportFor(application.taskManager, application.logManager.logs.entries, 0, out totalMinutes);
+            IDictionary<string, int> categoryTimeMap = GetReportFor(application.taskManager, application.logManager.logs.entries, 0, out totalMinutes);
 
             ConsoleWriter.PrintInColor("{0,-20} {1,-7} hours", 
                 application.DesignData.HighlightColorForText, 
