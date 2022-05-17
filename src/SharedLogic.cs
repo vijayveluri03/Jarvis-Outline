@@ -7,10 +7,10 @@ namespace Jarvis
 {
     public static class SharedLogic
     {
-        public static Task CreateNewEntry(TaskManager outlineManager)
+        public static Task CreateNewEntry(TaskManager taskManager)
         {
             Task ed = new Task();
-            ed.id = outlineManager.GetAvailableID();
+            ed.id = taskManager.GetAvailableID();
             return ed;
         }
 

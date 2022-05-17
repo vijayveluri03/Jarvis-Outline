@@ -1,4 +1,4 @@
-# Jarvis-Outline
+# Jarvis
 A CLI tool, which has a huge potential to be anything. 
 
 For now, you can use it as a taskmanager or a reminder. 

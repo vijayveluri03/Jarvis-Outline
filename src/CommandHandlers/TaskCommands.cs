@@ -326,14 +326,14 @@ public class TaskListCommand : ICommand
         }
 
         // output Heading 
-        if (application.taskManager.outlineData.entries.Count() > 0)
+        if (application.taskManager.Data.entries.Count() > 0)
         {
             ConsoleWriter.Print("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
                 "ID", "DEPT", "TITLE", "STATUS", "TIME SPENT"
                 );
 
 
-            foreach (var entry in application.taskManager.outlineData.entries)
+            foreach (var entry in application.taskManager.Data.entries)
             {
                 if (entry.IsOpen && !open)
                     continue;
@@ -609,7 +609,7 @@ public class TaskReportCommand : ICommand
             return true;
         }
 
-        if (application.taskManager.outlineData.entries.Count() > 0)
+        if (application.taskManager.Data.entries.Count() > 0)
         {
             int totalMinutes = 0;
             IDictionary<string, int> categoryTimeMap = GetReportFor(application.taskManager, application.logManager.logs.entries, 0, out totalMinutes);

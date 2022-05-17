@@ -92,28 +92,28 @@ namespace Jarvis
 
     public class TaskManager
     {
-        public TaskCollection outlineData { get; private set; }
+        public TaskCollection Data { get; private set; }
         private bool dirty = false;
 
         public TaskManager()
         {
-            if (Utils.CreateFileIfNotExit(JConstants.OUTLINE_FILENAME, JConstants.OUTLINE_TEMPLATE_FILENAME))
+            if (Utils.CreateFileIfNotExit(JConstants.TASKS_FILENAME, JConstants.TASKS_TEMPLATE_FILENAME))
             {
-                ConsoleWriter.Print("outline data copied from Template. This happens on the first launch.");
+                ConsoleWriter.Print("Task data copied from Template. This happens on the first launch.");
             }
 
-            Load(JConstants.OUTLINE_FILENAME);
+            Load(JConstants.TASKS_FILENAME);
         }
 
         public void AddTask(Task ed)
         {
-            outlineData.entries.Add(ed);
+            Data.entries.Add(ed);
             dirty = true;
         }
         public bool RemoveTask(Task ed)
         {
             dirty = true;
-            return outlineData.entries.Remove(ed);
+            return Data.entries.Remove(ed);
         }
         public bool RemoveTaskIfExists(int id)
         {
@@ -121,7 +121,7 @@ namespace Jarvis
 
             Task ed = GetTask_ReadOnly(id);
             if (ed != null)
-                return outlineData.entries.Remove(ed);
+                return Data.entries.Remove(ed);
             return false;
         }
 
@@ -132,10 +132,10 @@ namespace Jarvis
             {
                 string json = r.ReadToEnd();
                 TaskCollection data = JsonConvert.DeserializeObject<TaskCollection>(json);
-                outlineData = data;
+                Data = data;
             }
 
-            foreach (Task ed in outlineData.entries)
+            foreach (Task ed in Data.entries)
             {
                 if (ed.id >= availableID)
                     availableID = ed.id + 1;
@@ -146,8 +146,8 @@ namespace Jarvis
             if(!dirty)
                 return;
 
-            string serializedData = JsonConvert.SerializeObject(outlineData, Formatting.Indented);
-            File.WriteAllText(JConstants.OUTLINE_FILENAME, serializedData);
+            string serializedData = JsonConvert.SerializeObject(Data, Formatting.Indented);
+            File.WriteAllText(JConstants.TASKS_FILENAME, serializedData);
             dirty = false;
 
             #if RELEASE_LOG
@@ -159,7 +159,7 @@ namespace Jarvis
 
         public bool DoesTaskExist(int id)
         {
-            foreach (Task ed in outlineData.entries)
+            foreach (Task ed in Data.entries)
             {
                 if (ed.id == id)
                     return true;
@@ -170,7 +170,7 @@ namespace Jarvis
         // Because C# doesnt in const (-|-)
         public Task GetTask_ReadOnly(int id)
         {
-            foreach (Task ed in outlineData.entries)
+            foreach (Task ed in Data.entries)
             {
                 if (ed.id == id)
                     return ed;
