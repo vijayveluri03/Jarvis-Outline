@@ -339,7 +339,7 @@ public static class DateExt
 {
     public static string ShortForm(this DateTime date)
     {
-        return date.Month + "/" + date.Date;
+        return date.Month + "/" + date.Day;
     }
     public static DateTime ZeroTime(this DateTime date)
     {

@@ -14,13 +14,25 @@ namespace Jarvis
             return ed;
         }
 
-        public static Task CreateNewEntry(TaskManager taskManager, string[] category, string title, Task.Type type)
+        public static Task CreateNewTask(TaskManager taskManager, string[] category, string title, Task.Type type)
         {
             Task ed = new Task();
             ed.id = taskManager.GetAvailableID();
             ed.categories = category;
             ed.title = title;
             ed.type = type;
+            return ed;
+        }
+
+        public static Habit CreateNewHabit(HabitManager habitManager, string[] category, string title, int previousStreak)
+        {
+            Habit ed = new Habit();
+            ed.id = habitManager.GetAvailableID();
+            ed.categories = category;
+            ed.title = title;
+            ed.startDate = DateTime.Now.ZeroTime();
+            ed.previousStreak = previousStreak;
+            
             return ed;
         }
 

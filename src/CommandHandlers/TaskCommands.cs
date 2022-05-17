@@ -135,7 +135,7 @@ public class TaskAddCommand : ICommand
             return true;
         }
 
-        var entry = SharedLogic.CreateNewEntry(application.taskManager, categories, title, isStory ? Task.Type.Story : Task.Type.Task);
+        var entry = SharedLogic.CreateNewTask(application.taskManager, categories, title, isStory ? Task.Type.Story : Task.Type.Task);
         application.taskManager.AddTask(entry);
 
         ConsoleWriter.Print("New task added with id : " + entry.id);
