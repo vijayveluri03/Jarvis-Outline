@@ -227,7 +227,7 @@ public class TaskStopCommand : ICommand
 
     public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
     {
-        if (arguments.Count != 1)
+        if (arguments.Count > 1)
         {
             ConsoleWriter.Print("Invalid arguments! \n");
             ConsoleWriter.Print("USAGE : \n" +
@@ -242,7 +242,7 @@ public class TaskStopCommand : ICommand
             return true;
         }
 
-        string comments = arguments[0];
+        string comments = arguments != null && arguments.Count > 0 ? arguments[0] : string.Empty; 
         int id = application.UserData.taskProgress.taskIDInProgress;
         int timeTakenInMinutes = (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes;
         application.UserData.StopTask();
@@ -581,7 +581,7 @@ public class TaskRecordTimeLogCommand : ICommand
 
         int id = Utils.Atoi(arguments[0]);
         int timeTakenInMinutes = Utils.Atoi(arguments[1]);
-        string comments = arguments.Count() > 2 ? arguments[2] : "";
+        string comments = arguments.Count() > 2 ? arguments[2] : string.Empty;
 
         bool syntaxErrorForWhenArgument = false;
         int deltaTime = Utils.ExtractIntFromArgument(optionalArguments, "--when", 0, null, null, out syntaxErrorForWhenArgument);
