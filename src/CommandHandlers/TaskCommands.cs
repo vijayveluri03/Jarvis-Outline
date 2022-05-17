@@ -295,19 +295,19 @@ public class TaskListCommand : ICommand
         bool story = optionalArguments.Contains("--story");
         bool task = optionalArguments.Contains("--task");
 
-        string categoryListItem = optionalArguments.FindItemWithSubstring("--cat:");
-        string categoryFilter = string.Empty;
-        if (categoryListItem != string.Empty)
+        bool syntaxErrorInCategoryFilter = false;
+        string categoryFilter = Utils.ExtractStringFromArgument(optionalArguments, "--cat", string.Empty, null, null, out syntaxErrorInCategoryFilter );
+        if( syntaxErrorInCategoryFilter )
         {
-            string[] allCategories = categoryListItem.Split(':');
-            if (!application.DesignData.DoesCategoryExist(allCategories[1]))
-            {
-                ConsoleWriter.Print("Invalid category");
-            }
-            else
-            {
-                categoryFilter = allCategories[1];
-            }
+            ConsoleWriter.Print("Invalid syntax for --cat argument."); 
+            categoryFilter = string.Empty;
+            return true;
+        }
+        else if (categoryFilter != string.Empty && !application.DesignData.DoesCategoryExist(categoryFilter))
+        {
+            ConsoleWriter.Print("Invalid category");
+            categoryFilter = string.Empty;
+            return true;
         }
 
         // By default all are shown
@@ -525,7 +525,8 @@ public class TaskRecordTimeLogCommand : ICommand
         {
             ConsoleWriter.Print("Invalid arguments! \n");
             ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task recordtimelog <taskID> <time in mins> <comments>"
+                "jarvis task recordtimelog <taskID> <time in mins> <comments>\n" +
+                "jarvis task recordtimelog <taskID> <time in mins> <comments> <---when:-1>   // delta day count. -1 as in this timelog is created for yesterday. -2 as in day before yesterday. by default, this is 0, as in the time log is created for today."
                 );
             return true;
         }
@@ -534,20 +535,29 @@ public class TaskRecordTimeLogCommand : ICommand
         int timeTakenInMinutes = Utils.Atoi(arguments[1]);
         string comments = arguments.Count() > 2 ? arguments[2] : "";
 
+        bool syntaxErrorForWhenArgument = false;
+        int deltaTime = Utils.ExtractIntFromArgument(optionalArguments, "--when", 0, null, null, out syntaxErrorForWhenArgument);
+
+        if( syntaxErrorForWhenArgument)
+        {
+            ConsoleWriter.Print("syntax invalid for --when argument. please try again");
+            return true;
+        }
+
         if (application.taskManager.DoesTaskExist(id))
         {
             // Add record to log manager
             {
                 LogEntry le = new LogEntry();
                 le.id = id;
-                le.date = DateTime.Now;
+                le.date = DateTime.Now.AddDays(deltaTime);
                 le.comment = comments;
                 le.timeTakenInMinutes = timeTakenInMinutes;
 
                 application.logManager.AddEntry(le);
-            }
 
-            ConsoleWriter.Print("New timelog added for task : " + id);
+                ConsoleWriter.Print("New timelog added for task : {0} on date : {1}", id, le.date);
+            }
         }
         else
             ConsoleWriter.Print("Task not found with id : " + id);

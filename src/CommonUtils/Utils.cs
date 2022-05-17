@@ -159,6 +159,46 @@ public static class Utils
         return String.Format("{0:0.0}", hours);
     }
 
+    public static int ExtractIntFromArgument(List<string> arguments, string startingSubstring, int defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
+    {
+        syntaxError = false;
+        string subString = ExtractStringFromArgument(arguments, startingSubstring, string.Empty, itemNotFoundCB, syntaxNotValidCB, out syntaxError);
+        if ( subString == string.Empty)
+            return defaul;
+        return Atoi(subString);
+    }
+
+    public static string ExtractStringFromArgument( List<string> arguments, string startingSubstring, string defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
+    {
+        syntaxError = false;
+        string listItem = arguments.FindItemWithSubstring(startingSubstring);
+        if ( listItem == null || listItem == string.Empty)
+        {
+            if( itemNotFoundCB != null)
+                itemNotFoundCB();
+            return defaul;
+        }
+        if(!listItem.Contains(":"))
+        {
+            syntaxError = true;
+            if(syntaxNotValidCB != null)
+                syntaxNotValidCB();
+            return defaul;
+        }
+
+        string[] subStrings = listItem.Split(':');
+
+        if(subStrings.Length <= 1)
+        {
+            syntaxError = true;
+            if(syntaxNotValidCB != null)
+                syntaxNotValidCB();
+            return defaul;
+        }
+
+        return subStrings[1];
+    }
+
     public static string ArrayToString(List<string> array, bool useDelimitter, char delimitter = ',')
     {
         StringBuilder sb = new StringBuilder();
@@ -337,6 +377,13 @@ public static class StringExt
     {
         if (string.IsNullOrEmpty(value)) return value;
         return value.Length <= maxLength ? value : value.Substring(0, maxLength) + "...";
+    }
+
+    public static string SplitAndGetString(this string value, int index, char delimiter = ':')
+    {
+        string[] subStrings = value.Split(delimiter);
+        Utils.Assert(subStrings.Length > index);
+        return subStrings[index];
     }
 }
 
