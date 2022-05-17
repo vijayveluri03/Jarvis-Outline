@@ -30,10 +30,10 @@ public class CommandSelector : ICommand
         switch (task)
         {
             case "task":
-                selectedHander = (new TaskHandler());
+                selectedHander = new TaskHandler();
                 break;
             case "habit":
-                ConsoleWriter.Print("NYI");
+                selectedHander = new HabitHandler();
                 break;
             default:
                 ConsoleWriter.Print("unknown task");
