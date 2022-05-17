@@ -129,6 +129,7 @@ public class HabitListCommand : ICommand
 
         int lineCount = 0;
         int titleArea = 40;
+        int categoryArea = 15;
 
         bool syntaxErrorInCategoryFilter = false;
         string categoryFilter = Utils.ExtractStringFromArgument(optionalArguments, "--cat", string.Empty, null, null, out syntaxErrorInCategoryFilter );
@@ -148,7 +149,7 @@ public class HabitListCommand : ICommand
         // output Heading 
         if (application.habitManager.Data.entries.Count() > 0)
         {
-            ConsoleWriter.Print("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
+            ConsoleWriter.Print("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
                 "ID", "DEPT", "TITLE", "LAST UPDATED", "STREAK"
                 );
 
@@ -160,7 +161,7 @@ public class HabitListCommand : ICommand
 
                 ConsoleWriter.Print("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
                     entry.id,
-                    (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
+                    (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                     entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (entry.notes.Count > 0 ? "+(" + entry.notes.Count + ")" : ""),
                     entry.GetLastUpdatedOn().ShortForm(),
                     entry.GetStreak()

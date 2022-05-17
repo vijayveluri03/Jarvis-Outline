@@ -20,7 +20,9 @@ public class CommandSelector : ICommand
         {
             ConsoleWriter.Print("Invalid arguments! \n");
             ConsoleWriter.Print("USAGE : \n" +
-                "Jarvis task <arguments>. For more info on arguments, try \"Jarvis task\"");
+                "Jarvis task <arguments>. For more info on arguments, try \"Jarvis task\"\n" + 
+                "Jarvis habit <arguments>. For more info on arguments, try \"Jarvis habit\""
+                );
             return false;
         }
 

@@ -287,6 +287,7 @@ public class TaskListCommand : ICommand
 
         int lineCount = 0;
         int titleArea = 40;
+        int categoryArea = 15;
 
         bool archieved = optionalArguments.Contains("--archieved");
         bool completed = optionalArguments.Contains("--completed");
@@ -328,7 +329,7 @@ public class TaskListCommand : ICommand
         // output Heading 
         if (application.taskManager.Data.entries.Count() > 0)
         {
-            ConsoleWriter.Print("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
+            ConsoleWriter.Print("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
                 "ID", "DEPT", "TITLE", "STATUS", "TIME SPENT"
                 );
 
@@ -359,10 +360,10 @@ public class TaskListCommand : ICommand
                 bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id;
                 int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
                 
-                ConsoleWriter.PrintInColor("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
+                ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "+} {2,-" + titleArea + "} {3, -15} {4, -15}",
                     entry.IsStory ? application.DesignData.HighlightColorForText_2: application.DesignData.DefaultColorForText,
                     entry.id,
-                    (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
+                    (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                     entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (entry.subTasks != null && entry.subTasks.Length > 0 ? "+(" + entry.subTasks.Length + ")" : ""),
                     (isInProgress ? "In Progress" : entry.StatusString),
                     (isInProgress ? Utils.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(entry.id)) + " , " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpent(entry.id)) + " )")
