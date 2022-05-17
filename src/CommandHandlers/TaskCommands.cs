@@ -360,7 +360,7 @@ public class TaskListCommand : ICommand
                 bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id;
                 int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
                 
-                ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "+} {2,-" + titleArea + "} {3, -15} {4, -15}",
+                ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
                     entry.IsStory ? application.DesignData.HighlightColorForText_2: application.DesignData.DefaultColorForText,
                     entry.id,
                     (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),

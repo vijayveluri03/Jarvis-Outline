@@ -159,7 +159,7 @@ public class HabitListCommand : ICommand
                 if (categoryFilter != string.Empty && !entry.categories.Contains(categoryFilter))
                     continue;
 
-                ConsoleWriter.Print("{0, -4} {1,-15} {2,-" + titleArea + "} {3, -15} {4, -15}",
+                ConsoleWriter.Print("{0, -4} {1,-" + categoryArea +"} {2,-" + titleArea + "} {3, -15} {4, -15}",
                     entry.id,
                     (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                     entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (entry.notes.Count > 0 ? "+(" + entry.notes.Count + ")" : ""),
