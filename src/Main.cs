@@ -13,7 +13,7 @@ class Program
 
 #if DEBUG
         //string debugCommand = "task list & task report";
-        string debugCommand = "task report";
+        string debugCommand = "task list";
         //string debugCommand = "task list --cat:asdf:fefe";
         args = debugCommand.Split(' ');
 #endif

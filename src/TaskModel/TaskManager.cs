@@ -17,7 +17,7 @@ namespace Jarvis
 
         public enum Type
         {
-            Task, 
+            Task,
             Story
         }
 
@@ -29,11 +29,13 @@ namespace Jarvis
         // Unique ID
         public int id;
 
-        public string[] subTasks;
+        public List< Pair<int, string> > subTasks = new List<Pair<int, string>>();
 
         public Status taskStatus = Status.Open;
 
         public Type type = Type.Task;
+
+        [JsonIgnore] public bool isDirty = false;
 
         // Getters 
         [JsonIgnore] public bool IsOpen { get { return taskStatus == Status.Open; } }
@@ -74,12 +76,43 @@ namespace Jarvis
         public void SetAsDiscarded() { taskStatus = Status.Discard; }
         public void SetAsArchive() { taskStatus = Status.Archieve; }
         public void SetStatus(Status status) { taskStatus = status; }
-        public void AddSubTask( string subTask )
+
+        public int GetSubTaskCount()
         {
-            // TODO - optimize this 
-            List<string> tasks = subTasks != null ? new List<string> (subTasks) : new List<string>();
-            tasks.Add(subTask);
-            subTasks = tasks.ToArray();
+            return subTasks != null ? subTasks.Count: 0;
+        }
+
+        private int GetAvailableID()
+        {
+            int maxID = 0;
+            foreach (var subtaskPair in subTasks)
+            {
+                if (subtaskPair.First > maxID)
+                    maxID = subtaskPair.First;
+            }
+            return maxID + 1;
+        }
+
+        public Pair<int, string> GetSubtask (int id)
+        {
+            foreach (var subtaskPair in subTasks)
+            {
+                if (subtaskPair.First == id)
+                    return subtaskPair;
+            }
+            return null;
+        }
+
+        public void AddSubTask(string subTask)
+        {
+            subTasks.Add(new Pair<int, string>(GetAvailableID(), subTask));
+        }
+
+        public void RemoveSubTask(int id)
+        {
+            var subTaskPair = GetSubtask(id);
+            Utils.Assert(subTaskPair != null);
+            subTasks.Remove(subTaskPair);
         }
     }
 
@@ -143,16 +176,16 @@ namespace Jarvis
         }
         public void Save()
         {
-            if(!dirty)
+            if (!dirty)
                 return;
 
             string serializedData = JsonConvert.SerializeObject(Data, Formatting.Indented);
             File.WriteAllText(JConstants.TASKS_FILENAME, serializedData);
             dirty = false;
 
-            #if RELEASE_LOG
+#if RELEASE_LOG
             ConsoleWriter.Print("Tasks saved");
-            #endif
+#endif
         }
 
         // Getters
@@ -166,7 +199,7 @@ namespace Jarvis
             }
             return false;
         }
-        
+
         // Because C# doesnt in const (-|-)
         public Task GetTask_ReadOnly(int id)
         {

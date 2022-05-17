@@ -4,7 +4,6 @@ using System.Diagnostics;
 
 public static class ConsoleWriter
 {
-    public const int SLEEP_TIME_IN_MS = 30;
     private static ConsoleColor previousColor = ConsoleColor.Black;
     // Foreground Colors for the text
 
@@ -35,7 +34,6 @@ public static class ConsoleWriter
         Console.ForegroundColor = foregroundTextColorStack.Peek();
 
         Console.Write(message + "\n");
-        System.Threading.Thread.Sleep(SLEEP_TIME_IN_MS);
     }
     public static void Print(string message, params object[] parms)
     {
@@ -44,7 +42,6 @@ public static class ConsoleWriter
             Console.ForegroundColor = foregroundColor;
 
         Console.Write(message + "\n", parms);
-        System.Threading.Thread.Sleep(SLEEP_TIME_IN_MS);
     }
     public static void PrintInColor(string message, ConsoleColor foregroundColor, params object[] parms)
     {
@@ -52,13 +49,11 @@ public static class ConsoleWriter
         Print(message, parms);
         PopColor();
     }
-    public static void PrintWithOutLineBreak(string message, bool enableDelay = true, params object[] parms)
+    public static void PrintWithOutLineBreak(string message, params object[] parms)
     {
         Console.ForegroundColor = foregroundTextColorStack.Peek();
 
         Console.Write(message, parms);
-        if (enableDelay)
-            System.Threading.Thread.Sleep(SLEEP_TIME_IN_MS);
     }
     public static void Print()
     {

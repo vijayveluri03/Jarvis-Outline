@@ -37,6 +37,7 @@ public class TaskHandler : ICommand
                 "\n" +
                 "ADVANCED\n" +
                 "jarvis task addsubtask // to add subtasks to a task\n" +
+                "jarvis task removesubtask // to add subtasks to a task\n" +
                 "jarvis task recordtimelog // to record an offline task\n" +
                 "jarvis task report // to show all the work done in the last day/week\n");
 
@@ -69,6 +70,9 @@ public class TaskHandler : ICommand
                 break;
             case "addsubtask":
                 selectedHander = new TaskAddSubTaskCommand();
+                break;
+            case "removesubtask":
+                selectedHander = new TaskRemoveSubTaskCommand();
                 break;
             case "recordtimelog":
                 selectedHander = new TaskRecordTimeLogCommand();
@@ -364,7 +368,7 @@ public class TaskListCommand : ICommand
                     entry.IsStory ? application.DesignData.HighlightColorForText_2: application.DesignData.DefaultColorForText,
                     entry.id,
                     (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
-                    entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (entry.subTasks != null && entry.subTasks.Length > 0 ? "+(" + entry.subTasks.Length + ")" : ""),
+                    entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (entry.GetSubTaskCount() > 0 ? "+(" + entry.GetSubTaskCount() + ")" : ""),
                     (isInProgress ? "In Progress" : entry.StatusString),
                     (isInProgress ? Utils.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(entry.id)) + " , " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpent(entry.id)) + " )")
                     );
@@ -431,9 +435,13 @@ public class TaskShowCommand : ICommand
 
             if (entry.subTasks != null)
             {
-                foreach (string subTask in entry.subTasks)
+                ConsoleWriter.Print("{0, -15} {1,-30}",
+                "Subtask ID", "SubTask Title"
+                );
+
+                foreach (var subTaskPair in entry.subTasks)
                 {
-                    ConsoleWriter.Print(subTask);
+                    ConsoleWriter.Print( "{0, -15} {1, -30}", subTaskPair.First, subTaskPair.Second);
                 }
             }
         }
@@ -469,6 +477,45 @@ public class TaskAddSubTaskCommand : ICommand
         {
             application.taskManager.GetTask_Editable(id).AddSubTask(title);
             ConsoleWriter.Print("Subtask added to Task with id : " + id);
+        }
+        else
+            ConsoleWriter.Print("Task not found with id : " + id);
+
+        return true;
+    }
+}
+
+public class TaskRemoveSubTaskCommand : ICommand
+{
+    public TaskRemoveSubTaskCommand()
+    {
+    }
+
+    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
+    {
+        if (arguments.Count != 2)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ConsoleWriter.Print("USAGE : \n" +
+                "jarvis task removesubtask <taskID> <subtaskID>  // task id is the ID of the task. SubtaskId is the one which is assigned to each of the subtasks\n"
+                );
+            return true;
+        }
+
+        int id = Utils.Atoi(arguments[0]);
+        int subTaskID = Utils.Atoi( arguments[1]); 
+
+
+        if (application.taskManager.DoesTaskExist(id))
+        {
+            var subTaskPair = application.taskManager.GetTask_ReadOnly(id).GetSubtask(subTaskID);
+            if (subTaskPair != null)
+            {
+                application.taskManager.GetTask_Editable(id).RemoveSubTask(subTaskID);
+                ConsoleWriter.Print("Subtask removed from Task with id : " + id);
+            }
+            else
+                ConsoleWriter.Print("SubTask not found! Make sure you verify the subtask ID using 'Jarvis task show'");
         }
         else
             ConsoleWriter.Print("Task not found with id : " + id);

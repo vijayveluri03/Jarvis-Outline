@@ -27,7 +27,7 @@ public static class Utils
 
         ConsoleWriter.PushColor(color);
 
-        ConsoleWriter.PrintWithOutLineBreak(message, false);
+        ConsoleWriter.PrintWithOutLineBreak(message);
         string input = Console.ReadLine();
 
         ConsoleWriter.PopColor();
