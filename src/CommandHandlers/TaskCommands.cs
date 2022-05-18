@@ -303,9 +303,9 @@ public class TaskListCommand : CommandHandlerBase
                 "jarvis task list   // lists all the tasks which are open\n"
                  +
                 "jarvis task list --all // Shows all the tasks including archieved, discarded and completed\n" +
-                "jarvis task list --archieve // Shows all the tasks archieved\n" +
-                "jarvis task list --completed // Shows all the tasks completed\n" +
-                "jarvis task list --discarded // Shows all the tasks discarded\n" +
+                "jarvis task list --archieve // Shows all the tasks archieve\n" +
+                "jarvis task list --complete // Shows all the tasks complete\n" +
+                "jarvis task list --discard // Shows all the tasks discard\n" +
                 "jarvis task list --story // Shows only stories\n" +
                 "jarvis task list --task // Shows only tasks\n" +
                 "jarvis task list --cat:<category> // Shows only those category\n"
@@ -326,9 +326,9 @@ public class TaskListCommand : CommandHandlerBase
         int titleArea = 40;
         int categoryArea = 15;
 
-        bool archieved = optionalArguments_ReadOnly.Contains("--archieved");
-        bool completed = optionalArguments_ReadOnly.Contains("--completed");
-        bool discarded = optionalArguments_ReadOnly.Contains("--discarded");
+        bool archieved = optionalArguments_ReadOnly.Contains("--archieve");
+        bool completed = optionalArguments_ReadOnly.Contains("--complete");
+        bool discarded = optionalArguments_ReadOnly.Contains("--discard");
 
         bool story = optionalArguments_ReadOnly.Contains("--story");
         bool task = optionalArguments_ReadOnly.Contains("--task");

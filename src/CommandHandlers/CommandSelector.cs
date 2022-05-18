@@ -43,12 +43,6 @@ public class CommandSelector : CommandHandlerBase
 
     protected override bool Run(Jarvis.JApplication application)
     {
-        if (arguments_ReadOnly.Count < 1)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ShowHelp();
-            return true;
-        }
-        return true;
+        return false;
     }
 }
