@@ -7,27 +7,16 @@ using CommandLine;
 using Jarvis; //@todo 
 
 
-public class CommandSelector : ICommand
+public class CommandSelector : CommandHandlerBase
 {
     public CommandSelector()
     {
-
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application )
+    protected override CommandHandlerBase GetSpecializedCommandHandler()
     {
-        if (arguments.Count < 1)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ConsoleWriter.Print("USAGE : \n" +
-                "Jarvis task <arguments>. For more info on arguments, try \"Jarvis task\"\n" + 
-                "Jarvis habit <arguments>. For more info on arguments, try \"Jarvis habit\""
-                );
-            return false;
-        }
-
-        string task = arguments[0];
-        ICommand selectedHander = null;
+        string task = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
+        CommandHandlerBase selectedHander = null;
 
         switch (task)
         {
@@ -38,14 +27,27 @@ public class CommandSelector : ICommand
                 selectedHander = new HabitHandler();
                 break;
             default:
-                ConsoleWriter.Print("unknown task");
                 break;
         }
+        return selectedHander;
+    }
 
-        if (selectedHander != null)
+    protected override bool ShowHelp()
+    {
+        ConsoleWriter.Print("USAGE : \n" +
+            "Jarvis task <arguments>. For more info on arguments, try 'Jarvis task' or 'Jarvis task --help'\n" +
+            "Jarvis habit <arguments>. For more info on arguments, try 'Jarvis habit' or 'Jarvis habit --help'"
+            );
+        return true;
+    }
+
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count < 1)
         {
-            arguments.RemoveAt(0);
-            selectedHander.Run(arguments, optionalArguments,  application);
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
         }
         return true;
     }

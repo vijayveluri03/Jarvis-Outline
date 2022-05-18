@@ -13,7 +13,7 @@ class Program
 
 #if DEBUG
         //string debugCommand = "task list & task report";
-        string debugCommand = "task list";
+        string debugCommand = "task list --help";
         //string debugCommand = "task list --cat:asdf:fefe";
         args = debugCommand.Split(' ');
 #endif
@@ -39,10 +39,10 @@ class Program
         List<List<string>> commands = new List<List<string>>();
         commands.Add(new List<string>());
 
-        int commandIndex = 0; 
-        foreach( var arg in args )
+        int commandIndex = 0;
+        foreach (var arg in args)
         {
-            if(arg =="&" || arg =="+")
+            if (arg == "&" || arg == "+")
             {
                 commandIndex++;
                 commands.Add(new List<string>());
@@ -53,7 +53,7 @@ class Program
         }
         #endregion
 
-        for( commandIndex = 0; commandIndex < commands.Count; commandIndex++ )
+        for (commandIndex = 0; commandIndex < commands.Count; commandIndex++)
         {
             var command = commands[commandIndex];
 
@@ -63,34 +63,28 @@ class Program
             // Seperating arguments into Value and Optional. 
             // optional are the ones with -- or - before an argument
             {
-            for( int i = 0; i < valueArguments.Count; i++ )
-            {
-                if(valueArguments[i].StartsWith("-"))
+                for (int i = 0; i < valueArguments.Count; i++)
                 {
-                    optionalArguments.Add(valueArguments[i]);
-                    valueArguments.RemoveAt(i);
-                    i--;
+                    if (valueArguments[i].StartsWith("-"))
+                    {
+                        optionalArguments.Add(valueArguments[i]);
+                        valueArguments.RemoveAt(i);
+                        i--;
+                    }
                 }
-            }
             }
 
             CommandSelector commandHandler = new CommandSelector();
-            commandHandler.Run(valueArguments, optionalArguments, app);
+            if (!commandHandler.TryHandle(valueArguments, optionalArguments, app))
+            {
+                ConsoleWriter.Print("Invalid arguments. Try 'jarvis --help' for more information.");
+            }
 
-            
             // A bit of space in between commands 
-            if( commandIndex < commands.Count - 1 )
+            if (commandIndex < commands.Count - 1)
                 ConsoleWriter.Print(" ");
 
         }
-
-        //CommandLine.Parser.Default.ParseArguments<BaseCommand>(args)
-        //.WithParsed<BaseCommand>(option => option.Run(null))
-        //.WithNotParsed(HandleParseError);
-
-        //CommandLine.Parser.Default.ParseArguments<TaskAddCommand, TaskStartCommand>(args)
-        //.WithParsed<ICommand>(option => RunOptions(option))
-        //.WithNotParsed(HandleParseError);
 
         app.Save();
 

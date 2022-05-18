@@ -6,30 +6,28 @@ using CommandLine;
 using Jarvis; //@todo 
 
 
-public class HabitHandler : ICommand
+public class HabitHandler : CommandHandlerBase
 {
     public HabitHandler()
     {
 
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
+    protected override bool ShowHelp()
     {
-
-        if (arguments.Count < 1)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ConsoleWriter.Print("USAGE : \n" +
+                ConsoleWriter.Print("USAGE : \n" +
                 "Jarvis habit add  // To add a habit\n" +
                 "Jarvis habit streakup // to increase the steak of a habits\n" +
                 "Jarvis habit reset // to reset a habits\n" +
                 "Jarvis habit list // to list all the habits\n");
 
-            return false;
-        }
+        return true;
+    }
 
-        string action = arguments[0];
-        ICommand selectedHander = null;
+    protected override CommandHandlerBase GetSpecializedCommandHandler()
+    {
+        string action = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
+        CommandHandlerBase selectedHander = null;
 
         switch (action)
         {
@@ -48,41 +46,53 @@ public class HabitHandler : ICommand
                 break;
 
             default:
-                ConsoleWriter.Print("unknown action");
                 break;
         }
+        return selectedHander;
+    }
 
-        if (selectedHander != null)
+    protected override bool Run(Jarvis.JApplication application)
+    {
+
+        if (arguments_ReadOnly.Count < 1)
         {
-            arguments.RemoveAt(0);
-            selectedHander.Run(arguments, optionalArguments, application);
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+    
+            return false;
         }
+
         return true;
     }
 }
 
-public class HabitAddCommand : ICommand
+public class HabitAddCommand : CommandHandlerBase
 {
     public HabitAddCommand()
     {
 
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
+    protected override bool ShowHelp()
     {
-        if (arguments.Count != 2)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ConsoleWriter.Print("USAGE : \n" +
+        ConsoleWriter.Print("USAGE : \n" +
                 "jarvis habit add <category> <title>\n" +
                 "jarvis habit add <category> <title> --previousstreak:<count>  // This sets the streak to a base value\n" +
                 "Category can be office,learn,chores,health. you can add more in the design data as per your need.\n\n" 
                 );
+        return true;
+    }
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count != 2)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
             return true;
         }
 
-        string[] categories = arguments[0].Split(',');
-        string title = arguments[1];
+        string[] categories = arguments_ReadOnly[0].Split(',');
+        string title = arguments_ReadOnly[1];
 
         if (!application.DesignData.DoesCategoryExist(categories))
         {
@@ -92,7 +102,7 @@ public class HabitAddCommand : ICommand
         }
 
         bool syntaxErrorInCount = false;
-        int previousStreak = Utils.ExtractIntFromArgument(optionalArguments, "--previousstreak", 0, null, null, out syntaxErrorInCount );
+        int previousStreak = Utils.ExtractIntFromArgument(optionalArguments_ReadOnly, "--previousstreak", 0, null, null, out syntaxErrorInCount );
         if( syntaxErrorInCount )
         {
             ConsoleWriter.Print("Invalid syntax for --previousstreak argument."); 
@@ -108,22 +118,27 @@ public class HabitAddCommand : ICommand
     }
 }
 
-public class HabitListCommand : ICommand
+public class HabitListCommand : CommandHandlerBase
 {
     public HabitListCommand()
     {
 
     }
-
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
+    protected override bool ShowHelp()
     {
-        if (arguments.Count != 0)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ConsoleWriter.Print("USAGE : \n" +
+        ConsoleWriter.Print("USAGE : \n" +
                 "jarvis habit list   // lists all the habits\n" +
                 "jarvis habit list --cat:<category> // Shows only those category\n"
                 );
+        return true;
+    }
+
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count != 0)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
             return true;
         }
 
@@ -132,7 +147,7 @@ public class HabitListCommand : ICommand
         int categoryArea = 15;
 
         bool syntaxErrorInCategoryFilter = false;
-        string categoryFilter = Utils.ExtractStringFromArgument(optionalArguments, "--cat", string.Empty, null, null, out syntaxErrorInCategoryFilter );
+        string categoryFilter = Utils.ExtractStringFromArgument(optionalArguments_ReadOnly, "--cat", string.Empty, null, null, out syntaxErrorInCategoryFilter );
         if( syntaxErrorInCategoryFilter )
         {
             ConsoleWriter.Print("Invalid syntax for --cat argument."); 
@@ -181,24 +196,29 @@ public class HabitListCommand : ICommand
     }
 }
 
-public class HabitStreakUpCommand : ICommand
+public class HabitStreakUpCommand : CommandHandlerBase
 {
     public HabitStreakUpCommand()
     {
     }
 
-    public override bool Run(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
+    protected override bool ShowHelp()
     {
-        if (arguments.Count != 1)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ConsoleWriter.Print("USAGE : \n" +
+        ConsoleWriter.Print("USAGE : \n" +
                 "jarvis habit streakup <id>"    
                 );
+        return true;
+    }
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count != 1)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
             return true;
         }
 
-        int id = Utils.Atoi(arguments[0]);
+        int id = Utils.Atoi(arguments_ReadOnly[0]);
 
         Habit hb = application.habitManager.GetHabit_Editable(id);
 
