@@ -210,7 +210,7 @@ public class TaskStartCommand : ICommand
         if (application.taskManager.DoesTaskExist(id))
         {
             application.UserData.StartTask(id, DateTime.Now);
-            ConsoleWriter.Print("Started progress on Task with id : " + id);
+            ConsoleWriter.Print("Started progress on Task with id : {0} -> {1}", id, application.taskManager.GetTask_ReadOnly(id).title);
         }
         else
             ConsoleWriter.Print("Task not found with id : " + id);
@@ -258,7 +258,8 @@ public class TaskStopCommand : ICommand
             application.logManager.AddEntry(le);
         }
 
-        ConsoleWriter.Print("Stopped progress on Task with id : " + id);
+        ConsoleWriter.Print("Stopped progress on Task with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
+        ConsoleWriter.Print("Total time record : {0}", Utils.MinutesToHoursString( timeTakenInMinutes ) );
         return true;
     }
 }
@@ -415,7 +416,8 @@ public class TaskShowCommand : ICommand
             Task entry = application.taskManager.GetTask_ReadOnly(id);
 
             // Heading
-            ConsoleWriter.Print("{0, -4} {1,-15} {2}",
+            ConsoleWriter.PrintInColor("{0, -4} {1,-15} {2}",
+                application.DesignData.HighlightColorForText,
                 "ID", "DEPT", "TITLE"
                 );
 
@@ -428,20 +430,23 @@ public class TaskShowCommand : ICommand
 
             ConsoleWriter.Print("STATUS : {0, -15}\nTIME SPENT : {1,-15}",
                 (isInProgress ? "In Progress" : entry.StatusString),
-                (isInProgress ? timeInProgress + " + " : "") + ("(" + application.logManager.GetTotalTimeSpentToday(entry.id) + "," + application.logManager.GetTotalTimeSpent(entry.id) + ")")
+                (isInProgress ? Utils.MinutesToHoursString(timeInProgress) + " + " : "") + 
+                ("(" + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(entry.id)) + 
+                " , " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpent(entry.id)) + ")")
                 );
 
             ConsoleWriter.Print();
 
             if (entry.subTasks != null)
             {
-                ConsoleWriter.Print("{0, -15} {1,-30}",
-                "Subtask ID", "SubTask Title"
+                ConsoleWriter.PrintInColor("{0, -15} {1,-30}",
+                application.DesignData.HighlightColorForText,
+                "SUBTASK ID", "SUBTASK TITLE"
                 );
 
                 foreach (var subTaskPair in entry.subTasks)
                 {
-                    ConsoleWriter.Print( "{0, -15} {1, -30}", subTaskPair.First, subTaskPair.Second);
+                    ConsoleWriter.Print( "{0, -15} {1, -30}\n", subTaskPair.First, subTaskPair.Second);
                 }
             }
         }
