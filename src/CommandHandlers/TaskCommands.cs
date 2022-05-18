@@ -28,6 +28,7 @@ public class TaskHandler : CommandHandlerBase
                 "\n" +
                 "Jarvis task start // to track the time of a task\n" +
                 "Jarvis task stop // to stop time tracking\n" +
+                "Jarvis task active // to show if any time record is in progress\n" +
                 "\n" +
                 "Jarvis task show // to show a task\n" +
                 "\n" +
@@ -61,6 +62,9 @@ public class TaskHandler : CommandHandlerBase
                 break;
             case "stop":
                 selectedHander = new TaskStopCommand();
+                break;
+            case "active":
+                selectedHander = new TaskActiveCommand();
                 break;
             case "show":
                 selectedHander = new TaskShowCommand();
@@ -286,7 +290,45 @@ public class TaskStopCommand : CommandHandlerBase
         }
 
         ConsoleWriter.Print("Stopped progress on Task with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
-        ConsoleWriter.Print("Total time record : {0}", Utils.MinutesToHoursString( timeTakenInMinutes ) );
+        ConsoleWriter.Print("Total time recorded : {0}", Utils.MinutesToHoursString( timeTakenInMinutes ) );
+        return true;
+    }
+}
+
+public class TaskActiveCommand : CommandHandlerBase
+{
+    public TaskActiveCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        ConsoleWriter.Print("USAGE : \n" +
+            "jarvis task active"
+                );
+        return true;
+    }
+
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count > 1)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        if (!application.UserData.IsTaskInProgress())
+        {
+            ConsoleWriter.Print("There is no task in progress.");
+            return true;
+        }
+
+        int id = application.UserData.taskProgress.taskIDInProgress;
+        int timeTakenInMinutes = (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes;
+
+        ConsoleWriter.Print("Task in progress, with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
+        ConsoleWriter.Print("Total time recorded : {0}", Utils.MinutesToHoursString( timeTakenInMinutes ) );
         return true;
     }
 }
