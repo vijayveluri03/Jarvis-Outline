@@ -451,40 +451,76 @@ public class TaskShowCommand : CommandHandlerBase
         {
             bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == id;
             int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
-            Task entry = application.taskManager.GetTask_ReadOnly(id);
+            Task task = application.taskManager.GetTask_ReadOnly(id);
 
-            // Heading
-            ConsoleWriter.PrintInColor("{0, -4} {1,-15} {2}",
-                application.DesignData.HighlightColorForText,
-                "ID", "DEPT", "TITLE"
-                );
-
-            ConsoleWriter.Print("{0, -4} {1,-15} {2}",
-                entry.id,
-                (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true) : "INVALID"),
-                entry.title);
-
-            ConsoleWriter.Print();
-
-            ConsoleWriter.Print("STATUS : {0, -15}\nTIME SPENT : {1,-15}",
-                (isInProgress ? "In Progress" : entry.StatusString),
-                (isInProgress ? Utils.MinutesToHoursString(timeInProgress) + " + " : "") + 
-                ("(" + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(entry.id)) + 
-                " , " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpent(entry.id)) + ")")
-                );
-
-            ConsoleWriter.Print();
-
-            if (entry.subTasks != null)
+            // Print Task details
             {
-                ConsoleWriter.PrintInColor("{0, -15} {1,-30}",
-                application.DesignData.HighlightColorForText,
-                "SUBTASK ID", "SUBTASK TITLE"
-                );
+                // Heading
+                ConsoleWriter.PrintInColor("{0, -4} {1,-15} {2}",
+                    application.DesignData.HighlightColorForText,
+                    "ID", "DEPT", "TITLE"
+                    );
 
-                foreach (var subTaskPair in entry.subTasks)
+                ConsoleWriter.Print("{0, -4} {1,-15} {2}",
+                    task.id,
+                    (task.categories != null && task.categories.Length > 0 ? Utils.ArrayToString(task.categories, true) : "INVALID"),
+                    task.title);
+
+                ConsoleWriter.Print();
+
+                ConsoleWriter.Print("STATUS : {0, -15}\nTIME SPENT : {1,-15}",
+                    (isInProgress ? "In Progress" : task.StatusString),
+                    (isInProgress ? Utils.MinutesToHoursString(timeInProgress) + " + " : "") +
+                    ("(" + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) +
+                    " , " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + ")")
+                    );
+
+            }
+            
+            ConsoleWriter.Print();
+
+            // Print sub tasks 
+            {
+                if (task.subTasks != null)
                 {
-                    ConsoleWriter.Print( "{0, -15} {1, -30}\n", subTaskPair.First, subTaskPair.Second);
+                    if ( task.subTasks.Count > 0 )
+                        ConsoleWriter.PrintInColor("{0, -15} {1,-30}",
+                        application.DesignData.HighlightColorForText,
+                        "SUBTASK ID", "SUBTASK TITLE"
+                        );
+
+                    foreach (var subTaskPair in task.subTasks)
+                    {
+                        ConsoleWriter.Print("{0, -15} {1, -30}\n", subTaskPair.First, subTaskPair.Second);
+                    }
+                }
+            }
+
+            ConsoleWriter.Print();
+
+            {
+                SortedDictionary<DateTime, int> timeLogs = new SortedDictionary<DateTime, int>();
+
+                foreach( var logEntry in application.logManager.logs.entries)
+                {
+                    if ( logEntry.id == id )
+                    {
+                        if( !timeLogs.ContainsKey(logEntry.date.ZeroTime()))
+                            timeLogs[logEntry.date.ZeroTime()] = 0;
+                        timeLogs[logEntry.date.ZeroTime()] += logEntry.timeTakenInMinutes;
+                    }
+                }
+
+                ConsoleWriter.PrintInColor("{0, -15} {1,-30}",
+                    application.DesignData.HighlightColorForText,
+                    "DATE", "HOURS SPEND"
+                    );
+
+                foreach( var log in timeLogs)
+                {
+                    ConsoleWriter.PrintInColor("{0, -15} {1,-30}",
+                    application.DesignData.DefaultColorForText,
+                    log.Key.ShortFormWithDay(), Utils.MinutesToHoursString( log.Value ) );
                 }
             }
         }

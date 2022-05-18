@@ -341,6 +341,10 @@ public static class DateExt
     {
         return date.Month + "/" + date.Day;
     }
+    public static string ShortFormWithDay(this DateTime date)
+    {
+        return date.Month + "/" + date.Day + " - " + date.DayOfWeek.ToString().Truncate(2);
+    }
     public static DateTime ZeroTime(this DateTime date)
     {
         return new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
