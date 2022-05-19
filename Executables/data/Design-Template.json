@@ -3,7 +3,8 @@
     // Options are "White, Black, DarkBlue, DarkGreen, DarkCyan, DarkRed, DardMagenta, DarkYellow, Gray, Blue, Green, Cyan, Red, Magenta, Yellow
     "defaultColorForText": "White",
     "HighlightColorForText": "DarkBlue",
-    "HighlightColorForText_2": "Yellow"
+    "HighlightColorForText_2": "Yellow",
+    "HighlightColorForText_3": "DarkYellow"
   },
   "categories": {
     "listOfCategories": [

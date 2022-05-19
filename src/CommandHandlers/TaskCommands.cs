@@ -544,19 +544,21 @@ public class TaskShowCommand : CommandHandlerBase
                 if (task.subTasks != null)
                 {
                     if ( task.subTasks.Count > 0 )
+                    {
                         ConsoleWriter.PrintInColor("{0, -15} {1,-30}",
                         application.DesignData.HighlightColorForText,
                         "SUBTASK ID", "SUBTASK TITLE"
                         );
 
-                    foreach (var subTaskPair in task.subTasks)
-                    {
-                        ConsoleWriter.Print("{0, -15} {1, -30}\n", subTaskPair.First, subTaskPair.Second);
+                        foreach (var subTaskPair in task.subTasks)
+                        {
+                            ConsoleWriter.Print("{0, -15} {1, -30}", subTaskPair.First, subTaskPair.Second);
+                        }
                     }
+                    ConsoleWriter.Print();
                 }
             }
 
-            ConsoleWriter.Print();
 
             {
                 SortedDictionary<DateTime, int> timeLogs = new SortedDictionary<DateTime, int>();
@@ -571,16 +573,19 @@ public class TaskShowCommand : CommandHandlerBase
                     }
                 }
 
-                ConsoleWriter.PrintInColor("{0, -15} {1,-30}",
-                    application.DesignData.HighlightColorForText,
-                    "DATE", "HOURS SPEND"
-                    );
-
-                foreach( var log in timeLogs)
+                if (timeLogs.Count > 0)
                 {
                     ConsoleWriter.PrintInColor("{0, -15} {1,-30}",
-                    application.DesignData.DefaultColorForText,
-                    log.Key.ShortFormWithDay(), Utils.MinutesToHoursString( log.Value ) );
+                        application.DesignData.HighlightColorForText,
+                        "DATE", "HOURS SPEND"
+                        );
+
+                    foreach (var log in timeLogs)
+                    {
+                        ConsoleWriter.PrintInColor("{0, -15} {1,-30}",
+                        application.DesignData.DefaultColorForText,
+                        log.Key.ShortFormWithDay(), Utils.MinutesToHoursString(log.Value));
+                    }
                 }
             }
         }
