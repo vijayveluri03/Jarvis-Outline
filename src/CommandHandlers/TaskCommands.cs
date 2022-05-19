@@ -126,7 +126,8 @@ public class TaskAddCommand : CommandHandlerBase
         ConsoleWriter.Print("USAGE : \n" +
                 "jarvis task add <category> <title>\n" +
                 "Category can be office,learn,chores,health. you can add more in the design data as per your need.\n\n" +
-                "use --story or -s to create a story"
+                "use --story or -s to create a story\n" +
+                "use --collection or -c to create a collection"
                 );
         return true;
     }
@@ -143,6 +144,7 @@ public class TaskAddCommand : CommandHandlerBase
         string[] categories = arguments_ReadOnly[0].Split(',');
         string title = arguments_ReadOnly[1];
         bool isStory = optionalArguments_ReadOnly.Contains("--story") || optionalArguments_ReadOnly.Contains("-s");
+        bool isCollection = optionalArguments_ReadOnly.Contains("--collection") || optionalArguments_ReadOnly.Contains("-c");
 
         if (!application.DesignData.DoesCategoryExist(categories))
         {
@@ -151,7 +153,7 @@ public class TaskAddCommand : CommandHandlerBase
             return true;
         }
 
-        var entry = SharedLogic.CreateNewTask(application.taskManager, categories, title, isStory ? Task.Type.Story : Task.Type.Task);
+        var entry = SharedLogic.CreateNewTask(application.taskManager, categories, title, isStory ? Task.Type.Story : ( isCollection ? Task.Type.Collection : Task.Type.Task));
         application.taskManager.AddTask(entry);
 
         ConsoleWriter.Print("New task added with id : " + entry.id);
@@ -349,6 +351,7 @@ public class TaskListCommand : CommandHandlerBase
                 "jarvis task list --complete // Shows all the tasks complete\n" +
                 "jarvis task list --discard // Shows all the tasks discard\n" +
                 "jarvis task list --story // Shows only stories\n" +
+                "jarvis task list --collection // Shows only stories\n" +
                 "jarvis task list --task // Shows only tasks\n" +
                 "jarvis task list --cat:<category> // Shows only those category\n"
                 );
@@ -373,6 +376,7 @@ public class TaskListCommand : CommandHandlerBase
         bool discarded = optionalArguments_ReadOnly.Contains("--discard");
 
         bool story = optionalArguments_ReadOnly.Contains("--story");
+        bool collection = optionalArguments_ReadOnly.Contains("--collection");
         bool task = optionalArguments_ReadOnly.Contains("--task");
 
         bool syntaxErrorInCategoryFilter = false;
@@ -391,8 +395,8 @@ public class TaskListCommand : CommandHandlerBase
         }
 
         // By default all are shown
-        if (!story && !task)
-            story = task = true;
+        if (!story && !task && !collection)
+            story = task = collection = true;
 
         // by default only open ones are shown, unless specified in which case open ones are not shown. 
         bool open = true;
@@ -433,20 +437,33 @@ public class TaskListCommand : CommandHandlerBase
                 if (entry.IsStory && !story)
                     continue;
 
+                if (entry.IsCollection && !collection)
+                    continue;
+
                 if (categoryFilter != string.Empty && !entry.categories.Contains(categoryFilter))
                     continue;
 
                 bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id;
                 int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
+
+                ConsoleColor textColor = application.DesignData.DefaultColorForText;
+                if ( entry.IsStory)
+                    textColor = application.DesignData.HighlightColorForText_2;
+                else if ( entry.IsCollection)
+                    textColor = application.DesignData.HighlightColorForText_3;
+                else if (entry.IsTask)
+                    textColor = application.DesignData.DefaultColorForText;
+                else 
+                    Utils.Assert(false);
                 
                 ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
-                    entry.IsStory ? application.DesignData.HighlightColorForText_2: application.DesignData.DefaultColorForText,
+                    textColor,
                     entry.id,
                     (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                     entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (entry.GetSubTaskCount() > 0 ? "+(" + entry.GetSubTaskCount() + ")" : ""),
                     (isInProgress ? "In Progress" : entry.StatusString),
                     (isInProgress ? Utils.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(entry.id)) + " , " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpent(entry.id)) + " )")
-                    );
+                    );;
 
                 lineCount++;
 
@@ -510,8 +527,9 @@ public class TaskShowCommand : CommandHandlerBase
 
                 ConsoleWriter.Print();
 
-                ConsoleWriter.Print("STATUS : {0, -15}\nTIME SPENT : {1,-15}",
+                ConsoleWriter.Print("STATUS : {0, -15}\nTYPE : {1}\nTIME SPENT : {2,-15}",
                     (isInProgress ? "In Progress" : task.StatusString),
+                    task.TypeString,
                     (isInProgress ? Utils.MinutesToHoursString(timeInProgress) + " + " : "") +
                     ("(" + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) +
                     " , " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + ")")

@@ -18,7 +18,8 @@ namespace Jarvis
         public enum Type
         {
             Task,
-            Story
+            Story,
+            Collection
         }
 
         public string[] categories;
@@ -45,6 +46,7 @@ namespace Jarvis
         [JsonIgnore] public bool IsClosed { get { return IsDiscarded || IsComplete; } }
         [JsonIgnore] public bool IsTask { get { return type == Type.Task; } }
         [JsonIgnore] public bool IsStory { get { return type == Type.Story; } }
+        [JsonIgnore] public bool IsCollection { get { return type == Type.Collection; } }
 
         [JsonIgnore]
         public string StatusString
@@ -66,6 +68,7 @@ namespace Jarvis
             {
                 if (IsTask) return "Task";
                 if (IsStory) return "Story";
+                if (IsCollection) return "Collection";
                 Utils.Assert(false);
                 return "Unknown";
             }
