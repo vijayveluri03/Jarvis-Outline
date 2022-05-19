@@ -24,7 +24,7 @@ public class HabitHandler : CommandHandlerBase
         return true;
     }
 
-    protected override CommandHandlerBase GetSpecializedCommandHandler()
+    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler)
     {
         string action = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
         CommandHandlerBase selectedHander = null;
@@ -48,6 +48,9 @@ public class HabitHandler : CommandHandlerBase
             default:
                 break;
         }
+        argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
+        argumentsForSpecializedHandler.RemoveAt(0);
+
         return selectedHander;
     }
 

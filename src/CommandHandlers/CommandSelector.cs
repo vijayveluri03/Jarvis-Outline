@@ -13,22 +13,36 @@ public class CommandSelector : CommandHandlerBase
     {
     }
 
-    protected override CommandHandlerBase GetSpecializedCommandHandler()
+    private CommandHandlerBase GetCommandHandler(string command)
     {
-        string task = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
-        CommandHandlerBase selectedHander = null;
-
-        switch (task)
+        switch (command)
         {
             case "task":
-                selectedHander = new TaskHandler();
-                break;
+                return new TaskHandler();
             case "habit":
-                selectedHander = new HabitHandler();
-                break;
+                return new HabitHandler();
             default:
                 break;
         }
+        return null;
+    }
+    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler)
+    {
+        string command = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
+        CommandHandlerBase selectedHander = GetCommandHandler(command);
+
+        if (selectedHander != null)
+        {
+            application.UserData.SetCommandUsed(command);
+            argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
+            argumentsForSpecializedHandler.RemoveAt(0);
+        }
+        else
+        {
+            selectedHander = GetCommandHandler(application.UserData.GetLastCommand());
+            argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
+        }
+
         return selectedHander;
     }
 

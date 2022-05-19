@@ -12,12 +12,11 @@ public class CommandHandlerBase
         this.arguments_ReadOnly = arguments;
         this.optionalArguments_ReadOnly = optionalArguments;
 
-        CommandHandlerBase command = GetSpecializedCommandHandler();
+        List<string> argumentsForSpecializedHandler;
+        CommandHandlerBase command = GetSpecializedCommandHandler(application, out argumentsForSpecializedHandler);
         if (command != null)
         {
-            List<string> argumentsNew = new List<string>(arguments);
-            argumentsNew.RemoveAt(0);
-            return command.TryHandle( argumentsNew, optionalArguments, application );
+            return command.TryHandle( argumentsForSpecializedHandler, optionalArguments, application );
         }
 
         bool help = optionalArguments.Contains("--help");
@@ -28,8 +27,9 @@ public class CommandHandlerBase
             return Run(application);
     }
 
-    protected virtual CommandHandlerBase GetSpecializedCommandHandler()
+    protected virtual CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler )
     {
+        argumentsForSpecializedHandler = null;
         return null;
     }
 

@@ -44,6 +44,7 @@ namespace Jarvis
         [JsonProperty] public string userName = string.Empty;
         [JsonProperty] public DateTime lastLoginDate = DateTime.MinValue;
         [JsonProperty] public TaskProgress taskProgress = new TaskProgress();
+        [JsonProperty] public string lastCommandUsed = "";
 
         [JsonIgnore] private bool dirty = false;
 
@@ -82,6 +83,18 @@ namespace Jarvis
         {
             return taskProgress.taskIDInProgress != -1;
         }
+        public string GetLastCommand()
+        {
+            return lastCommandUsed;
+        }
+        public void SetCommandUsed(string command)
+        {
+            if (command != lastCommandUsed)
+            {
+                lastCommandUsed = command;
+                dirty = true;
+            }
+        }
 
 
         public void Save()
@@ -93,9 +106,9 @@ namespace Jarvis
             File.WriteAllText(JConstants.PLAYERPREFS_FILENAME, serializedUserData);
             dirty = false;
 
-            #if RELEASE_LOG
+#if RELEASE_LOG
             ConsoleWriter.Print("Userdata saved");
-            #endif
+#endif
         }
     }
 
