@@ -48,8 +48,14 @@ public class HabitHandler : CommandHandlerBase
             default:
                 break;
         }
-        argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
-        argumentsForSpecializedHandler.RemoveAt(0);
+
+        if ( selectedHander != null )
+        {
+            argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
+            argumentsForSpecializedHandler.RemoveAt(0);
+        }
+        else 
+            argumentsForSpecializedHandler = null;
 
         return selectedHander;
     }

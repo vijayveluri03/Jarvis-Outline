@@ -31,16 +31,16 @@ public class CommandSelector : CommandHandlerBase
         string command = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
         CommandHandlerBase selectedHander = GetCommandHandler(command);
 
-        if (selectedHander != null)
+        if (selectedHander != null) // If the command is provided 
         {
             application.UserData.SetCommandUsed(command);
             argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
-            argumentsForSpecializedHandler.RemoveAt(0);
+            argumentsForSpecializedHandler.RemoveAt(0);     // stripping the command from the arguments before sending it along
         }
         else
-        {
+        {   // command not provided. We are trying to see if we can use the last used command. 
             selectedHander = GetCommandHandler(application.UserData.GetLastCommand());
-            argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
+            argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);  // since the command is not provided anyway, there is nothing to strip
         }
 
         return selectedHander;
