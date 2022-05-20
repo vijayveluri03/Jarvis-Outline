@@ -41,8 +41,7 @@ public class HabitHandler : CommandHandlerBase
                 selectedHander = new HabitListCommand();
                 break;
             case "reset":
-                selectedHander = null;
-                ConsoleWriter.Print("NYI"); // @todo
+                selectedHander = new HabitResetCommand();
                 break;
 
             default:
@@ -246,6 +245,51 @@ public class HabitStreakUpCommand : CommandHandlerBase
         hb.AddNewEntry(DateTime.Now.ZeroTime());
 
         ConsoleWriter.Print("Habit with id : {0} Streaked up!", id);
+        return true;
+    }
+}
+
+public class HabitResetCommand : CommandHandlerBase
+{
+    public HabitResetCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        ConsoleWriter.Print("USAGE : \n" +
+                "jarvis habit reset <id> // This is reset the streak of a habit!"
+                );
+        return true;
+    }
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count != 1)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int id = Utils.Atoi(arguments_ReadOnly[0]);
+
+        Habit hb = application.habitManager.GetHabit_Editable(id);
+
+        if ( hb == null )
+        {
+            ConsoleWriter.Print("Habit with id : {0} not found!", id);
+            return true;
+        }
+        
+        if( hb.IsEntryOn(DateTime.Now.ZeroTime()))
+        {
+            ConsoleWriter.Print("Habit with id: {0} is already updated today. try again tomorrow!", id);
+            return true;
+        }
+
+        hb.Reset();
+
+        ConsoleWriter.Print("Habit with id : {0} is resetted. Streak back to 0 :(", id);
         return true;
     }
 }
