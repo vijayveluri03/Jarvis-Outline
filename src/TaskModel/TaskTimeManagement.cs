@@ -41,6 +41,12 @@ namespace Jarvis
 
             dirty = true;
         }
+
+        public void RemoveAllEntries(int taskID)
+        {
+            logs.entries.RemoveAll(e => { return e.id == taskID; } );
+        }
+
         public int GetTotalTimeSpentToday(int id)
         {
             int totalTime = 0;

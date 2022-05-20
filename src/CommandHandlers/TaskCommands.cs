@@ -201,7 +201,10 @@ public class TaskRemoveCommand : CommandHandlerBase
         {
             int id = Utils.Atoi(idStr, -1);
             if (application.taskManager.RemoveTaskIfExists(id))
+            {
+                application.logManager.RemoveAllEntries(id);
                 ConsoleWriter.Print("Task removed with id : " + id);
+            }
             else
                 ConsoleWriter.Print("Task not found with id : " + id);
         }
