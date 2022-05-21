@@ -55,6 +55,13 @@ public static class ConsoleWriter
 
         Console.Write(message, parms);
     }
+    public static void PrintWithColorWithOutLineBreak(string message, ConsoleColor color, params object[] parms)
+    {
+        PushColor(color);
+        Console.Write(message, parms);
+        PopColor();
+    }
+
     public static void Print()
     {
         PrintNewLine();

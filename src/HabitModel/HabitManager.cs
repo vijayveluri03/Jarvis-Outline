@@ -28,6 +28,22 @@ namespace Jarvis
             return entries.Count + previousStreak;
             }
 
+        public int GetEntryCount()
+        {
+            return entries.Count;
+        }
+        public int GetEntryCount(int dayCount )
+        {
+            int count = 0;
+            Utils.Assert( dayCount >= 0 );
+            foreach( var entry in entries)
+            {
+                if ( entry.ZeroTime() >= DateTime.Now.AddDays( -1 * dayCount ).ZeroTime() )
+                    count++;
+            }
+            return count;
+        }
+
         public bool IsEntryOn(DateTime date)
         {
             date = date.ZeroTime();
