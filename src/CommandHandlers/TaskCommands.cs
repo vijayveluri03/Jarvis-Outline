@@ -136,7 +136,9 @@ public class TaskAddCommand : CommandHandlerBase
                 "jarvis task add <category> <title>\n" +
                 "Category can be office,learn,chores,health. you can add more in the design data as per your need.\n\n" +
                 "use --story or -s to create a story\n" +
-                "use --collection or -c to create a collection"
+                "use --collection or -c to create a collection\n" + 
+                "\n" + 
+                "use --archieve to sent it straight to archieve category\n"
                 );
         return true;
     }
@@ -154,6 +156,7 @@ public class TaskAddCommand : CommandHandlerBase
         string title = arguments_ReadOnly[1];
         bool isStory = optionalArguments_ReadOnly.Contains("--story") || optionalArguments_ReadOnly.Contains("-s");
         bool isCollection = optionalArguments_ReadOnly.Contains("--collection") || optionalArguments_ReadOnly.Contains("-c");
+        bool isArchieve = optionalArguments_ReadOnly.Contains("--archieve");
 
         if (!application.DesignData.DoesCategoryExist(categories))
         {
@@ -162,7 +165,13 @@ public class TaskAddCommand : CommandHandlerBase
             return true;
         }
 
-        var entry = SharedLogic.CreateNewTask(application.taskManager, categories, title, isStory ? Task.Type.Story : ( isCollection ? Task.Type.Collection : Task.Type.Task));
+        var entry = SharedLogic.CreateNewTask( 
+            application.taskManager, 
+            categories, 
+            title, 
+            isStory ? Task.Type.Story : ( isCollection ? Task.Type.Collection : Task.Type.Task),
+            isArchieve ? Task.Status.Archieve : Task.Status.Open);
+
         application.taskManager.AddTask(entry);
 
         ConsoleWriter.Print("New task added with id : " + entry.id);
@@ -360,6 +369,7 @@ public class TaskListCommand : CommandHandlerBase
                  +
                 "jarvis task list --all // Shows all the tasks including archieved, discarded and completed\n" +
                 "jarvis task list --archieve // Shows all the tasks archieve\n" +
+                "jarvis task list --open // Shows all the open tasks ( this is also the default setting )\n" +
                 "jarvis task list --complete // Shows all the tasks complete\n" +
                 "jarvis task list --discard // Shows all the tasks discard\n" +
                 "jarvis task list --story // Shows only stories\n" +
@@ -383,13 +393,14 @@ public class TaskListCommand : CommandHandlerBase
         int titleArea = 40;
         int categoryArea = 15;
 
-        bool archieved = optionalArguments_ReadOnly.Contains("--archieve");
-        bool completed = optionalArguments_ReadOnly.Contains("--complete");
-        bool discarded = optionalArguments_ReadOnly.Contains("--discard");
+        bool isArchieved = optionalArguments_ReadOnly.Contains("--archieve");
+        bool isCompleted = optionalArguments_ReadOnly.Contains("--complete");
+        bool isDiscarded = optionalArguments_ReadOnly.Contains("--discard");
+        bool isOpen = optionalArguments_ReadOnly.Contains("--open");
 
-        bool story = optionalArguments_ReadOnly.Contains("--story");
-        bool collection = optionalArguments_ReadOnly.Contains("--collection");
-        bool task = optionalArguments_ReadOnly.Contains("--task");
+        bool isStory = optionalArguments_ReadOnly.Contains("--story");
+        bool isCollection = optionalArguments_ReadOnly.Contains("--collection");
+        bool isTask = optionalArguments_ReadOnly.Contains("--task");
 
         bool syntaxErrorInCategoryFilter = false;
         string categoryFilter = Utils.ExtractStringFromArgument(optionalArguments_ReadOnly, "--cat", string.Empty, null, null, out syntaxErrorInCategoryFilter );
@@ -407,81 +418,102 @@ public class TaskListCommand : CommandHandlerBase
         }
 
         // By default all are shown
-        if (!story && !task && !collection)
-            story = task = collection = true;
+        if (!isStory && !isTask && !isCollection)
+            isStory = isTask = isCollection = true;
 
         // by default only open ones are shown, unless specified in which case open ones are not shown. 
-        bool open = true;
+        bool showOpenByDefault = true;
 
-        if (archieved || completed || discarded)
-            open = false;
+        if (isArchieved || isCompleted || isDiscarded)
+            showOpenByDefault = false;
+        if (isOpen)
+            showOpenByDefault = true;
 
         if (optionalArguments_ReadOnly.Contains("--all") || optionalArguments_ReadOnly.Contains("-a"))
         {
-            archieved = completed = discarded = open = true;
+            isArchieved = isCompleted = isDiscarded = isOpen = true;
         }
 
+        Dictionary<string, List<Task>> filteredTasks = new Dictionary<string, List<Task>>();
+
+        foreach (var task in application.taskManager.Data.entries)
+        {
+            if (task.IsOpen && !showOpenByDefault)
+                continue;
+
+            if (task.IsComplete && !isCompleted)
+                continue;
+
+            if (task.IsDiscarded && !isDiscarded)
+                continue;
+
+            if (task.IsArchieved && !isArchieved)
+                continue;
+
+            if (task.IsTask && !isTask)
+                continue;
+
+            if (task.IsStory && !isStory)
+                continue;
+
+            if (task.IsCollection && !isCollection)
+                continue;
+
+            if (categoryFilter != string.Empty && !task.categories.Contains(categoryFilter))
+                continue;
+
+            foreach (var category in task.categories)
+            {
+                if (!filteredTasks.ContainsKey(category))
+                    filteredTasks[category] = new List<Task>();
+
+                filteredTasks[category].Add(task);
+            }
+        }
+
+
         // output Heading 
-        if (application.taskManager.Data.entries.Count() > 0)
+        if (filteredTasks.Count() > 0)
         {
             ConsoleWriter.Print("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
                 "ID", "DEPT", "TITLE", "STATUS", "TIME SPENT"
                 );
 
-
-            foreach (var entry in application.taskManager.Data.entries)
+            foreach (var categoryFilteredTasks in filteredTasks)
             {
-                if (entry.IsOpen && !open)
-                    continue;
+                ConsoleWriter.Print("\n--- {0} --- ", categoryFilteredTasks.Key.ToUpper());
+                lineCount = 0;
 
-                if (entry.IsComplete && !completed)
-                    continue;
+                foreach (var task in categoryFilteredTasks.Value)
+                {
+                    bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == task.id;
+                    int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
 
-                if (entry.IsDiscarded && !discarded)
-                    continue;
+                    ConsoleColor textColor = application.DesignData.DefaultColorForText;
+                    if (task.IsStory)
+                        textColor = application.DesignData.HighlightColorForText_2;
+                    else if (task.IsCollection)
+                        textColor = application.DesignData.HighlightColorForText_3;
+                    else if (task.IsTask)
+                        textColor = application.DesignData.DefaultColorForText;
+                    else
+                        Utils.Assert(false);
 
-                if (entry.IsArchieved && !archieved)
-                    continue;
+                    ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
+                        textColor,
+                        task.id,
+                        (task.categories != null && task.categories.Length > 0 ? Utils.ArrayToString(task.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
+                        task.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (task.GetSubTaskCount() > 0 ? "+(" + task.GetSubTaskCount() + ")" : ""),
+                        (isInProgress ? "In Progress" : task.StatusString),
+                        (isInProgress ? Utils.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) + " , " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + " )")
+                        ); ;
 
-                if (entry.IsTask && !task)
-                    continue;
+                    lineCount++;
 
-                if (entry.IsStory && !story)
-                    continue;
-
-                if (entry.IsCollection && !collection)
-                    continue;
-
-                if (categoryFilter != string.Empty && !entry.categories.Contains(categoryFilter))
-                    continue;
-
-                bool isInProgress = application.UserData.IsTaskInProgress() && application.UserData.taskProgress.taskIDInProgress == entry.id;
-                int timeInProgress = isInProgress ? (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes : 0;
-
-                ConsoleColor textColor = application.DesignData.DefaultColorForText;
-                if ( entry.IsStory)
-                    textColor = application.DesignData.HighlightColorForText_2;
-                else if ( entry.IsCollection)
-                    textColor = application.DesignData.HighlightColorForText_3;
-                else if (entry.IsTask)
-                    textColor = application.DesignData.DefaultColorForText;
-                else 
-                    Utils.Assert(false);
-                
-                ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
-                    textColor,
-                    entry.id,
-                    (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
-                    entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (entry.GetSubTaskCount() > 0 ? "+(" + entry.GetSubTaskCount() + ")" : ""),
-                    (isInProgress ? "In Progress" : entry.StatusString),
-                    (isInProgress ? Utils.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(entry.id)) + " , " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpent(entry.id)) + " )")
-                    );;
-
-                lineCount++;
-
-                //@todo
-                if (lineCount % 5 == 0)
-                    ConsoleWriter.Print();
+                    //@todo
+                    if (lineCount % 5 == 0)
+                        ConsoleWriter.Print();
+                }
             }
         }
         else
