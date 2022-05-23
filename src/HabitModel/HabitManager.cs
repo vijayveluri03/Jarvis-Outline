@@ -7,6 +7,13 @@ namespace Jarvis
 {
     public class Habit
     {
+        public enum Status
+        {
+            In_Progress = 0,
+            Disabled
+        }
+
+
         public string[] categories;
 
         // The name or the title for an entry 
@@ -23,22 +30,38 @@ namespace Jarvis
 
         public int previousStreak = 0;
 
+        public Status status = Status.In_Progress;
+
+        public bool IsEnabled { get { return status == Status.In_Progress; } }
+        public bool IsDisabled { get { return status == Status.Disabled; } }
+
+        public string StatusStr
+        {
+            get { return status == Status.In_Progress ? "In-Progress" : "Disabled"; }
+        }
+
         public int GetStreak()
-            {
+        {
             return entries.Count + previousStreak;
-            }
+        }
 
         public int GetEntryCount()
         {
             return entries.Count;
         }
-        public int GetEntryCount(int dayCount )
+
+        public void SetStatus(Status status)
+        {
+            this.status = status;
+        }
+
+        public int GetEntryCount(int dayCount)
         {
             int count = 0;
-            Utils.Assert( dayCount >= 0 );
-            foreach( var entry in entries)
+            Utils.Assert(dayCount >= 0);
+            foreach (var entry in entries)
             {
-                if ( entry.ZeroTime() >= DateTime.Now.AddDays( -1 * dayCount ).ZeroTime() )
+                if (entry.ZeroTime() >= DateTime.Now.AddDays(-1 * dayCount).ZeroTime())
                     count++;
             }
             return count;
@@ -47,23 +70,23 @@ namespace Jarvis
         public bool IsEntryOn(DateTime date)
         {
             date = date.ZeroTime();
-            foreach( var entry in entries)
+            foreach (var entry in entries)
             {
-                if ( entry.ZeroTime() == date)
+                if (entry.ZeroTime() == date)
                     return true;
             }
             return false;
         }
 
-        public void AddNewEntry( DateTime newEntry)
+        public void AddNewEntry(DateTime newEntry)
         {
-            Utils.Assert( !IsEntryOn(newEntry));
+            Utils.Assert(!IsEntryOn(newEntry));
             entries.Add(newEntry);
         }
 
         public DateTime GetLastUpdatedOn()
         {
-            if( entries.Count == 0 )
+            if (entries.Count == 0)
                 return startDate;
             return entries[entries.Count - 1];
         }
@@ -71,7 +94,7 @@ namespace Jarvis
         public void Reset()
         {
             entries.Clear();
-            previousStreak= 0;
+            previousStreak = 0;
         }
     }
 

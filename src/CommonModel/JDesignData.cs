@@ -124,6 +124,9 @@ namespace Jarvis
             [JsonProperty] public string highlightColorForText = "White";
             [JsonProperty] public string highlightColorForText_2 = "White";
             [JsonProperty] public string highlightColorForText_3 = "White";
+            [JsonProperty] public string highlightColorForText_4 = "White";
+            [JsonProperty] public string highlightColorForText_5 = "White";
+            [JsonProperty] public string highlightColorForText_disabled = "White";
         }
         [Serializable]
         public class Categories
@@ -141,6 +144,9 @@ namespace Jarvis
         [JsonIgnore] public ConsoleColor HighlightColorForText { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText); } }
         [JsonIgnore] public ConsoleColor HighlightColorForText_2 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_2); } }
         [JsonIgnore] public ConsoleColor HighlightColorForText_3 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_3); } }
+        [JsonIgnore] public ConsoleColor HighlightColorForText_4 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_4); } }
+        [JsonIgnore] public ConsoleColor HighlightColorForText_5 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_5); } }
+        [JsonIgnore] public ConsoleColor HighlightColorForText_Disabled { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_disabled); } }
 
         public static JDesignData Load()
         {

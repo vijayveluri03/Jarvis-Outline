@@ -21,7 +21,9 @@ public class HabitHandler : CommandHandlerBase
         "Jarvis habit reset // to reset a habits\n" +
         "Jarvis habit list // to list all the habits\n" +
         "jarvis habit addnotes // to add notes to a habit\n" +
-        "jarvis habit show // to show details of a habit\n"
+        "jarvis habit show // to show details of a habit\n" +
+        "jarvis habit disable // to disable a habit\n" +
+        "jarvis habit re-enable // to re-enable a disabled habit\n"
         );
 
         return true;
@@ -51,6 +53,12 @@ public class HabitHandler : CommandHandlerBase
                 break;
             case "show":
                 selectedHander = new HabitShowCommand();
+                break;
+            case "disable":
+                selectedHander = new HabitDisableCommand();
+                break;
+            case "re-enable":
+                selectedHander = new HabitReEnableCommand();
                 break;
             default:
                 break;
@@ -145,6 +153,8 @@ public class HabitListCommand : CommandHandlerBase
         ConsoleWriter.Print("USAGE : \n" +
                 "jarvis habit list   // lists all the habits\n" +
                 "jarvis habit list --cat:<category> // Shows only those category\n"
+
+                //"jarvis habit list --detailed // show more details \n"
                 );
         return true;
     }
@@ -157,6 +167,8 @@ public class HabitListCommand : CommandHandlerBase
             ShowHelp();
             return true;
         }
+
+        List<Habit> habits = new List<Habit>(application.habitManager.Data.entries);
 
         int lineCount = 0;
         int titleArea = 40;
@@ -178,24 +190,28 @@ public class HabitListCommand : CommandHandlerBase
         }
 
         // output Heading 
-        if (application.habitManager.Data.entries.Count() > 0)
+        if (habits.Count > 0)
         {
             ConsoleWriter.Print("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
                 "ID", "DEPT", "TITLE", "LAST UPDATED", "STREAK"
                 );
 
+            // Sorts based on status to keep In-Progress onces above
+            habits.Sort((entry1, entry2) => { return entry1.status.CompareTo(entry2.status); });
 
-            foreach (var entry in application.habitManager.Data.entries)
+            foreach (var entry in habits)
             {
                 if (categoryFilter != string.Empty && !entry.categories.Contains(categoryFilter))
                     continue;
 
-                ConsoleWriter.Print("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
+                ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -5} {5, -10}",
+                    entry.IsDisabled ? application.DesignData.HighlightColorForText_Disabled : application.DesignData.DefaultColorForText,
                     entry.id,
                     (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
-                    entry.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (entry.notes.Count > 0 ? "+(" + entry.notes.Count + ")" : ""),
+                    entry.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/) + (entry.notes.Count > 0 ? "+(" + entry.notes.Count + ")" : ""),
                     entry.GetLastUpdatedOn().ShortForm(),
-                    entry.GetStreak()
+                    entry.GetStreak(),
+                    entry.IsDisabled ? "Disabled" : ""
                     );
 
                 lineCount++;
@@ -250,9 +266,105 @@ public class HabitStreakUpCommand : CommandHandlerBase
             return true;
         }
 
+        if (hb.IsDisabled)
+        {
+            ConsoleWriter.Print("Habit with id: {0} is disabled. You would want to re-enable it before it can be updated!", id);
+            return true;
+        }
+
         hb.AddNewEntry(DateTime.Now.ZeroTime());
 
         ConsoleWriter.Print("Habit with id : {0} Streaked up!", id);
+        return true;
+    }
+}
+
+public class HabitDisableCommand : CommandHandlerBase
+{
+    public HabitDisableCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        ConsoleWriter.Print("USAGE : \n" +
+                "jarvis habit disable <id>"
+                );
+        return true;
+    }
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count != 1)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int id = Utils.Atoi(arguments_ReadOnly[0]);
+
+        Habit hb = application.habitManager.GetHabit_Editable(id);
+
+        if (hb == null)
+        {
+            ConsoleWriter.Print("Habit with id : {0} not found!", id);
+            return true;
+        }
+
+        if (hb.IsDisabled)
+        {
+            ConsoleWriter.Print("Habit with id: {0} is already disabled. ", id);
+            return true;
+        }
+
+        hb.SetStatus(Habit.Status.Disabled); ;
+
+        ConsoleWriter.Print("Habit with id : {0} disabled!", id);
+        return true;
+    }
+}
+
+public class HabitReEnableCommand : CommandHandlerBase
+{
+    public HabitReEnableCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        ConsoleWriter.Print("USAGE : \n" +
+                "jarvis habit re-enable <id>"
+                );
+        return true;
+    }
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count != 1)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int id = Utils.Atoi(arguments_ReadOnly[0]);
+
+        Habit hb = application.habitManager.GetHabit_Editable(id);
+
+        if (hb == null)
+        {
+            ConsoleWriter.Print("Habit with id : {0} not found!", id);
+            return true;
+        }
+
+        if (hb.IsEnabled)
+        {
+            ConsoleWriter.Print("Habit with id: {0} is already enabled. ", id);
+            return true;
+        }
+
+        hb.SetStatus(Habit.Status.In_Progress); ;
+
+        ConsoleWriter.Print("Habit with id : {0} is enabled now!", id);
         return true;
     }
 }
@@ -295,6 +407,12 @@ public class HabitResetCommand : CommandHandlerBase
             return true;
         }
 
+        if (hb.IsDisabled)
+        {
+            ConsoleWriter.Print("Habit with id: {0} is disabled. You would want to re-enable it before it can be updated!", id);
+            return true;
+        }
+
         hb.Reset();
 
         ConsoleWriter.Print("Habit with id : {0} is resetted. Streak back to 0 :(", id);
@@ -332,6 +450,12 @@ public class HabitAddNotesCommand : CommandHandlerBase
         if (hb == null)
         {
             ConsoleWriter.Print("Habit with id : {0} not found!", id);
+            return true;
+        }
+
+        if (hb.IsDisabled)
+        {
+            ConsoleWriter.Print("Habit with id: {0} is disabled. You would want to re-enable it before it can be updated!", id);
             return true;
         }
 
@@ -390,10 +514,12 @@ public class HabitShowCommand : CommandHandlerBase
             ConsoleWriter.Print();
 
             ConsoleWriter.Print("STREAK : {0, -15}\n" +
-                "LAST COMPLETED ON : {1}\n" +
-                "AVG IN LAST 7 DAYS : {2,15}\n" +
-                "AVG IN LAST MONTH : {3,-15}",
+                "STATUS : {1}\n" + 
+                "LAST COMPLETED ON : {2}\n" +
+                "AVG IN LAST 7 DAYS : {3,15}\n" +
+                "AVG IN LAST MONTH : {4,-15}",
                 hb.GetStreak(),
+                hb.StatusStr,
                 hb.GetLastUpdatedOn().ShortFormWithDay(),
                 (hb.GetStreak() >= 7 && hb.GetEntryCount() >= 7 ? hb.GetEntryCount(7 - 1) / 7.0f : "Need more data to show this"),
                 (hb.GetStreak() >= 30 && hb.GetEntryCount() >= 30 ? hb.GetEntryCount(28 - 1) / 7.0f : "Need more data to show this")

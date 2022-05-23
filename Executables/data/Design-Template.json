@@ -4,7 +4,11 @@
     "defaultColorForText": "White",
     "HighlightColorForText": "DarkBlue",
     "HighlightColorForText_2": "Yellow",
-    "HighlightColorForText_3": "DarkYellow"
+    "HighlightColorForText_3": "White",
+    "HighlightColorForText_4": "White",
+    "HighlightColorForText_5": "White",
+    "HighlightColorForText_Disabled": "Gray"
+
   },
   "categories": {
     "listOfCategories": [
