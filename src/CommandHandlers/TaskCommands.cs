@@ -276,7 +276,8 @@ public class TaskStopCommand : CommandHandlerBase
     {
         ConsoleWriter.Print("USAGE : \n" +
             "jarvis task stop\n" +
-            "jarvis task stop <comments> "
+            "jarvis task stop <comments> \n" + 
+            "jarvis task stop --discard // to ignore the recording alltogether" 
                 );
         return true;
     }
@@ -299,7 +300,14 @@ public class TaskStopCommand : CommandHandlerBase
         string comments = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : string.Empty; 
         int id = application.UserData.taskProgress.taskIDInProgress;
         int timeTakenInMinutes = (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes;
+        bool discard = optionalArguments_ReadOnly.Contains("--discard");
         application.UserData.StopTask();
+
+        if(discard)
+        {
+            ConsoleWriter.Print("Stopped and discarded progress on Task with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
+            return true;
+        }
 
         // Add record to log manager
         {
@@ -313,7 +321,8 @@ public class TaskStopCommand : CommandHandlerBase
         }
 
         ConsoleWriter.Print("Stopped progress on Task with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
-        ConsoleWriter.Print("Total time recorded : {0}", Utils.MinutesToHoursString( timeTakenInMinutes ) );
+        ConsoleWriter.Print("Total time recorded : {0}", Utils.MinutesToHoursString(timeTakenInMinutes));
+
         return true;
     }
 }
