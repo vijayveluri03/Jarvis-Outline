@@ -237,7 +237,8 @@ public class HabitStreakUpCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit streakup <id>"
+                "jarvis habit streakup <id>\n" +
+                "jarvis habit streakup <id>  <--when:-1>   // How many days before ?. -1 this timelog is of yesterday. -2 for a day before that. by default, this is 0, as in the time log is created for today."
                 );
         return true;
     }
@@ -250,7 +251,9 @@ public class HabitStreakUpCommand : CommandHandlerBase
             return true;
         }
 
+        bool syntaxErrorForWhenArgument = false;
         int id = Utils.Atoi(arguments_ReadOnly[0]);
+        int deltaTime = Utils.ExtractIntFromArgument(optionalArguments_ReadOnly, "--when", 0, null, null, out syntaxErrorForWhenArgument);
 
         Habit hb = application.habitManager.GetHabit_Editable(id);
 
@@ -260,9 +263,16 @@ public class HabitStreakUpCommand : CommandHandlerBase
             return true;
         }
 
-        if (hb.IsEntryOn(DateTime.Now.ZeroTime()))
+        if( syntaxErrorForWhenArgument)
         {
-            ConsoleWriter.Print("Habit with id: {0} already streaked up today. This can be only done once a day!", id);
+            ConsoleWriter.Print("syntax invalid for --when argument. please try again");
+            return true;
+        }
+
+        DateTime dateForEntry = DateTime.Now.ZeroTime().AddDays(deltaTime);
+        if (hb.IsEntryOn(dateForEntry))
+        {
+            ConsoleWriter.Print("Habit with id: {0} already streaked up on {1}. This can only be done once a day!", id, dateForEntry.ShortForm());
             return true;
         }
 
@@ -272,9 +282,12 @@ public class HabitStreakUpCommand : CommandHandlerBase
             return true;
         }
 
-        hb.AddNewEntry(DateTime.Now.ZeroTime());
+        hb.AddNewEntry(dateForEntry);
 
         ConsoleWriter.Print("Habit with id : {0} Streaked up!", id);
+        if( deltaTime != 0 )
+            ConsoleWriter.Print("Entry added for date : {0}!", dateForEntry.ShortForm());
+
         return true;
     }
 }

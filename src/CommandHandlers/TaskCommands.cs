@@ -785,7 +785,7 @@ public class TaskRecordTimeLogCommand : CommandHandlerBase
     {
         ConsoleWriter.Print("USAGE : \n" +
                 "jarvis task recordtimelog <taskID> <time in mins> <comments>\n" +
-                "jarvis task recordtimelog <taskID> <time in mins> <comments> <---when:-1>   // delta day count. -1 as in this timelog is created for yesterday. -2 as in day before yesterday. by default, this is 0, as in the time log is created for today."
+                "jarvis task recordtimelog <taskID> <time in mins> <comments> <--when:-1>   // How many days before ?. -1 this timelog is of yesterday. -2 for a day before that. by default, this is 0, as in the time log is created for today."
                 );
         return true;
     }
