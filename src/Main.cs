@@ -10,11 +10,10 @@ class Program
 
     static void Main(string[] args)
     {
-
 #if DEBUG
         //string debugCommand = "task list & task report";
-        //string debugCommand = "task list --help";
-        string debugCommand = "habit show 1";
+        string debugCommand = "task --help";
+        //string debugCommand = "habit show 1";
         //string debugCommand = "task list --cat:asdf:fefe";
         args = debugCommand.Split(' ');
 
@@ -25,9 +24,9 @@ class Program
             ConsoleWriter.Print(arg);
         }
         ConsoleWriter.Print("****** DEBUG ******");
-
 #endif
-        ConsoleWriter.OnAppLaunched();
+
+        ConsoleWriter.Initialize();
         Jarvis.JApplication app = new Jarvis.JApplication();
         app.Initialize();
         
@@ -49,7 +48,7 @@ class Program
         app.Save();
 
         ConsoleWriter.EmptyLine();       // A bit of space at the end
-        ConsoleWriter.OnAppKilled();
+        ConsoleWriter.DestroyAndCleanUp();
     }
 
     public static List<List<string>> SplitSingleCompositeCommandToSimpleOnes( string[] args )

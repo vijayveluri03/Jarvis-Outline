@@ -150,20 +150,28 @@ public static class Utils
 
             return subStrings[1];
         }
-        public static void ExecuteCommandInConsole(string command)
+        public static void ExecuteCommandInConsole(string command, bool runSilently = true, bool printOutput = true)
         {
             Process proc = new System.Diagnostics.Process();
-            proc.StartInfo.FileName = "/bin/bash";
-            proc.StartInfo.Arguments = "-c \" " + command + " \"";
-            //ConsoleWriter.PrintInRed(proc.StartInfo.Arguments);
+
+            #if UNIX // @todo - Need to decide based on the environment 
+                proc.StartInfo.FileName = "/bin/bash";
+            #else 
+                proc.StartInfo.FileName = "cmd.exe";
+            #endif
+
+            proc.StartInfo.Arguments = (runSilently ? "/C" : "/K") + " " + command;
             proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardOutput = true;
+            proc.StartInfo.RedirectStandardOutput = !printOutput;
+            proc.StartInfo.CreateNoWindow = runSilently;
+
             proc.Start();
 
-            while (!proc.StandardOutput.EndOfStream)
-            {
+            /* todo - This hangs atm - This is supposed to print the details which are sent to Standard out */
+            #if false 
+            while ( printOutput && !proc.StandardOutput.EndOfStream)
                 Console.WriteLine(proc.StandardOutput.ReadLine());
-            }
+            #endif
         }
     }
 
@@ -247,7 +255,6 @@ public static class Utils
         }
         return false;
     }
-
 }
 
 // Date Utils

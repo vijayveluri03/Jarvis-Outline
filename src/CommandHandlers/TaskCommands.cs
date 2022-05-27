@@ -37,6 +37,8 @@ public class TaskHandler : CommandHandlerBase
                 "jarvis task removesubtask // to add subtasks to a task\n" +
                 "jarvis task recordtimelog // to record an offline task\n" +
                 "jarvis task report // to show all the work done in the last day/week\n");
+
+        Utils.CLI.ExecuteCommandInConsole("dir", false, true );
         return true;
     }
 

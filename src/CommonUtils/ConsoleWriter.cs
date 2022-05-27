@@ -7,11 +7,11 @@ public static class ConsoleWriter
     private static ConsoleColor previousColor = ConsoleColor.Black;
     // Foreground Colors for the text
 
-    public static void OnAppLaunched()
+    public static void Initialize()
     {
         previousColor = Console.ForegroundColor;
     }
-    public static void OnAppKilled()
+    public static void DestroyAndCleanUp()
     {
         Console.ForegroundColor = previousColor;
     }
