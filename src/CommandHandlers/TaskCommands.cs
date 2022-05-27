@@ -208,7 +208,7 @@ public class TaskRemoveCommand : CommandHandlerBase
 
         foreach (var idStr in ids)
         {
-            int id = Utils.Atoi(idStr, -1);
+            int id = Utils.Conversions.Atoi(idStr, -1);
             if (application.taskManager.RemoveTaskIfExists(id))
             {
                 application.logManager.RemoveAllEntries(id);
@@ -246,7 +246,7 @@ public class TaskStartCommand : CommandHandlerBase
             return true;
         }
 
-        int id = Utils.Atoi(arguments_ReadOnly[0]);
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
         if (application.UserData.IsTaskInProgress())
         {
@@ -321,7 +321,7 @@ public class TaskStopCommand : CommandHandlerBase
         }
 
         ConsoleWriter.Print("Stopped progress on Task with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
-        ConsoleWriter.Print("Total time recorded : {0}", Utils.MinutesToHoursString(timeTakenInMinutes));
+        ConsoleWriter.Print("Total time recorded : {0}", Utils.Time.MinutesToHoursString(timeTakenInMinutes));
 
         return true;
     }
@@ -360,7 +360,7 @@ public class TaskActiveCommand : CommandHandlerBase
         int timeTakenInMinutes = (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes;
 
         ConsoleWriter.Print("Task in progress, with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
-        ConsoleWriter.Print("Total time recorded : {0}", Utils.MinutesToHoursString( timeTakenInMinutes ) );
+        ConsoleWriter.Print("Total time recorded : {0}", Utils.Time.MinutesToHoursString( timeTakenInMinutes ) );
         return true;
     }
 }
@@ -412,7 +412,7 @@ public class TaskListCommand : CommandHandlerBase
         bool isTask = optionalArguments_ReadOnly.Contains("--task");
 
         bool syntaxErrorInCategoryFilter = false;
-        string categoryFilter = Utils.ExtractStringFromArgument(optionalArguments_ReadOnly, "--cat", string.Empty, null, null, out syntaxErrorInCategoryFilter );
+        string categoryFilter = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--cat", string.Empty, null, null, out syntaxErrorInCategoryFilter );
         if( syntaxErrorInCategoryFilter )
         {
             ConsoleWriter.Print("Invalid syntax for --cat argument."); 
@@ -511,10 +511,10 @@ public class TaskListCommand : CommandHandlerBase
                     ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
                         textColor,
                         task.id,
-                        (task.categories != null && task.categories.Length > 0 ? Utils.ArrayToString(task.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
+                        (task.categories != null && task.categories.Length > 0 ? Utils.Conversions.ArrayToString(task.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                         task.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (task.GetSubTaskCount() > 0 ? "+(" + task.GetSubTaskCount() + ")" : ""),
                         (isInProgress ? "In Progress" : task.StatusString),
-                        (isInProgress ? Utils.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) + " , " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + " )")
+                        (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) + " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + " )")
                         ); ;
 
                     lineCount++;
@@ -557,7 +557,7 @@ public class TaskShowCommand : CommandHandlerBase
             return true;
         }
 
-        int id = Utils.Atoi(arguments_ReadOnly[0]);
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
         if (application.taskManager.DoesTaskExist(id))
         {
@@ -575,7 +575,7 @@ public class TaskShowCommand : CommandHandlerBase
 
                 ConsoleWriter.Print("{0, -4} {1,-15} {2}",
                     task.id,
-                    (task.categories != null && task.categories.Length > 0 ? Utils.ArrayToString(task.categories, true) : "INVALID"),
+                    (task.categories != null && task.categories.Length > 0 ? Utils.Conversions.ArrayToString(task.categories, true) : "INVALID"),
                     task.title);
 
                 ConsoleWriter.Print();
@@ -583,9 +583,9 @@ public class TaskShowCommand : CommandHandlerBase
                 ConsoleWriter.Print("STATUS : {0, -15}\nTYPE : {1}\nTIME SPENT : {2,-15}",
                     (isInProgress ? "In Progress" : task.StatusString),
                     task.TypeString,
-                    (isInProgress ? Utils.MinutesToHoursString(timeInProgress) + " + " : "") +
-                    ("(" + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) +
-                    " , " + Utils.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + ")")
+                    (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") +
+                    ("(" + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) +
+                    " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + ")")
                     );
 
             }
@@ -637,7 +637,7 @@ public class TaskShowCommand : CommandHandlerBase
                     {
                         ConsoleWriter.PrintInColor("{0, -15} {1,-30}",
                         application.DesignData.DefaultColorForText,
-                        log.Key.ShortFormWithDay(), Utils.MinutesToHoursString(log.Value));
+                        log.Key.ShortFormWithDay(), Utils.Time.MinutesToHoursString(log.Value));
                     }
                 }
             }
@@ -671,7 +671,7 @@ public class TaskAddSubTaskCommand : CommandHandlerBase
             return true;
         }
 
-        int id = Utils.Atoi(arguments_ReadOnly[0]);
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
         string title = arguments_ReadOnly[1];
 
 
@@ -710,8 +710,8 @@ public class TaskRemoveSubTaskCommand : CommandHandlerBase
             return true;
         }
 
-        int id = Utils.Atoi(arguments_ReadOnly[0]);
-        int subTaskID = Utils.Atoi( arguments_ReadOnly[1]); 
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        int subTaskID = Utils.Conversions.Atoi( arguments_ReadOnly[1]); 
 
 
         if (application.taskManager.DoesTaskExist(id))
@@ -758,7 +758,7 @@ public class TaskSetStatusCommand : CommandHandlerBase
             return true;
         }
 
-        int id = Utils.Atoi(arguments_ReadOnly[0]);
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
         if (application.taskManager.DoesTaskExist(id))
         {
@@ -799,12 +799,12 @@ public class TaskRecordTimeLogCommand : CommandHandlerBase
             return true;
         }
 
-        int id = Utils.Atoi(arguments_ReadOnly[0]);
-        int timeTakenInMinutes = Utils.Atoi(arguments_ReadOnly[1]);
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        int timeTakenInMinutes = Utils.Conversions.Atoi(arguments_ReadOnly[1]);
         string comments = arguments_ReadOnly.Count() > 2 ? arguments_ReadOnly[2] : string.Empty;
 
         bool syntaxErrorForWhenArgument = false;
-        int deltaTime = Utils.ExtractIntFromArgument(optionalArguments_ReadOnly, "--when", 0, null, null, out syntaxErrorForWhenArgument);
+        int deltaTime = Utils.CLI.ExtractIntFromCLIParameter(optionalArguments_ReadOnly, "--when", 0, null, null, out syntaxErrorForWhenArgument);
 
         if( syntaxErrorForWhenArgument)
         {
@@ -892,13 +892,13 @@ public class TaskReportCommand : CommandHandlerBase
             ConsoleWriter.PrintInColor("{0,-20} {1,-7} hours", 
                 application.DesignData.HighlightColorForText, 
                 "FOR TODAY", 
-                Utils.MinutesToHoursString(totalMinutes));
+                Utils.Time.MinutesToHoursString(totalMinutes));
 
             if (categoryTimeMap.Count > 0)
             {
                 foreach (var timeMap in categoryTimeMap)
                 {
-                    ConsoleWriter.Print("{0,-20} {1,-7} hours", timeMap.Key, Utils.MinutesToHoursString(timeMap.Value));
+                    ConsoleWriter.Print("{0,-20} {1,-7} hours", timeMap.Key, Utils.Time.MinutesToHoursString(timeMap.Value));
                 }
             }
             else
@@ -913,13 +913,13 @@ public class TaskReportCommand : CommandHandlerBase
             ConsoleWriter.PrintInColor("{0,-20} {1,-7} hours {2,-7} {3, -7} hours(avg)", 
                 application.DesignData.HighlightColorForText, 
                 "FOR LAST 7 DAYS", 
-                Utils.MinutesToHoursString(totalMinutes), " ", Utils.HoursToHoursString(Utils.MinutesToHours(totalMinutes) / 7));
+                Utils.Time.MinutesToHoursString(totalMinutes), " ", Utils.Time.HoursToHoursString(Utils.Time.MinutesToHours(totalMinutes) / 7));
 
             if (categoryTimeMap.Count > 0)
             {
                 foreach (var timeMap in categoryTimeMap)
                 {
-                    ConsoleWriter.Print("{0,-20} {1,-7} hours {2,-7} {3,-7} hours(avg)", timeMap.Key, Utils.MinutesToHoursString(timeMap.Value), " ", Utils.HoursToHoursString(Utils.MinutesToHours(timeMap.Value / 7)));
+                    ConsoleWriter.Print("{0,-20} {1,-7} hours {2,-7} {3,-7} hours(avg)", timeMap.Key, Utils.Time.MinutesToHoursString(timeMap.Value), " ", Utils.Time.HoursToHoursString(Utils.Time.MinutesToHours(timeMap.Value / 7)));
                 }
             }
             else
