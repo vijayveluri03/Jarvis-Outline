@@ -154,11 +154,11 @@ public static class Utils
         {
             Process proc = new System.Diagnostics.Process();
 
-            #if UNIX // @todo - Need to decide based on the environment 
+#if UNIX // @todo - Need to decide based on the environment 
                 proc.StartInfo.FileName = "/bin/bash";
-            #else 
-                proc.StartInfo.FileName = "cmd.exe";
-            #endif
+#else
+            proc.StartInfo.FileName = "cmd.exe";
+#endif
 
             proc.StartInfo.Arguments = (runSilently ? "/C" : "/K") + " " + command;
             proc.StartInfo.UseShellExecute = false;
@@ -168,10 +168,10 @@ public static class Utils
             proc.Start();
 
             /* todo - This hangs atm - This is supposed to print the details which are sent to Standard out */
-            #if false 
+#if false
             while ( printOutput && !proc.StandardOutput.EndOfStream)
                 Console.WriteLine(proc.StandardOutput.ReadLine());
-            #endif
+#endif
         }
     }
 
@@ -235,6 +235,52 @@ public static class Utils
         }
     }
 
+    public static class FileHandler
+    {
+        public static bool DoesFileExist(string path)
+        {
+            return File.Exists(path);
+        }
+
+        public static bool Create(string path, bool overwriteIfExists = false)
+        {
+            if (DoesFileExist(path) && !overwriteIfExists)
+                return false;
+
+            StreamWriter stream = File.CreateText(path);
+            stream.Close();
+            return true;
+        }
+
+        public static string Read(string path)
+        {
+            if (!DoesFileExist(path))
+                return string.Empty;
+
+            return File.ReadAllText(path);
+        }
+
+        public static void Append(string path, string txt)
+        {
+            Assert(DoesFileExist(path));
+
+            File.AppendAllText( path, txt);
+        }
+
+        public static void Clean (string path)
+        {
+            Assert(DoesFileExist(path));
+            File.WriteAllText(path, string.Empty);
+        }
+
+        public static void Remove (string path)
+        {
+            Assert(DoesFileExist(path));
+            File.Delete(path);
+        }
+
+    }
+
     public static T ParseEnum<T>(string value)
     {
         return (T)Enum.Parse(typeof(T), value, true);
@@ -245,16 +291,22 @@ public static class Utils
             ConsoleWriter.Print("==== ASSERT here =======");
         Debug.Assert(condition, message);
     }
-    public static bool CreateFileIfNotExit(string path, string templateFile)
+    public static bool CreateFileIfNotExit(string path, string copyFrom)
     {
         if (!File.Exists(path))
         {
-            Assert(File.Exists(templateFile), "Template file doesnt exist.");
-            File.Copy(templateFile, path);
+            Assert(File.Exists(copyFrom), "Source file doesnt exist : " + copyFrom);
+            File.Copy(copyFrom, path);
             return true;
         }
         return false;
     }
+
+    public static void OpenAFileInEditor(string filePath, string editor = "vim")
+    {
+        CLI.ExecuteCommandInConsole(editor + " " + filePath, false, true);
+    }
+
 }
 
 // Date Utils
