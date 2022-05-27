@@ -64,9 +64,9 @@ public static class ConsoleWriter
 
     public static void Print()
     {
-        PrintNewLine();
+        EmptyLine();
     }
-    public static void PrintNewLine()
+    public static void EmptyLine()
     {
         Print("");
     }

@@ -126,7 +126,7 @@ public class HabitAddCommand : CommandHandlerBase
         }
 
         bool syntaxErrorInCount = false;
-        int previousStreak = Utils.ExtractIntFromArgument(optionalArguments_ReadOnly, "--previousstreak", 0, null, null, out syntaxErrorInCount);
+        int previousStreak = Utils.CLI.ExtractIntFromCLIParameter(optionalArguments_ReadOnly, "--previousstreak", 0, null, null, out syntaxErrorInCount);
         if (syntaxErrorInCount)
         {
             ConsoleWriter.Print("Invalid syntax for --previousstreak argument.");
@@ -175,7 +175,7 @@ public class HabitListCommand : CommandHandlerBase
         int categoryArea = 15;
 
         bool syntaxErrorInCategoryFilter = false;
-        string categoryFilter = Utils.ExtractStringFromArgument(optionalArguments_ReadOnly, "--cat", string.Empty, null, null, out syntaxErrorInCategoryFilter);
+        string categoryFilter = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--cat", string.Empty, null, null, out syntaxErrorInCategoryFilter);
         if (syntaxErrorInCategoryFilter)
         {
             ConsoleWriter.Print("Invalid syntax for --cat argument.");
@@ -207,7 +207,7 @@ public class HabitListCommand : CommandHandlerBase
                 ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -5} {5, -10}",
                     entry.IsDisabled ? application.DesignData.HighlightColorForText_Disabled : application.DesignData.DefaultColorForText,
                     entry.id,
-                    (entry.categories != null && entry.categories.Length > 0 ? Utils.ArrayToString(entry.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
+                    (entry.categories != null && entry.categories.Length > 0 ? Utils.Conversions.ArrayToString(entry.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                     entry.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/) + (entry.notes.Count > 0 ? "+(" + entry.notes.Count + ")" : ""),
                     entry.GetLastUpdatedOn().ShortForm(),
                     entry.GetStreak(),
@@ -252,8 +252,8 @@ public class HabitStreakUpCommand : CommandHandlerBase
         }
 
         bool syntaxErrorForWhenArgument = false;
-        int id = Utils.Atoi(arguments_ReadOnly[0]);
-        int deltaTime = Utils.ExtractIntFromArgument(optionalArguments_ReadOnly, "--when", 0, null, null, out syntaxErrorForWhenArgument);
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        int deltaTime = Utils.CLI.ExtractIntFromCLIParameter(optionalArguments_ReadOnly, "--when", 0, null, null, out syntaxErrorForWhenArgument);
 
         Habit hb = application.habitManager.GetHabit_Editable(id);
 
@@ -314,7 +314,7 @@ public class HabitDisableCommand : CommandHandlerBase
             return true;
         }
 
-        int id = Utils.Atoi(arguments_ReadOnly[0]);
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
         Habit hb = application.habitManager.GetHabit_Editable(id);
 
@@ -359,7 +359,7 @@ public class HabitReEnableCommand : CommandHandlerBase
             return true;
         }
 
-        int id = Utils.Atoi(arguments_ReadOnly[0]);
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
         Habit hb = application.habitManager.GetHabit_Editable(id);
 
@@ -404,7 +404,7 @@ public class HabitResetCommand : CommandHandlerBase
             return true;
         }
 
-        int id = Utils.Atoi(arguments_ReadOnly[0]);
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
         Habit hb = application.habitManager.GetHabit_Editable(id);
 
@@ -455,7 +455,7 @@ public class HabitAddNotesCommand : CommandHandlerBase
             return true;
         }
 
-        int id = Utils.Atoi(arguments_ReadOnly[0]);
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
         string notes = (arguments_ReadOnly[1]);
 
         Habit hb = application.habitManager.GetHabit_Editable(id);
@@ -501,7 +501,7 @@ public class HabitShowCommand : CommandHandlerBase
             return true;
         }
 
-        int id = Utils.Atoi(arguments_ReadOnly[0]);
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
         Habit hb = application.habitManager.GetHabit_ReadOnly(id);
 
@@ -521,7 +521,7 @@ public class HabitShowCommand : CommandHandlerBase
 
             ConsoleWriter.Print("{0, -4} {1,-15} {2}",
                 hb.id,
-                (hb.categories != null && hb.categories.Length > 0 ? Utils.ArrayToString(hb.categories, true) : "INVALID"),
+                (hb.categories != null && hb.categories.Length > 0 ? Utils.Conversions.ArrayToString(hb.categories, true) : "INVALID"),
                 hb.title);
 
             ConsoleWriter.Print();
@@ -572,7 +572,7 @@ public class HabitShowCommand : CommandHandlerBase
 
                 ConsoleWriter.PrintWithColorWithOutLineBreak(isEntryAvailable ? " + " : " - ", isWeekend ? application.DesignData.HighlightColorForText_3 : application.DesignData.DefaultColorForText);
             }
-            ConsoleWriter.PrintNewLine();
+            ConsoleWriter.EmptyLine();
         }
 
         return true;

@@ -7,232 +7,226 @@ using System.Text;
 
 public static class Utils
 {
-    // Fetch user inputs from console 
-    #region GET USER INPUT FROM CONSOLE
-
-    public static string GetUserInputString(string message, string defaultInput = "")
+    public static class Time
     {
-        if (!string.IsNullOrEmpty(defaultInput))
-            message += "( defaults to " + defaultInput + ")";
-        ConsoleWriter.PrintWithOutLineBreak(message);
-        string input = Console.ReadLine();
-        if (string.IsNullOrEmpty(input) && !string.IsNullOrEmpty(defaultInput))
-            return defaultInput;
-        return input;
-    }
-    public static string GetUserInputString(string message, ConsoleColor color, string defaultInput = "")
-    {
-        if (!string.IsNullOrEmpty(defaultInput))
-            message += "( defaults to '" + defaultInput + "')";
-
-        ConsoleWriter.PushColor(color);
-
-        ConsoleWriter.PrintWithOutLineBreak(message);
-        string input = Console.ReadLine();
-
-        ConsoleWriter.PopColor();
-
-        if (string.IsNullOrEmpty(input) && !string.IsNullOrEmpty(defaultInput))
-            return defaultInput;
-        return input;
-    }
-    public static string[] GetUserInputStringArray(string message)
-    {
-        ConsoleWriter.PrintWithOutLineBreak(message + "(Double Enter to exit):");
-        List<string> input = new List<string>();
-        while (true)
+        public static float MinutesToHours(int minutes)
         {
-            string line = Console.ReadLine();
-
-            if (string.IsNullOrEmpty(line))
-                break;
-            else
-                input.Add(line);
+            return (float)(minutes / 60.0);
         }
-
-        return input.ToArray();
-    }
-    public static int GetUserInputInt(string message, int defaultInput = -999)
-    {
-        if (defaultInput != -999)
-            message += "( defaults to " + defaultInput + ")";
-        ConsoleWriter.PrintWithOutLineBreak(message);
-        string input = Console.ReadLine();
-
-        if (string.IsNullOrEmpty(input) && defaultInput != -999)
-            return defaultInput;
-
-        int result = 0;
-        return int.TryParse(input, out result) ? result : 0;
-    }
-    public static int[] GetUserInputIntArray(string message)
-    {
-        ConsoleWriter.PrintWithOutLineBreak(message + "(use comma to seperate");
-        string input = Console.ReadLine();
-
-        if (string.IsNullOrEmpty(input))
-            return null;
-
-        if (input.Contains(","))
+        public static string MinutesToHoursString(int minutes)
         {
-            string[] splitStr = input.Split(',');
-            int[] result = new int[splitStr.Length];
-
-            for (int i = 0; i < result.Length; i++)
-            {
-                int temp = 0;
-                temp = int.TryParse(splitStr[i], out temp) ? temp : 0;
-                result[i] = temp;
-            }
-            return result;
+            return String.Format("{0:0.0}", MinutesToHours(minutes));
         }
-        else
+        public static string HoursToHoursString(float hours)
         {
+            return String.Format("{0:0.0}", hours);
+        }
+    }
+
+    public static class CLI
+    {
+        public static string GetUserInputString(string message, string defaultInput = "")
+        {
+            if (!string.IsNullOrEmpty(defaultInput))
+                message += "( defaults to " + defaultInput + ")";
+            ConsoleWriter.PrintWithOutLineBreak(message);
+            string input = Console.ReadLine();
+            if (string.IsNullOrEmpty(input) && !string.IsNullOrEmpty(defaultInput))
+                return defaultInput;
+            return input;
+        }
+        public static string GetUserInputString(string message, ConsoleColor color, string defaultInput = "")
+        {
+            if (!string.IsNullOrEmpty(defaultInput))
+                message += "( defaults to '" + defaultInput + "')";
+
+            ConsoleWriter.PushColor(color);
+
+            ConsoleWriter.PrintWithOutLineBreak(message);
+            string input = Console.ReadLine();
+
+            ConsoleWriter.PopColor();
+
+            if (string.IsNullOrEmpty(input) && !string.IsNullOrEmpty(defaultInput))
+                return defaultInput;
+            return input;
+        }
+        public static int GetUserInputInt(string message, int defaultInput = -999)
+        {
+            if (defaultInput != -999)
+                message += "( defaults to " + defaultInput + ")";
+            ConsoleWriter.PrintWithOutLineBreak(message);
+            string input = Console.ReadLine();
+
+            if (string.IsNullOrEmpty(input) && defaultInput != -999)
+                return defaultInput;
+
             int result = 0;
-            result = int.TryParse(input, out result) ? result : 0;
-            return new int[] { result };
+            return int.TryParse(input, out result) ? result : 0;
         }
-    }
-    public static bool GetConfirmationFromUser(string message, bool takeNoByDefault = false)
-    {
-        if (!takeNoByDefault)
-            ConsoleWriter.PrintWithOutLineBreak(message + " (enter yes or y to confirm, default) :");
-        else
-            ConsoleWriter.PrintWithOutLineBreak(message + " (enter no or n to confirm, default) :");
-
-        string input = Console.ReadLine();
-        bool isYes = input.ToLower() == "yes" || input.ToLower() == "y";
-
-        if (string.IsNullOrEmpty(input))
+        public static bool GetConfirmationFromUser(string message, bool takeNoByDefault = false)
         {
-            if (takeNoByDefault)
-                return false;
+            if (!takeNoByDefault)
+                ConsoleWriter.PrintWithOutLineBreak(message + " (enter yes or y to confirm, default) :");
             else
-                return true;
+                ConsoleWriter.PrintWithOutLineBreak(message + " (enter no or n to confirm, default) :");
+
+            string input = Console.ReadLine();
+            bool isYes = input.ToLower() == "yes" || input.ToLower() == "y";
+
+            if (string.IsNullOrEmpty(input))
+            {
+                if (takeNoByDefault)
+                    return false;
+                else
+                    return true;
+            }
+
+            return isYes;
         }
-
-        return isYes;
-    }
-    public static DateTime GetCustomDateFromUser(string message)
-    {
-        ConsoleWriter.PrintWithOutLineBreak(message);
-
-        string input = Console.ReadLine();
-        DateTime result;
-        if (DateTime.TryParse(input, null, System.Globalization.DateTimeStyles.RoundtripKind, out result))
-            return result;
-        else
-            return DateTime.MinValue;
-    }
-    public static DateTime GetCustomDateFromUser(string message, DateTime defaultValue, bool showXToReset = true)
-    {
-        if (defaultValue != DateTime.MinValue)
-            message += "( defaults to " + defaultValue + ")";
-        if (showXToReset)
-            message += "(x to reset to min)";
-        ConsoleWriter.PrintWithOutLineBreak(message);
-
-        string input = Console.ReadLine();
-        DateTime result;
-        if (input == "x")
-            return DateTime.MinValue;
-        if (DateTime.TryParse(input, null, System.Globalization.DateTimeStyles.RoundtripKind, out result))
-            return result;
-        else
-            return defaultValue;
-    }
-    #endregion
-
-
-    public static float MinutesToHours (int minutes)
-    {
-        return (float)(minutes/60.0);
-    }
-
-    public static string MinutesToHoursString (int minutes)
-    {
-        return String.Format("{0:0.0}", MinutesToHours(minutes));
-    }
-
-    public static string HoursToHoursString (float hours)
-    {
-        return String.Format("{0:0.0}", hours);
-    }
-
-    public static int ExtractIntFromArgument(List<string> arguments, string startingSubstring, int defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
-    {
-        syntaxError = false;
-        string subString = ExtractStringFromArgument(arguments, startingSubstring, string.Empty, itemNotFoundCB, syntaxNotValidCB, out syntaxError);
-        if ( subString == string.Empty)
-            return defaul;
-        return Atoi(subString);
-    }
-
-    public static string ExtractStringFromArgument( List<string> arguments, string startingSubstring, string defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
-    {
-        syntaxError = false;
-        string listItem = arguments.FindItemWithSubstring(startingSubstring);
-        if ( listItem == null || listItem == string.Empty)
+        public static DateTime GetCustomDateFromUser(string message)
         {
-            if( itemNotFoundCB != null)
-                itemNotFoundCB();
-            return defaul;
+            ConsoleWriter.PrintWithOutLineBreak(message);
+
+            string input = Console.ReadLine();
+            DateTime result;
+            if (DateTime.TryParse(input, null, System.Globalization.DateTimeStyles.RoundtripKind, out result))
+                return result;
+            else
+                return DateTime.MinValue;
         }
-        if(!listItem.Contains(":"))
+        public static DateTime GetCustomDateFromUser(string message, DateTime defaultValue, bool showXToReset = true)
         {
-            syntaxError = true;
-            if(syntaxNotValidCB != null)
-                syntaxNotValidCB();
-            return defaul;
+            if (defaultValue != DateTime.MinValue)
+                message += "( defaults to " + defaultValue + ")";
+            if (showXToReset)
+                message += "(x to reset to min)";
+            ConsoleWriter.PrintWithOutLineBreak(message);
+
+            string input = Console.ReadLine();
+            DateTime result;
+            if (input == "x")
+                return DateTime.MinValue;
+            if (DateTime.TryParse(input, null, System.Globalization.DateTimeStyles.RoundtripKind, out result))
+                return result;
+            else
+                return defaultValue;
         }
-
-        string[] subStrings = listItem.Split(':');
-
-        if(subStrings.Length <= 1)
+        public static int ExtractIntFromCLIParameter(List<string> arguments, string startingSubstring, int defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
         {
-            syntaxError = true;
-            if(syntaxNotValidCB != null)
-                syntaxNotValidCB();
-            return defaul;
+            syntaxError = false;
+            string subString = ExtractStringFromCLIParameter(arguments, startingSubstring, string.Empty, itemNotFoundCB, syntaxNotValidCB, out syntaxError);
+            if (subString == string.Empty)
+                return defaul;
+            return Utils.Conversions.Atoi(subString);
         }
+        public static string ExtractStringFromCLIParameter(List<string> arguments, string startingSubstring, string defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
+        {
+            syntaxError = false;
+            string listItem = arguments.FindItemWithSubstring(startingSubstring);
+            if (listItem == null || listItem == string.Empty)
+            {
+                if (itemNotFoundCB != null)
+                    itemNotFoundCB();
+                return defaul;
+            }
+            if (!listItem.Contains(":"))
+            {
+                syntaxError = true;
+                if (syntaxNotValidCB != null)
+                    syntaxNotValidCB();
+                return defaul;
+            }
 
-        return subStrings[1];
+            string[] subStrings = listItem.Split(':');
+
+            if (subStrings.Length <= 1)
+            {
+                syntaxError = true;
+                if (syntaxNotValidCB != null)
+                    syntaxNotValidCB();
+                return defaul;
+            }
+
+            return subStrings[1];
+        }
+        public static void ExecuteCommandInConsole(string command)
+        {
+            Process proc = new System.Diagnostics.Process();
+            proc.StartInfo.FileName = "/bin/bash";
+            proc.StartInfo.Arguments = "-c \" " + command + " \"";
+            //ConsoleWriter.PrintInRed(proc.StartInfo.Arguments);
+            proc.StartInfo.UseShellExecute = false;
+            proc.StartInfo.RedirectStandardOutput = true;
+            proc.Start();
+
+            while (!proc.StandardOutput.EndOfStream)
+            {
+                Console.WriteLine(proc.StandardOutput.ReadLine());
+            }
+        }
     }
 
-    public static string ArrayToString(List<string> array, bool useDelimitter, char delimitter = ',')
+    public static class Conversions
     {
-        StringBuilder sb = new StringBuilder();
-        foreach (var str in array)
+        public static string ArrayToString(List<string> array, bool useDelimitter, char delimitter = ',')
         {
-            sb.Append(str);
+            StringBuilder sb = new StringBuilder();
+            foreach (var str in array)
+            {
+                sb.Append(str);
+                if (useDelimitter)
+                    sb.Append(delimitter);
+            }
+            return sb.ToString();
+        }
+        // @todo - I guess we can simply use ienumerable, instead of two seperate methods. 
+        public static string ArrayToString(string[] array, bool useDelimitter, char delimitter = ',')
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (var str in array)
+            {
+                sb.Append(str);
+                if (useDelimitter)
+                    sb.Append(delimitter);
+            }
+            // Just to remove the last bit of dilimitter. @todo - find a better way 
             if (useDelimitter)
-                sb.Append(delimitter);
+                sb.Remove(sb.Length - 1, 1);
+
+            return sb.ToString();
         }
-        return sb.ToString();
-    }
-    // @todo - I guess we can simply use ienumerable, instead of two seperate methods. 
-    public static string ArrayToString(string[] array, bool useDelimitter, char delimitter = ',')
-    {
-        StringBuilder sb = new StringBuilder();
-        foreach (var str in array)
+        public static int Atoi(string txt, int fallback = -1)
         {
-            sb.Append(str);
-            if (useDelimitter)
-                sb.Append(delimitter);
+            int num = fallback;
+            if (int.TryParse(txt, out num))
+                return num;
+            return fallback;
         }
-        // Just to remove the last bit of dilimitter. @todo - find a better way 
-        if(useDelimitter)
-            sb.Remove(sb.Length -1, 1);
-
-        return sb.ToString();
     }
 
-    // Utils
-
-    public static int Clamp(int value, int min, int max)
+    public static class Math
     {
-        return (value < min) ? min : (value > max) ? max : value;
+        public static int Clamp(int value, int min, int max)
+        {
+            return (value < min) ? min : (value > max) ? max : value;
+        }
+        public static int ReMap(int min, int max, int newMin, int newMax, int value)
+        {
+            float ratio = (value - min) / (float)(max - min);
+            return (int)(newMin + (newMax - newMin) * ratio);
+        }
+        public static float ReMap(float min, float max, float newMin, float newMax, float value)
+        {
+            float ratio = (value - min) / (float)(max - min);
+            return (float)(newMin + (newMax - newMin) * ratio);
+        }
+        public static int Lerp(int min, int max, int ratio)
+        {
+            return (int)(min + (max - min) * ratio);
+        }
     }
+
     public static T ParseEnum<T>(string value)
     {
         return (T)Enum.Parse(typeof(T), value, true);
@@ -243,68 +237,6 @@ public static class Utils
             ConsoleWriter.Print("==== ASSERT here =======");
         Debug.Assert(condition, message);
     }
-    public static int ConvertRange(int min, int max, int newMin, int newMax, int value)
-    {
-        float ratio = (value - min) / (float)(max - min);
-        return (int)(newMin + (newMax - newMin) * ratio);
-    }
-    public static float ConvertRange(float min, float max, float newMin, float newMax, float value)
-    {
-        float ratio = (value - min) / (float)(max - min);
-        return (float)(newMin + (newMax - newMin) * ratio);
-    }
-    public static int Lerp(int min, int max, int ratio)
-    {
-        return (int)(min + (max - min) * ratio);
-    }
-    public static DateTime Now
-    {
-        get
-        {
-            return DateTime.Now.ZeroTime();
-        }
-    }
-
-    public static int[] ConvertCommaAndHyphenSeperateStringToIDs(string uberText)
-    {
-        string[] IDs = uberText.Split(',');
-        List<int> convertedIDs = new List<int>();
-        foreach (string idStr in IDs)
-        {
-
-            if (idStr.Contains('-'))
-            {
-                string[] range = idStr.Split('-');
-                Assert(range != null && range.Length == 2);
-                int num1 = Atoi(range[0], -1);
-                int num2 = Atoi(range[1], -1);
-                if (num1 != -1 && num2 != -1 && num1 <= num2)
-                {
-                    while (num1 <= num2)
-                    {
-                        convertedIDs.Add(num1);
-                        num1++;
-                    }
-                }
-            }
-            else
-            {
-                int id = Atoi(idStr, -1);
-                if (id != -1)
-                    convertedIDs.Add(id);
-            }
-        }
-        return convertedIDs.ToArray();
-    }
-
-    public static int Atoi(string txt, int fallback = -1)
-    {
-        int num = fallback;
-        if (int.TryParse(txt, out num))
-            return num;
-        return fallback;
-    }
-
     public static bool CreateFileIfNotExit(string path, string templateFile)
     {
         if (!File.Exists(path))
@@ -315,22 +247,7 @@ public static class Utils
         }
         return false;
     }
-    //Execute a command in console. 
-    public static void ExecuteCommandInConsole(string command)
-    {
-        Process proc = new System.Diagnostics.Process();
-        proc.StartInfo.FileName = "/bin/bash";
-        proc.StartInfo.Arguments = "-c \" " + command + " \"";
-        //ConsoleWriter.PrintInRed(proc.StartInfo.Arguments);
-        proc.StartInfo.UseShellExecute = false;
-        proc.StartInfo.RedirectStandardOutput = true;
-        proc.Start();
 
-        while (!proc.StandardOutput.EndOfStream)
-        {
-            Console.WriteLine(proc.StandardOutput.ReadLine());
-        }
-    }
 }
 
 // Date Utils
@@ -359,7 +276,7 @@ public static class DateExt
     }
     public static bool IsToday(this DateTime date, int offset = 0)
     {
-        return IsSameAs(date, Utils.Now.AddDays(offset));
+        return IsSameAs(date, DateTime.Now.AddDays(offset));
     }
     public static bool IsThisMinDate(this DateTime date)
     {
@@ -376,13 +293,11 @@ public static class StringExt
         if (string.IsNullOrEmpty(value)) return value;
         return value.Length <= maxLength ? value : value.Substring(0, maxLength);
     }
-
     public static string TruncateWithVisualFeedback(this string value, int maxLength)
     {
         if (string.IsNullOrEmpty(value)) return value;
         return value.Length <= maxLength ? value : value.Substring(0, maxLength) + "...";
     }
-
     public static string SplitAndGetString(this string value, int index, char delimiter = ':')
     {
         string[] subStrings = value.Split(delimiter);
@@ -395,9 +310,9 @@ public static class List
 {
     public static string FindItemWithSubstring(this List<string> list, string substring)
     {
-        foreach( var value in list)
+        foreach (var value in list)
         {
-            if ( value.Contains(substring))
+            if (value.Contains(substring))
             {
                 return value;
             }

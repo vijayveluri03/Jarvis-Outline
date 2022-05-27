@@ -17,26 +17,43 @@ class Program
         string debugCommand = "habit show 1";
         //string debugCommand = "task list --cat:asdf:fefe";
         args = debugCommand.Split(' ');
+
+        ConsoleWriter.Print("****** DEBUG ******");
+        ConsoleWriter.Print("List of parameters:");
+        foreach (string arg in args)
+        {
+            ConsoleWriter.Print(arg);
+        }
+        ConsoleWriter.Print("****** DEBUG ******");
+
 #endif
         ConsoleWriter.OnAppLaunched();
         Jarvis.JApplication app = new Jarvis.JApplication();
         app.Initialize();
+        
+        List<List<string>> commands = SplitSingleCompositeCommandToSimpleOnes(args);
 
-        // A bit of space at the head
-        ConsoleWriter.Print(" ");
-        //ConsoleWriter.Print("Number of arguments" + args.Length);
-
-#if DEBUG
-        ConsoleWriter.Print("****** DEBUG ******" );
-        ConsoleWriter.Print("List of parameters:");
-        foreach(string arg in args)
+        foreach (var command in commands)
         {
-            ConsoleWriter.Print(arg);
-        }
-        ConsoleWriter.Print("****** DEBUG ******" );
-#endif
+            List<string>[] arguments = SplitCommandIntoManditoryAndOptional(command);
+            Utils.Assert( arguments.Length == 2);   // 0 being manditory and 1 being optional
+            
+            ConsoleWriter.EmptyLine();
 
-        #region Splitting multiple commands
+            if (!(new CommandSelector()).TryHandle(arguments[0] /*Manditory arguments*/, arguments[1] /*Optional*/, app))
+            {
+                ConsoleWriter.Print("Invalid arguments. Try 'jarvis --help' for more information.");
+            }
+        }
+
+        app.Save();
+
+        ConsoleWriter.EmptyLine();       // A bit of space at the end
+        ConsoleWriter.OnAppKilled();
+    }
+
+    public static List<List<string>> SplitSingleCompositeCommandToSimpleOnes( string[] args )
+    {
         List<List<string>> commands = new List<List<string>>();
         commands.Add(new List<string>());
 
@@ -52,45 +69,28 @@ class Program
 
             commands[commandIndex].Add(arg);
         }
-        #endregion
+        return commands;
+    }
 
-        for (commandIndex = 0; commandIndex < commands.Count; commandIndex++)
+    public static List<string>[] SplitCommandIntoManditoryAndOptional(List<string> arguments)
+    {
+        List<string> valueArguments = new List<string>(arguments);
+        List<string> optionalArguments = new List<string>();
+
+        // Seperating arguments into Value and Optional. 
+        // optional are the ones with -- or - before an argument
         {
-            var command = commands[commandIndex];
-
-            List<string> valueArguments = new List<string>(command);
-            List<string> optionalArguments = new List<string>();
-
-            // Seperating arguments into Value and Optional. 
-            // optional are the ones with -- or - before an argument
+            for (int i = 0; i < valueArguments.Count; i++)
             {
-                for (int i = 0; i < valueArguments.Count; i++)
+                if (valueArguments[i].StartsWith("-"))
                 {
-                    if (valueArguments[i].StartsWith("-"))
-                    {
-                        optionalArguments.Add(valueArguments[i]);
-                        valueArguments.RemoveAt(i);
-                        i--;
-                    }
+                    optionalArguments.Add(valueArguments[i]);
+                    valueArguments.RemoveAt(i);
+                    i--;
                 }
             }
-
-            CommandSelector commandHandler = new CommandSelector();
-            if (!commandHandler.TryHandle(valueArguments, optionalArguments, app))
-            {
-                ConsoleWriter.Print("Invalid arguments. Try 'jarvis --help' for more information.");
-            }
-
-            // A bit of space in between commands 
-            if (commandIndex < commands.Count - 1)
-                ConsoleWriter.Print(" ");
-
         }
-
-        app.Save();
-
-        // A bit of space at the tail
-        ConsoleWriter.Print(" ");
-        ConsoleWriter.OnAppKilled();
+        return new []{valueArguments, optionalArguments };
     }
+
 }
