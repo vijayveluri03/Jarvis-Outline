@@ -43,6 +43,14 @@ public static class ConsoleWriter
 
         Console.Write(message + "\n", parms);
     }
+    public static void PrintText(string message)
+    {
+        ConsoleColor foregroundColor;
+        if (foregroundTextColorStack.TryPeek(out foregroundColor))
+            Console.ForegroundColor = foregroundColor;
+
+        Console.Write(message + "\n");
+    }
     public static void PrintInColor(string message, ConsoleColor foregroundColor, params object[] parms)
     {
         PushColor(foregroundColor);

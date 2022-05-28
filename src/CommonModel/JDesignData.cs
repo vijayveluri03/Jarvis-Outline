@@ -22,6 +22,10 @@ namespace Jarvis
         public static string HABITS_FILENAME { get { return JConstants.PATH_TO_DATA + ("Habits.json"); } }
         public static string TASK_LOG_FILENAME { get { return JConstants.PATH_TO_DATA + ("TaskLog.json"); } }
 
+        public static string PATH_TO_TASKS_NOTES { get { return JConstants.PATH_TO_DATA + ("Tasks/"); } }
+        public static string PATH_TO_HABITS_NOTES { get { return JConstants.PATH_TO_DATA + ("Habits/"); } }
+        public static string PATH_TO_TASK_LOG_NOTES { get { return JConstants.PATH_TO_DATA + ("TaskLog/"); } }
+
         public static string DESIGNDATA_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Design-Template.json"); } }
         public static string TASKS_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Tasks-Template.json"); } }
         public static string HABITS_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Habits-Template.json"); } }
@@ -138,15 +142,16 @@ namespace Jarvis
 
         [JsonProperty] public LookAndFeelProperties lookAndFeel;
         [JsonProperty] public Categories categories;
+        [JsonProperty] public string defaultExternalEditor = "code";
 
         // Getters        
-        [JsonIgnore] public ConsoleColor DefaultColorForText { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.defaultColorForText); } }
-        [JsonIgnore] public ConsoleColor HighlightColorForText { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText); } }
-        [JsonIgnore] public ConsoleColor HighlightColorForText_2 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_2); } }
-        [JsonIgnore] public ConsoleColor HighlightColorForText_3 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_3); } }
-        [JsonIgnore] public ConsoleColor HighlightColorForText_4 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_4); } }
-        [JsonIgnore] public ConsoleColor HighlightColorForText_5 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_5); } }
-        [JsonIgnore] public ConsoleColor HighlightColorForText_Disabled { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_disabled); } }
+        [JsonIgnore] public ConsoleColor DefaultColorForText { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.defaultColorForText); } } // used for all default text
+        [JsonIgnore] public ConsoleColor HighlightColorForText { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText); } } //used for headings 
+        [JsonIgnore] public ConsoleColor HighlightColorForText_2 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_2); } } // used to highlight stories
+        [JsonIgnore] public ConsoleColor HighlightColorForText_3 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_3); } } // used to highlight collections 
+        [JsonIgnore] public ConsoleColor HighlightColorForText_4 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_4); } } // unused
+        [JsonIgnore] public ConsoleColor HighlightColorForText_5 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_5); } } // unused
+        [JsonIgnore] public ConsoleColor HighlightColorForText_Disabled { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_disabled); } }    // used to represent disabled or inactive stuff
 
         public static JDesignData Load()
         {

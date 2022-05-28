@@ -12,7 +12,7 @@ class Program
     {
 #if DEBUG
         //string debugCommand = "task list & task report";
-        string debugCommand = "task --help";
+        string debugCommand = "task opennotes 2";
         //string debugCommand = "habit show 1";
         //string debugCommand = "task list --cat:asdf:fefe";
         args = debugCommand.Split(' ');

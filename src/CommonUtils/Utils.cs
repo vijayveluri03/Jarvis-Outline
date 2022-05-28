@@ -150,7 +150,7 @@ public static class Utils
 
             return subStrings[1];
         }
-        public static void ExecuteCommandInConsole(string command, bool runSilently = true, bool printOutput = true)
+        public static void ExecuteCommandInConsole(string command, bool runSilently = true, bool printOutput = true, bool createNewWindow = true, bool waitForProgramToExit = false )
         {
             Process proc = new System.Diagnostics.Process();
 
@@ -161,11 +161,42 @@ public static class Utils
 #endif
 
             proc.StartInfo.Arguments = (runSilently ? "/C" : "/K") + " " + command;
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardOutput = !printOutput;
-            proc.StartInfo.CreateNoWindow = runSilently;
-
+            proc.StartInfo.UseShellExecute = createNewWindow;   // this will run in a seperate window 
+            proc.StartInfo.RedirectStandardOutput = !printOutput;   
+            //proc.StartInfo.CreateNoWindow = !createNewWindow; // this is not working as expected 
+            
             proc.Start();
+
+            if ( waitForProgramToExit )
+                proc.WaitForExit();
+
+            //ConsoleWriter.Print("EXITTED");
+
+            /* todo - This hangs atm - This is supposed to print the details which are sent to Standard out */
+#if false
+            while ( printOutput && !proc.StandardOutput.EndOfStream)
+                Console.WriteLine(proc.StandardOutput.ReadLine());
+#endif
+        }
+        public static void ExecuteCommand(string program, string arguments, bool printOutput = true, bool waitForProgramToExit = false )
+        {
+            Process proc = new System.Diagnostics.Process();
+
+#if UNIX // @todo - Need to decide based on the environment 
+                proc.StartInfo.FileName = "/bin/bash";
+#else
+            proc.StartInfo.FileName = program;
+#endif
+
+            proc.StartInfo.Arguments = arguments;
+            proc.StartInfo.UseShellExecute = true;   // this will run in a seperate window 
+            proc.StartInfo.RedirectStandardOutput = !printOutput;   
+            //proc.StartInfo.CreateNoWindow = !createNewWindow; // this is not working as expected 
+            
+            proc.Start();
+
+            if ( waitForProgramToExit )
+                proc.WaitForExit();
 
             /* todo - This hangs atm - This is supposed to print the details which are sent to Standard out */
 #if false
@@ -302,9 +333,10 @@ public static class Utils
         return false;
     }
 
-    public static void OpenAFileInEditor(string filePath, string editor = "vim")
+    public static void OpenAFileInEditor(string filePath, string editor = "vim", bool waitForTheProgramToEnd = false)
     {
-        CLI.ExecuteCommandInConsole(editor + " " + filePath, false, true);
+        //CLI.ExecuteCommandInConsole(editor + " " + filePath, false, true, true, waitForTheProgramToEnd);
+        CLI.ExecuteCommand(editor, filePath, true, waitForTheProgramToEnd);
     }
 
 }
@@ -347,6 +379,10 @@ public static class DateExt
 
 public static class StringExt
 {
+    public static bool IsEmpty(this string value )
+    {
+        return string.IsNullOrEmpty(value);
+    }
     public static string Truncate(this string value, int maxLength)
     {
         if (string.IsNullOrEmpty(value)) return value;
