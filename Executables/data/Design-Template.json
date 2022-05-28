@@ -18,5 +18,6 @@
       "chores",
       "fun"
     ]
-  }
+  },
+  "defaultExternalEditor": "code"
 }

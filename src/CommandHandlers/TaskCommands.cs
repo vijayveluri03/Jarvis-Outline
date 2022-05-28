@@ -18,25 +18,26 @@ public class TaskHandler : CommandHandlerBase
         ConsoleWriter.Print("USAGE : \n" +
                 "Jarvis task add  \t\t| To add a task\n" +
                 "Jarvis task list \t\t| to list all the tasks\n" +
-                "Jarvis task list --all \t\t| to list all the tasks\n" +
+                
                 "\n" +
                 "Jarvis task delete \t\t| to remove a task\n" +
                 "Jarvis task complete \t\t| to complete a task\n" +
                 "Jarvis task discard \t\t| to discard a task\n" +
                 "Jarvis task archieve \t\t| to archieve a task\n" +
                 "Jarvis task open \t\t| to re-open a task\n" +
+                
                 "\n" +
+                "LOG TIME\n" + 
                 "Jarvis task start \t\t| to track the time of a task\n" +
                 "Jarvis task stop \t\t| to stop time tracking\n" +
                 "Jarvis task active \t\t| to show if any time record is in progress\n" +
-                "\n" +
-                "Jarvis task show \t\t| to show a task\n" +
+                "jarvis task recordtimelog \t\t| to record an offline task\n" +
+
                 "\n" +
                 "ADVANCED\n" +
-                "jarvis task addsubtask \t\t| to add subtasks to a task\n" +
-                "jarvis task removesubtask \t\t| to add subtasks to a task\n" +
-                "jarvis task recordtimelog \t\t| to record an offline task\n" +
+                "Jarvis task show \t\t| to show a task\n" +
                 "jarvis task report \t\t| to show all the work done in the last day/week\n" +
+                
                 "\n" +
                 "NOTES\n" + 
                 "jarvis task addnotes" + "\t\t| create new notes for a task. You can open it using opennotes\n" + 
@@ -76,12 +77,6 @@ public class TaskHandler : CommandHandlerBase
                 break;
             case "show":
                 selectedHander = new TaskShowCommand();
-                break;
-            case "addsubtask":
-                selectedHander = new TaskAddSubTaskCommand();
-                break;
-            case "removesubtask":
-                selectedHander = new TaskRemoveSubTaskCommand();
                 break;
             case "recordtimelog":
                 selectedHander = new TaskRecordTimeLogCommand();
@@ -534,7 +529,8 @@ public class TaskListCommand : CommandHandlerBase
                         textColor,
                         task.id,
                         (task.categories != null && task.categories.Length > 0 ? Utils.Conversions.ArrayToString(task.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
-                        task.title.TruncateWithVisualFeedback(titleArea - 6/*for the ...*/) + (task.GetSubTaskCount() > 0 ? "+(" + task.GetSubTaskCount() + ")" : ""),
+                        task.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/)
+                            + (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTES + task.id) ? "+(N)" : ""),
                         (isInProgress ? "In Progress" : task.StatusString),
                         (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) + " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + " )")
                         ); ;
@@ -602,38 +598,18 @@ public class TaskShowCommand : CommandHandlerBase
 
                 ConsoleWriter.Print();
 
-                ConsoleWriter.Print("STATUS : {0, -15}\nTYPE : {1}\nTIME SPENT : {2,-15}",
+                ConsoleWriter.Print("STATUS : {0, -15}\nTYPE : {1}\nTIME SPENT : {2,-15}\nNOTES AVAILABLE: {3,-15}",
                     (isInProgress ? "In Progress" : task.StatusString),
                     task.TypeString,
                     (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") +
                     ("(" + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) +
-                    " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + ")")
+                    " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + ")"),
+                    (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTES + task.id) ? "YES" : "NO")
                     );
 
             }
             
             ConsoleWriter.Print();
-
-            // Print sub tasks 
-            {
-                if (task.subTasks != null)
-                {
-                    if ( task.subTasks.Count > 0 )
-                    {
-                        ConsoleWriter.PrintInColor("{0, -15} {1,-30}",
-                        application.DesignData.HighlightColorForText,
-                        "SUBTASK ID", "SUBTASK TITLE"
-                        );
-
-                        foreach (var subTaskPair in task.subTasks)
-                        {
-                            ConsoleWriter.Print("{0, -15} {1, -30}", subTaskPair.First, subTaskPair.Second);
-                        }
-                    }
-                    ConsoleWriter.Print();
-                }
-            }
-
 
             {
                 SortedDictionary<DateTime, int> timeLogs = new SortedDictionary<DateTime, int>();
@@ -663,89 +639,6 @@ public class TaskShowCommand : CommandHandlerBase
                     }
                 }
             }
-        }
-        else
-            ConsoleWriter.Print("Task not found with id : " + id);
-
-        return true;
-    }
-}
-
-public class TaskAddSubTaskCommand : CommandHandlerBase
-{
-    public TaskAddSubTaskCommand()
-    {
-    }
-
-    protected override bool ShowHelp()
-    {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task addsubtask <taskID> <subtasktitle>  \t\t| task id is the ID of the task under which the subtask would be created\n"
-                );
-        return true;
-    }
-    protected override bool Run(Jarvis.JApplication application)
-    {
-        if (arguments_ReadOnly.Count != 2)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ShowHelp();
-            return true;
-        }
-
-        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
-        string title = arguments_ReadOnly[1];
-
-
-        if (application.taskManager.DoesTaskExist(id))
-        {
-            application.taskManager.GetTask_Editable(id).AddSubTask(title);
-            ConsoleWriter.Print("Subtask added to Task with id : " + id);
-        }
-        else
-            ConsoleWriter.Print("Task not found with id : " + id);
-
-        return true;
-    }
-}
-
-public class TaskRemoveSubTaskCommand : CommandHandlerBase
-{
-    public TaskRemoveSubTaskCommand()
-    {
-    }
-
-    protected override bool ShowHelp()
-    {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task removesubtask <taskID> <subtaskID>  \t\t| task id is the ID of the task. SubtaskId is the one which is assigned to each of the subtasks\n"
-                );
-        return true;
-    }
-
-    protected override bool Run(Jarvis.JApplication application)
-    {
-        if (arguments_ReadOnly.Count != 2)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ShowHelp();
-            return true;
-        }
-
-        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
-        int subTaskID = Utils.Conversions.Atoi( arguments_ReadOnly[1]); 
-
-
-        if (application.taskManager.DoesTaskExist(id))
-        {
-            var subTaskPair = application.taskManager.GetTask_ReadOnly(id).GetSubtask(subTaskID);
-            if (subTaskPair != null)
-            {
-                application.taskManager.GetTask_Editable(id).RemoveSubTask(subTaskID);
-                ConsoleWriter.Print("Subtask removed from Task with id : " + id);
-            }
-            else
-                ConsoleWriter.Print("SubTask not found! Make sure you verify the subtask ID using 'Jarvis task show'");
         }
         else
             ConsoleWriter.Print("Task not found with id : " + id);
