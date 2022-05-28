@@ -30,8 +30,6 @@ namespace Jarvis
         // Unique ID
         public int id;
 
-        public List< Pair<int, string> > subTasks = new List<Pair<int, string>>();
-
         public Status taskStatus = Status.Open;
 
         public Type type = Type.Task;
@@ -80,43 +78,6 @@ namespace Jarvis
         public void SetAsArchive() { taskStatus = Status.Archieve; }
         public void SetStatus(Status status) { taskStatus = status; }
 
-        public int GetSubTaskCount()
-        {
-            return subTasks != null ? subTasks.Count: 0;
-        }
-
-        private int GetAvailableID()
-        {
-            int maxID = 0;
-            foreach (var subtaskPair in subTasks)
-            {
-                if (subtaskPair.First > maxID)
-                    maxID = subtaskPair.First;
-            }
-            return maxID + 1;
-        }
-
-        public Pair<int, string> GetSubtask (int id)
-        {
-            foreach (var subtaskPair in subTasks)
-            {
-                if (subtaskPair.First == id)
-                    return subtaskPair;
-            }
-            return null;
-        }
-
-        public void AddSubTask(string subTask)
-        {
-            subTasks.Add(new Pair<int, string>(GetAvailableID(), subTask));
-        }
-
-        public void RemoveSubTask(int id)
-        {
-            var subTaskPair = GetSubtask(id);
-            Utils.Assert(subTaskPair != null);
-            subTasks.Remove(subTaskPair);
-        }
     }
 
     // List of all the Entries

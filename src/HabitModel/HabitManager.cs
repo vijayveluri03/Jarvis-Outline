@@ -24,8 +24,6 @@ namespace Jarvis
         // Unique ID
         public int id;
 
-        public List<string> notes = new List<string>();
-
         public List<DateTime> entries = new List<DateTime>();
 
         public int previousStreak = 0;
