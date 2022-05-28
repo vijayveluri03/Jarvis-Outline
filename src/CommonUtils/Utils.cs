@@ -150,20 +150,59 @@ public static class Utils
 
             return subStrings[1];
         }
-        public static void ExecuteCommandInConsole(string command)
+        public static void ExecuteCommandInConsole(string command, bool runSilently = true, bool printOutput = true, bool createNewWindow = true, bool waitForProgramToExit = false )
         {
             Process proc = new System.Diagnostics.Process();
-            proc.StartInfo.FileName = "/bin/bash";
-            proc.StartInfo.Arguments = "-c \" " + command + " \"";
-            //ConsoleWriter.PrintInRed(proc.StartInfo.Arguments);
-            proc.StartInfo.UseShellExecute = false;
-            proc.StartInfo.RedirectStandardOutput = true;
+
+#if UNIX // @todo - Need to decide based on the environment 
+                proc.StartInfo.FileName = "/bin/bash";
+#else
+            proc.StartInfo.FileName = "cmd.exe";
+#endif
+
+            proc.StartInfo.Arguments = (runSilently ? "/C" : "/K") + " " + command;
+            proc.StartInfo.UseShellExecute = createNewWindow;   // this will run in a seperate window 
+            proc.StartInfo.RedirectStandardOutput = !printOutput;   
+            //proc.StartInfo.CreateNoWindow = !createNewWindow; // this is not working as expected 
+            
             proc.Start();
 
-            while (!proc.StandardOutput.EndOfStream)
-            {
+            if ( waitForProgramToExit )
+                proc.WaitForExit();
+
+            //ConsoleWriter.Print("EXITTED");
+
+            /* todo - This hangs atm - This is supposed to print the details which are sent to Standard out */
+#if false
+            while ( printOutput && !proc.StandardOutput.EndOfStream)
                 Console.WriteLine(proc.StandardOutput.ReadLine());
-            }
+#endif
+        }
+        public static void ExecuteCommand(string program, string arguments, bool printOutput = true, bool waitForProgramToExit = false )
+        {
+            Process proc = new System.Diagnostics.Process();
+
+#if UNIX // @todo - Need to decide based on the environment 
+                proc.StartInfo.FileName = "/bin/bash";
+#else
+            proc.StartInfo.FileName = program;
+#endif
+
+            proc.StartInfo.Arguments = arguments;
+            proc.StartInfo.UseShellExecute = true;   // this will run in a seperate window 
+            proc.StartInfo.RedirectStandardOutput = !printOutput;   
+            //proc.StartInfo.CreateNoWindow = !createNewWindow; // this is not working as expected 
+            
+            proc.Start();
+
+            if ( waitForProgramToExit )
+                proc.WaitForExit();
+
+            /* todo - This hangs atm - This is supposed to print the details which are sent to Standard out */
+#if false
+            while ( printOutput && !proc.StandardOutput.EndOfStream)
+                Console.WriteLine(proc.StandardOutput.ReadLine());
+#endif
         }
     }
 
@@ -227,6 +266,52 @@ public static class Utils
         }
     }
 
+    public static class FileHandler
+    {
+        public static bool DoesFileExist(string path)
+        {
+            return File.Exists(path);
+        }
+
+        public static bool Create(string path, bool overwriteIfExists = false)
+        {
+            if (DoesFileExist(path) && !overwriteIfExists)
+                return false;
+
+            StreamWriter stream = File.CreateText(path);
+            stream.Close();
+            return true;
+        }
+
+        public static string Read(string path)
+        {
+            if (!DoesFileExist(path))
+                return string.Empty;
+
+            return File.ReadAllText(path);
+        }
+
+        public static void Append(string path, string txt)
+        {
+            Assert(DoesFileExist(path));
+
+            File.AppendAllText( path, txt);
+        }
+
+        public static void Clean (string path)
+        {
+            Assert(DoesFileExist(path));
+            File.WriteAllText(path, string.Empty);
+        }
+
+        public static void Remove (string path)
+        {
+            Assert(DoesFileExist(path));
+            File.Delete(path);
+        }
+
+    }
+
     public static T ParseEnum<T>(string value)
     {
         return (T)Enum.Parse(typeof(T), value, true);
@@ -237,15 +322,21 @@ public static class Utils
             ConsoleWriter.Print("==== ASSERT here =======");
         Debug.Assert(condition, message);
     }
-    public static bool CreateFileIfNotExit(string path, string templateFile)
+    public static bool CreateFileIfNotExit(string path, string copyFrom)
     {
         if (!File.Exists(path))
         {
-            Assert(File.Exists(templateFile), "Template file doesnt exist.");
-            File.Copy(templateFile, path);
+            Assert(File.Exists(copyFrom), "Source file doesnt exist : " + copyFrom);
+            File.Copy(copyFrom, path);
             return true;
         }
         return false;
+    }
+
+    public static void OpenAFileInEditor(string filePath, string editor = "vim", bool waitForTheProgramToEnd = false)
+    {
+        //CLI.ExecuteCommandInConsole(editor + " " + filePath, false, true, true, waitForTheProgramToEnd);
+        CLI.ExecuteCommand(editor, filePath, true, waitForTheProgramToEnd);
     }
 
 }
@@ -288,6 +379,10 @@ public static class DateExt
 
 public static class StringExt
 {
+    public static bool IsEmpty(this string value )
+    {
+        return string.IsNullOrEmpty(value);
+    }
     public static string Truncate(this string value, int maxLength)
     {
         if (string.IsNullOrEmpty(value)) return value;

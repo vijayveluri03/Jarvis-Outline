@@ -7,11 +7,11 @@ public static class ConsoleWriter
     private static ConsoleColor previousColor = ConsoleColor.Black;
     // Foreground Colors for the text
 
-    public static void OnAppLaunched()
+    public static void Initialize()
     {
         previousColor = Console.ForegroundColor;
     }
-    public static void OnAppKilled()
+    public static void DestroyAndCleanUp()
     {
         Console.ForegroundColor = previousColor;
     }
@@ -42,6 +42,14 @@ public static class ConsoleWriter
             Console.ForegroundColor = foregroundColor;
 
         Console.Write(message + "\n", parms);
+    }
+    public static void PrintText(string message)
+    {
+        ConsoleColor foregroundColor;
+        if (foregroundTextColorStack.TryPeek(out foregroundColor))
+            Console.ForegroundColor = foregroundColor;
+
+        Console.Write(message + "\n");
     }
     public static void PrintInColor(string message, ConsoleColor foregroundColor, params object[] parms)
     {
