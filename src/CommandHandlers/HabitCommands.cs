@@ -104,6 +104,7 @@ public class HabitHandler : CommandHandlerBase
             return false;
         }
 
+        Utils.Assert(false, "Shouldnt be here");
         return true;
     }
 }

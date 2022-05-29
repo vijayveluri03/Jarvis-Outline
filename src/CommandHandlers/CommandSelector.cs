@@ -21,7 +21,8 @@ public class CommandSelector : CommandHandlerBase
                 return new TaskHandler();
             case "habit":
                 return new HabitHandler();
-                
+            case "game":
+                return new GameHandler();
             default:
                 break;
         }
@@ -55,8 +56,9 @@ public class CommandSelector : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-            "Jarvis task <arguments>. For more info on arguments, try 'Jarvis task' or 'Jarvis task --help'\n" +
-            "Jarvis habit <arguments>. For more info on arguments, try 'Jarvis habit' or 'Jarvis habit --help'"
+            "Jarvis task <arguments> \t\t| For more info on arguments, try 'Jarvis task' or 'Jarvis task --help'\n" +
+            "Jarvis habit <arguments> \t\t| For more info on arguments, try 'Jarvis habit' or 'Jarvis habit --help'\n" +
+            "Jarvis game snake \t\t| For a fun game :) "
             );
         return true;
     }

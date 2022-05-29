@@ -136,6 +136,7 @@ public class TaskHandler : CommandHandlerBase
             return true;
         }
         
+        Utils.Assert(false, "Shouldnt be here");
         return true;
     }
 }

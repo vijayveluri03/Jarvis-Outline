@@ -339,6 +339,12 @@ public static class Utils
         CLI.ExecuteCommand(editor, filePath, true, waitForTheProgramToEnd);
     }
 
+    public static void OpenAProgram(string filePath, string arguments = default(string), bool waitForTheProgramToEnd = false)
+    {
+        //CLI.ExecuteCommandInConsole(editor + " " + filePath, false, true, true, waitForTheProgramToEnd);
+        CLI.ExecuteCommand(filePath, arguments, true, waitForTheProgramToEnd);
+    }
+
 }
 
 // Date Utils
