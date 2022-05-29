@@ -35,7 +35,7 @@ public class HabitHandler : CommandHandlerBase
         return true;
     }
 
-    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler)
+    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler, bool printErrors)
     {
         string action = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
         CommandHandlerBase selectedHander = null;
@@ -77,6 +77,8 @@ public class HabitHandler : CommandHandlerBase
                 selectedHander = new HabitDeleteNotesCommand();
                 break;
             default:
+                if(printErrors)
+                    ConsoleWriter.Print("Invalid command. Try 'jarvis habit --help' for more information");
                 break;
         }
 

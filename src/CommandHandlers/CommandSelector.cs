@@ -21,15 +21,18 @@ public class CommandSelector : CommandHandlerBase
                 return new TaskHandler();
             case "habit":
                 return new HabitHandler();
+                
             default:
                 break;
         }
         return null;
     }
-    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler)
+    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler, bool printErrors)
     {
         string command = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
         CommandHandlerBase selectedHander = GetCommandHandler(command);
+        //bool help = optionalArguments.Contains("--help");
+
 
         if (selectedHander != null) // If the command is provided 
         {
@@ -39,7 +42,10 @@ public class CommandSelector : CommandHandlerBase
         }
         else
         {   // command not provided. We are trying to see if we can use the last used command. 
-            selectedHander = GetCommandHandler(application.UserData.GetLastCommand());
+
+            if ( printErrors )
+                ConsoleWriter.Print("Invalid command. Try 'jarvis --help' for more information");
+            //selectedHander = GetCommandHandler(application.UserData.GetLastCommand());
             argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);  // since the command is not provided anyway, there is nothing to strip
         }
 

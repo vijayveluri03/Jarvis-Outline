@@ -39,10 +39,7 @@ class Program
             
             ConsoleWriter.EmptyLine();
 
-            if (!(new CommandSelector()).TryHandle(arguments[0] /*Manditory arguments*/, arguments[1] /*Optional*/, app))
-            {
-                ConsoleWriter.Print("Invalid arguments. Try 'jarvis --help' for more information.");
-            }
+            (new CommandSelector()).TryHandle(arguments[0] /*Manditory arguments*/, arguments[1] /*Optional*/, app);
         }
 
         app.Save();

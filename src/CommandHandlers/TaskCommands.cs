@@ -49,7 +49,7 @@ public class TaskHandler : CommandHandlerBase
         return true;
     }
 
-    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler)
+    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler, bool printErrors)
     {
         string action = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
         CommandHandlerBase selectedHander = null;
@@ -109,8 +109,9 @@ public class TaskHandler : CommandHandlerBase
             case "deletenotes":
                 selectedHander = new TaskDeleteNotesCommand();
                 break;
-
             default:
+                if(printErrors)
+                    ConsoleWriter.Print("Invalid command. Try 'jarvis task --help' for more information.");
                 break;
         }
 
