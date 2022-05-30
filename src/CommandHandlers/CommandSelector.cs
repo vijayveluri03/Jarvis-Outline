@@ -21,6 +21,8 @@ public class CommandSelector : CommandHandlerBase
                 return new TaskHandler();
             case "habit":
                 return new HabitHandler();
+            case "journal":
+                return new JournalHandler();
             case "game":
                 return new GameHandler();
             default:
@@ -58,6 +60,7 @@ public class CommandSelector : CommandHandlerBase
         ConsoleWriter.Print("USAGE : \n" +
             "Jarvis task <arguments> \t\t| For more info on arguments, try 'Jarvis task' or 'Jarvis task --help'\n" +
             "Jarvis habit <arguments> \t\t| For more info on arguments, try 'Jarvis habit' or 'Jarvis habit --help'\n" +
+            "Jarvis journal <arguments> \t\t| For more info on arguments, try 'Jarvis journal' or 'Jarvis journal --help'\n" +
             "Jarvis game snake \t\t| For a fun game :) "
             );
         return true;

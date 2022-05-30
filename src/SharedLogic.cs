@@ -37,6 +37,15 @@ namespace Jarvis
             return ed;
         }
 
+        public static JournalEntry CreateNewJournalEntry(JournalManager journalManager, string title)
+        {
+            JournalEntry ed = new JournalEntry();
+            ed.id = journalManager.GetAvailableID();
+            ed.title = title;
+            ed.loggedDate = DateTime.Now.ZeroTime();
+            return ed;
+        }
+
         public static class UI
         {
 
