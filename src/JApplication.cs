@@ -17,6 +17,7 @@ namespace Jarvis
         public JUserData UserData { get { return userData; } }
         public TaskManager taskManager { get; private set; }
         public HabitManager habitManager { get; private set; }
+        public JournalManager journalManager { get; private set; }
         public TaskTimeManagement logManager { get; private set; }
 
         public void Initialize()
@@ -47,6 +48,7 @@ namespace Jarvis
             taskManager = new TaskManager();
             habitManager = new HabitManager();
             logManager = new TaskTimeManagement();
+            journalManager = new JournalManager();
         }
 
         public void Save()
@@ -55,6 +57,7 @@ namespace Jarvis
             taskManager.Save();
             logManager.Save();
             habitManager.Save();
+            journalManager.Save();
         }
 
         // private

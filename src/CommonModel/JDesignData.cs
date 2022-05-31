@@ -19,17 +19,20 @@ namespace Jarvis
         public static string DESIGNDATA_FILENAME { get { return JConstants.PATH_TO_DATA + ("Design.json"); } }
         public static string PLAYERPREFS_FILENAME { get { return JConstants.PATH_TO_DATA + ("PlayerPrefs.json"); } }
         public static string TASKS_FILENAME { get { return JConstants.PATH_TO_DATA + ("Tasks.json"); } }
+        public static string JOURNAL_FILENAME { get { return JConstants.PATH_TO_DATA + ("Journal.json"); } }
         public static string HABITS_FILENAME { get { return JConstants.PATH_TO_DATA + ("Habits.json"); } }
         public static string TASK_LOG_FILENAME { get { return JConstants.PATH_TO_DATA + ("TaskLog.json"); } }
 
         public static string PATH_TO_TASKS_NOTES { get { return JConstants.PATH_TO_DATA + ("Tasks/"); } }
         public static string PATH_TO_HABITS_NOTES { get { return JConstants.PATH_TO_DATA + ("Habits/"); } }
         public static string PATH_TO_TASK_LOG_NOTES { get { return JConstants.PATH_TO_DATA + ("TaskLog/"); } }
+        public static string PATH_TO_JOURNAL_NOTES { get { return JConstants.PATH_TO_DATA + ("Journal/"); } }
 
         public static string DESIGNDATA_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Design-Template.json"); } }
         public static string TASKS_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Tasks-Template.json"); } }
         public static string HABITS_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Habits-Template.json"); } }
         public static string TASK_LOG_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("TaskLog-Template.json"); } }
+        public static string JOURNAL_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Journal-Template.json"); } }
     }
 
     // Load and Save custom data per user.
