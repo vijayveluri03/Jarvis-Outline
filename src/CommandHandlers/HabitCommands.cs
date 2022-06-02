@@ -211,8 +211,8 @@ public class HabitListCommand : CommandHandlerBase
         // output Heading 
         if (habits.Count > 0)
         {
-            ConsoleWriter.Print("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
-                "ID", "DEPT", "TITLE", "LAST UPDATED", "STREAK"
+            ConsoleWriter.Print("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -10} {5, -15}",
+                "ID", "DEPT", "TITLE", "LAST UPDATED", "STREAK", "SUCCESS"
                 );
 
             // Sorts based on status to keep In-Progress onces above
@@ -223,7 +223,7 @@ public class HabitListCommand : CommandHandlerBase
                 if (categoryFilter != string.Empty && !habit.categories.Contains(categoryFilter))
                     continue;
 
-                ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -5} {5, -10}",
+                ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -10} {5, -5} {6, -10}",
                     habit.IsDisabled ? application.DesignData.HighlightColorForText_Disabled : application.DesignData.DefaultColorForText,
                     habit.id,
                     (habit.categories != null && habit.categories.Length > 0 ? Utils.Conversions.ArrayToString(habit.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
@@ -231,6 +231,7 @@ public class HabitListCommand : CommandHandlerBase
                         + (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTES + habit.id) ? "+(N)" : ""),
                     habit.GetLastUpdatedOn().ShortForm(),
                     habit.GetStreak(),
+                    habit.GetSuccessRate(),
                     habit.IsDisabled ? "Disabled" : ""
                     );
 
@@ -302,9 +303,11 @@ public class HabitStreakUpCommand : CommandHandlerBase
             return true;
         }
 
+        int previousSuccess = hb.GetSuccessRate();
+
         hb.AddNewEntry(dateForEntry);
 
-        ConsoleWriter.Print("Habit with id : {0} Streaked up!", id);
+        ConsoleWriter.Print("Habit with id : {0} Streaked up! Success rate {1} -> {2}", id, previousSuccess, hb.GetSuccessRate());
         if( deltaTime != 0 )
             ConsoleWriter.Print("Entry added for date : {0}!", dateForEntry.ShortForm());
 
@@ -431,12 +434,6 @@ public class HabitResetCommand : CommandHandlerBase
         if (hb == null)
         {
             ConsoleWriter.Print("Habit with id : {0} not found!", id);
-            return true;
-        }
-
-        if (hb.IsEntryOn(DateTime.Now.ZeroTime()))
-        {
-            ConsoleWriter.Print("Habit with id: {0} is already updated today. try again tomorrow!", id);
             return true;
         }
 
