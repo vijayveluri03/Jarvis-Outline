@@ -363,6 +363,10 @@ public static class DateExt
     {
         return new DateTime(date.Year, date.Month, date.Day, 0, 0, 0);
     }
+    public static DateTime MaxTime(this DateTime date)
+    {
+        return new DateTime(date.Year, date.Month, date.Day, 23, 59, 59);
+    }
     public static bool IsSameAs(this DateTime date, DateTime other)
     {
         if (date.Day == other.Day &&

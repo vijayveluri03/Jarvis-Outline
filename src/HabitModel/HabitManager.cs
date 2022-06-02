@@ -65,6 +65,20 @@ namespace Jarvis
             return count;
         }
 
+        public int GetSuccessRate ()
+        {
+             float totalDays = Math.Max( (float)(DateTime.Now.MaxTime() - startDate.ZeroTime()).TotalDays , 1 );
+
+            #if RELEASE_LOG
+            foreach (var entry in entries)
+            {
+                Utils.Assert(entry >= startDate);
+            }
+            #endif
+
+            return (int)Math.Round( entries.Count * 100/ totalDays);
+        }
+
         public bool IsEntryOn(DateTime date)
         {
             date = date.ZeroTime();
@@ -79,6 +93,7 @@ namespace Jarvis
         public void AddNewEntry(DateTime newEntry)
         {
             Utils.Assert(!IsEntryOn(newEntry));
+            Utils.Assert(newEntry >= startDate);
             entries.Add(newEntry);
         }
 
