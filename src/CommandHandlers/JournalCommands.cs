@@ -19,6 +19,7 @@ public class JournalHandler : CommandHandlerBase
         "Jarvis journal add  \t\t| To add a journal\n" +
         "Jarvis journal list \t\t| to list all the journals\n" +
         "jarvis journal show \t\t| to show details of a journal\n" +
+        "Jarvis journal edittitle  \t\t| to edit the title of journal\n" +
         "\n" +
         "NOTES\n" + 
         "jarvis journal editnote" + "\t\t| open notes for a journal. If the notes doesnt exit, try createnote first\n" +
@@ -51,6 +52,9 @@ public class JournalHandler : CommandHandlerBase
                 break;
             case "editnote":
                 selectedHander = new JournalEditNoteCommand();
+                break;
+            case "edittitle":
+                selectedHander = new JournalEditTitleCommand();
                 break;
             default:
                 if(printErrors)
@@ -236,6 +240,46 @@ public class JournalShowCommand : CommandHandlerBase
         }
 
         ConsoleWriter.Print();
+
+        return true;
+    }
+}
+
+public class JournalEditTitleCommand : CommandHandlerBase
+{
+    public JournalEditTitleCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        ConsoleWriter.Print("USAGE : \n" +
+                "jarvis journal edittitle <id> <new title>"
+                );
+        return true;
+    }
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count != 2)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        string title = arguments_ReadOnly[1];
+
+        JournalEntry hb = application.journalManager.GetJournal_ReadOnly(id);
+
+        if (hb == null)
+        {
+            ConsoleWriter.Print("Journal with id : {0} not found!", id);
+            return true;
+        }
+
+        application.journalManager.GetJournal_Editable(id).title = title;
+        ConsoleWriter.Print("Journal with id : {0} renamed to - {1}", id, title);
 
         return true;
     }

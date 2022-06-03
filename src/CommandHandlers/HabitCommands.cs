@@ -23,6 +23,7 @@ public class HabitHandler : CommandHandlerBase
         "jarvis habit show \t\t| to show details of a habit\n" +
         "jarvis habit disable \t\t| to disable a habit\n" +
         "jarvis habit re-enable \t\t| to re-enable a disabled habit\n" + 
+        "Jarvis habit edittitle \t\t| To edit the title habit\n" +
         "\n" +
         "NOTES\n" + 
         "jarvis habit createnote" + "\t\t| create new notes for a habit. You can open it using editnote\n" + 
@@ -75,6 +76,9 @@ public class HabitHandler : CommandHandlerBase
                 break;
             case "deletenote":
                 selectedHander = new HabitDeleteNoteCommand();
+                break;
+            case "edittitle":
+                selectedHander = new HabitEditTitleCommand();
                 break;
             default:
                 if(printErrors)
@@ -527,6 +531,46 @@ public class HabitShowCommand : CommandHandlerBase
             }
             ConsoleWriter.EmptyLine();
         }
+
+        return true;
+    }
+}
+
+public class HabitEditTitleCommand : CommandHandlerBase
+{
+    public HabitEditTitleCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        ConsoleWriter.Print("USAGE : \n" +
+                "jarvis habit edittitle <id> <new title> // this is to rename the habit title!"
+                );
+        return true;
+    }
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count != 2)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        string title = arguments_ReadOnly[1];
+
+        Habit hb = application.habitManager.GetHabit_ReadOnly(id);
+
+        if (hb == null)
+        {
+            ConsoleWriter.Print("Habit with id : {0} not found!", id);
+            return true;
+        }
+
+        application.habitManager.GetHabit_Editable(id).title = title;
+        ConsoleWriter.Print("Habit with id : {0} renamed to - {1}", id, title);
 
         return true;
     }

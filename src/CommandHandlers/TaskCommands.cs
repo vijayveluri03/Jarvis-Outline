@@ -37,6 +37,7 @@ public class TaskHandler : CommandHandlerBase
                 "ADVANCED\n" +
                 "Jarvis task show \t\t| to show a task\n" +
                 "jarvis task report \t\t| to show all the work done in the last day/week\n" +
+                "Jarvis task edittitle \t\t| To edit the title of a task\n" +
                 
                 "\n" +
                 "NOTES\n" + 
@@ -109,8 +110,11 @@ public class TaskHandler : CommandHandlerBase
             case "deletenote":
                 selectedHander = new TaskDeleteNoteCommand();
                 break;
+            case "edittitle":
+                selectedHander = new TaskEditTitleCommand();
+                break;
             default:
-                if(printErrors)
+                if (printErrors)
                     ConsoleWriter.Print("Invalid command. Try 'jarvis task --help' for more information.");
                 break;
         }
@@ -341,6 +345,45 @@ public class TaskStopCommand : CommandHandlerBase
 
         ConsoleWriter.Print("Stopped progress on Task with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
         ConsoleWriter.Print("Total time recorded : {0}", Utils.Time.MinutesToHoursString(timeTakenInMinutes));
+
+        return true;
+    }
+}
+
+public class TaskEditTitleCommand : CommandHandlerBase
+{
+    public TaskEditTitleCommand()
+    {
+
+    }
+
+    protected override bool ShowHelp()
+    {
+        ConsoleWriter.Print("USAGE : \n" +
+                "jarvis task edittitle <taskID> <title> \t\t| task id is the ID of the task want to edit. Title being the new Title for the task\n"
+                );
+        return true;
+    }
+
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count != 2)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        string title = arguments_ReadOnly[1];
+
+        if (application.taskManager.DoesTaskExist(id))
+        {
+            application.taskManager.GetTask_Editable(id).title = title;
+            ConsoleWriter.Print("Task with id : {0} renamed to - {1}", id, title);
+        }
+        else
+            ConsoleWriter.Print("Task not found with id : " + id);
 
         return true;
     }
