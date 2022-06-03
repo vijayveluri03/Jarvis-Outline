@@ -22,7 +22,6 @@ public class JournalHandler : CommandHandlerBase
         "\n" +
         "NOTES\n" + 
         "jarvis journal editnote" + "\t\t| open notes for a journal. If the notes doesnt exit, try createnote first\n" +
-        "jarvis journal appendnote" + "\t\t| Append notes to the existing one. \n" +
         "jarvis journal printnote" + "\t\t| print the notes. ( you can also use cat instead of printnote)\n"
 
         );
@@ -114,7 +113,7 @@ public class JournalAddCommand : CommandHandlerBase
         var entry = SharedLogic.CreateNewJournalEntry(application.journalManager, title);
         application.journalManager.AddJournal(entry);
 
-        Utils.FileHandler.Create(JConstants.PATH_TO_JOURNAL_NOTES + entry.id);
+        Utils.FileHandler.Create(JConstants.PATH_TO_JOURNAL_NOTE + entry.id);
 
         ConsoleWriter.Print("New Journal added with id : {0}. You can open the notes and fill it up. ", entry.id);
         return true;
@@ -272,12 +271,12 @@ public class JournalCatNotesCommand : CommandHandlerBase
         
         if (application.journalManager.DoesJournalExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_JOURNAL_NOTES + id) )
+            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_JOURNAL_NOTE + id) )
                 ConsoleWriter.Print("Notes not found for the journal with id : {0}", id);
             else 
             {
                 ConsoleWriter.PrintInColor("NOTES :", application.DesignData.HighlightColorForText);
-                ConsoleWriter.PrintText(Utils.FileHandler.Read(JConstants.PATH_TO_JOURNAL_NOTES + id));
+                ConsoleWriter.PrintText(Utils.FileHandler.Read(JConstants.PATH_TO_JOURNAL_NOTE + id));
             }
         }
         else
@@ -299,6 +298,7 @@ public class JournalEditNoteCommand : CommandHandlerBase
         ConsoleWriter.Print("USAGE : \n" +
                 "jarvis journal editnote <journalID> \t\t| Opens notes for a journal. If notes doesnt exist, you might want to try createnote first!\n" + 
                 "jarvis journal editnote <journalID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
+                "jarvis journal editnote <journalID> --append:<Message> \t\t| Added the message directly to the note\n" + 
                 "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
                 );
         return true;
@@ -323,15 +323,29 @@ public class JournalEditNoteCommand : CommandHandlerBase
             return true;
         }
 
+        syntaxError = false;
+        string appendMessage = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--append", string.Empty, null, null, out syntaxError);
+
+        if (syntaxError)
+        {
+            ConsoleWriter.Print("Invalid syntax for --append argument.");
+            return true;
+        }
+
         if (application.journalManager.DoesJournalExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_JOURNAL_NOTES + id) )
+            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_JOURNAL_NOTE + id) )
                 ConsoleWriter.Print("Notes not found for the journal with id : {0}", id);
+            else if ( !appendMessage.IsEmpty() )
+            {
+                ConsoleWriter.Print("Message appended to the notes");
+                Utils.AppendToFile(JConstants.PATH_TO_JOURNAL_NOTE + id, appendMessage );
+            }
             else 
             {
                 ConsoleWriter.Print("Opening Notes");
                 Utils.OpenAFileInEditor(
-                    JConstants.PATH_TO_JOURNAL_NOTES + id, 
+                    JConstants.PATH_TO_JOURNAL_NOTE + id, 
                     externalProgram.IsEmpty() ? application.DesignData.defaultExternalEditor : externalProgram,
                     true /* wait for the program to end*/);
                 ConsoleWriter.Print("Closing Notes");
