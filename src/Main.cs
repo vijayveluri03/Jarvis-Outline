@@ -86,7 +86,37 @@ class Program
                 }
             }
         }
-        return new []{valueArguments, optionalArguments };
+        return new []{ valueArguments, optionalArguments };
+    }
+    public static IEnumerable<string> SplitCommandLine(string commandLine)
+    {
+        bool inQuotes = false;
+
+        return Split(commandLine, c =>
+                                 {
+                                     if (c == '\"')
+                                         inQuotes = !inQuotes;
+
+                                     return !inQuotes && c == ' ';
+                                 })
+                          .Select(arg => arg.Trim().TrimMatchingQuotes('\"'))
+                          .Where(arg => !string.IsNullOrEmpty(arg));
+    }
+    public static IEnumerable<string> Split(string str,
+                                            Func<char, bool> controller)
+    {
+        int nextPiece = 0;
+
+        for (int c = 0; c < str.Length; c++)
+        {
+            if (controller(str[c]))
+            {
+                yield return str.Substring(nextPiece, c - nextPiece);
+                nextPiece = c + 1;
+            }
+        }
+
+        yield return str.Substring(nextPiece);
     }
 
 }
