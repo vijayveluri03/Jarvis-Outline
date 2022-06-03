@@ -28,7 +28,7 @@ public class HabitHandler : CommandHandlerBase
         "jarvis habit addnotes" + "\t\t| create new notes for a habit. You can open it using opennotes\n" + 
         "jarvis habit deletenotes" + "\t\t| delete notes for a habit\n" + 
         "jarvis habit opennotes" + "\t\t| open notes for a habit. If the notes doesnt exit, try addnotes first\n" +
-        "jarvis habit printnotes" + "\t\t| print the notes. ( you can also use catnotes instead of printnotes)\n"
+        "jarvis habit printnotes" + "\t\t| print the notes. ( you can also use cat instead of printnotes)\n"
 
         );
 
@@ -63,7 +63,7 @@ public class HabitHandler : CommandHandlerBase
             case "re-enable":
                 selectedHander = new HabitReEnableCommand();
                 break;
-                case "catnotes":
+                case "cat":
             case "printnotes":
                 selectedHander = new HabitCatNotesCommand();
                 break;
@@ -542,8 +542,8 @@ public class HabitCatNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit catnotes <habitID> \t\t| Prints the notes of a habit. You can also use printnotes instead of catnotes\n" +
-                "jarvis habit printnotes <habitID> \t\t| Same as catnotes\n"
+                "jarvis habit cat <habitID> \t\t| Prints the notes of a habit. You can also use printnotes instead of cat\n" +
+                "jarvis habit printnotes <habitID> \t\t| Same as cat\n"
                 );
         return true;
     }

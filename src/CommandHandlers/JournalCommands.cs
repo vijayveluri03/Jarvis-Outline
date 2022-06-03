@@ -22,7 +22,7 @@ public class JournalHandler : CommandHandlerBase
         "\n" +
         "NOTES\n" + 
         "jarvis journal opennotes" + "\t\t| open notes for a journal. If the notes doesnt exit, try addnotes first\n" +
-        "jarvis journal printnotes" + "\t\t| print the notes. ( you can also use catnotes instead of printnotes)\n"
+        "jarvis journal printnotes" + "\t\t| print the notes. ( you can also use cat instead of printnotes)\n"
 
         );
 
@@ -45,7 +45,7 @@ public class JournalHandler : CommandHandlerBase
             case "show":
                 selectedHander = new JournalShowCommand();
                 break;
-            case "catnotes":
+            case "cat":
             case "printnotes":
                 selectedHander = new JournalCatNotesCommand();
                 break;
@@ -251,8 +251,8 @@ public class JournalCatNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis journal catnotes <journalID> \t\t| Prints the notes of a journal. You can also use printnotes instead of catnotes\n" +
-                "jarvis journal printnotes <journalID> \t\t| Same as catnotes\n"
+                "jarvis journal cat <journalID> \t\t| Prints the notes of a journal. You can also use printnotes instead of cat\n" +
+                "jarvis journal printnotes <journalID> \t\t| Same as cat\n"
                 );
         return true;
     }

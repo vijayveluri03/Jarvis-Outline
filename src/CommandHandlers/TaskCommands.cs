@@ -43,7 +43,7 @@ public class TaskHandler : CommandHandlerBase
                 "jarvis task addnotes" + "\t\t| create new notes for a task. You can open it using opennotes\n" + 
                 "jarvis task deletenotes" + "\t\t| delete notes for a task\n" + 
                 "jarvis task opennotes" + "\t\t| open notes for a task. If the notes doesnt exit, try addnotes first\n" +
-                "jarvis task printnotes" + "\t\t| print the notes. ( you can also use catnotes instead of printnotes)\n"
+                "jarvis task printnotes" + "\t\t| print the notes. ( you can also use cat instead of printnotes)\n"
                 
                 );
         return true;
@@ -96,7 +96,7 @@ public class TaskHandler : CommandHandlerBase
             case "report":
                 selectedHander = new TaskReportCommand();
                 break;
-            case "catnotes":
+            case "cat":
             case "printnotes":
                 selectedHander = new TaskCatNotesCommand();
                 break;
@@ -861,8 +861,8 @@ public class TaskCatNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task catnotes <taskID> \t\t| Prints the notes of a task. You can also use printnotes instead of catnotes\n" +
-                "jarvis task printnotes <taskID> \t\t| Same as catnotes\n"
+                "jarvis task cat <taskID> \t\t| Prints the notes of a task. You can also use printnotes instead of cat\n" +
+                "jarvis task printnotes <taskID> \t\t| Same as cat\n"
                 );
         return true;
     }
