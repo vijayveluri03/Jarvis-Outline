@@ -40,9 +40,9 @@ public class TaskHandler : CommandHandlerBase
                 
                 "\n" +
                 "NOTES\n" + 
-                "jarvis task addnotes" + "\t\t| create new notes for a task. You can open it using editnotes\n" + 
+                "jarvis task createnotes" + "\t\t| create new notes for a task. You can open it using editnotes\n" + 
                 "jarvis task deletenotes" + "\t\t| delete notes for a task\n" + 
-                "jarvis task editnotes" + "\t\t| open notes for a task. If the notes doesnt exit, try addnotes first\n" +
+                "jarvis task editnotes" + "\t\t| open notes for a task. If the notes doesnt exit, try createnotes first\n" +
                 "jarvis task printnotes" + "\t\t| print the notes. ( you can also use cat instead of printnotes)\n"
                 
                 );
@@ -100,8 +100,8 @@ public class TaskHandler : CommandHandlerBase
             case "printnotes":
                 selectedHander = new TaskCatNotesCommand();
                 break;
-            case "addnotes":
-                selectedHander = new TaskAddNotesCommand();
+            case "createnotes":
+                selectedHander = new TaskCreateNotesCommand();
                 break;
             case "editnotes":
                 selectedHander = new TaskEditNotesCommand();
@@ -906,7 +906,7 @@ public class TaskEditNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task editnotes <taskID> \t\t| Opens notes for a task. If notes doesnt exist, you might want to try addnotes first!\n" + 
+                "jarvis task editnotes <taskID> \t\t| Opens notes for a task. If notes doesnt exist, you might want to try createnotes first!\n" + 
                 "jarvis task editnotes <taskID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
                 "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
                 );
@@ -952,9 +952,9 @@ public class TaskEditNotesCommand : CommandHandlerBase
     }
 }
 
-public class TaskAddNotesCommand : CommandHandlerBase
+public class TaskCreateNotesCommand : CommandHandlerBase
 {
-    public TaskAddNotesCommand()
+    public TaskCreateNotesCommand()
     {
 
     }
@@ -962,7 +962,7 @@ public class TaskAddNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task addnotes <taskID> \t\t| Creates new notes for a task. You can try editnotes after this!\n"
+                "jarvis task createnotes <taskID> \t\t| Creates new notes for a task. You can try editnotes after this!\n"
                 );
         return true;
     }

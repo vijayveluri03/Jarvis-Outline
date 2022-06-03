@@ -21,7 +21,7 @@ public class JournalHandler : CommandHandlerBase
         "jarvis journal show \t\t| to show details of a journal\n" +
         "\n" +
         "NOTES\n" + 
-        "jarvis journal editnotes" + "\t\t| open notes for a journal. If the notes doesnt exit, try addnotes first\n" +
+        "jarvis journal editnotes" + "\t\t| open notes for a journal. If the notes doesnt exit, try createnotes first\n" +
         "jarvis journal printnotes" + "\t\t| print the notes. ( you can also use cat instead of printnotes)\n"
 
         );
@@ -296,7 +296,7 @@ public class JournalEditNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis journal editnotes <journalID> \t\t| Opens notes for a journal. If notes doesnt exist, you might want to try addnotes first!\n" + 
+                "jarvis journal editnotes <journalID> \t\t| Opens notes for a journal. If notes doesnt exist, you might want to try createnotes first!\n" + 
                 "jarvis journal editnotes <journalID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
                 "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
                 );
