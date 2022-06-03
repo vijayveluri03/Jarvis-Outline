@@ -37,13 +37,14 @@ public class TaskHandler : CommandHandlerBase
                 "ADVANCED\n" +
                 "Jarvis task show \t\t| to show a task\n" +
                 "jarvis task report \t\t| to show all the work done in the last day/week\n" +
+                "Jarvis task edittitle \t\t| To edit the title of a task\n" +
                 
                 "\n" +
                 "NOTES\n" + 
-                "jarvis task addnotes" + "\t\t| create new notes for a task. You can open it using opennotes\n" + 
-                "jarvis task deletenotes" + "\t\t| delete notes for a task\n" + 
-                "jarvis task opennotes" + "\t\t| open notes for a task. If the notes doesnt exit, try addnotes first\n" +
-                "jarvis task printnotes" + "\t\t| print the notes. ( you can also use catnotes instead of printnotes)\n"
+                "jarvis task createnote" + "\t\t| create new notes for a task. You can open it using editnote\n" + 
+                "jarvis task deletenote" + "\t\t| delete notes for a task\n" + 
+                "jarvis task editnote" + "\t\t| open notes for a task. If the notes doesnt exit, try createnote first\n" +
+                "jarvis task printnote" + "\t\t| print the notes. ( you can also use cat instead of printnote)\n"
                 
                 );
         return true;
@@ -96,21 +97,24 @@ public class TaskHandler : CommandHandlerBase
             case "report":
                 selectedHander = new TaskReportCommand();
                 break;
-            case "catnotes":
-            case "printnotes":
+            case "cat":
+            case "printnote":
                 selectedHander = new TaskCatNotesCommand();
                 break;
-            case "addnotes":
-                selectedHander = new TaskAddNotesCommand();
+            case "createnote":
+                selectedHander = new TaskcreatenoteCommand();
                 break;
-            case "opennotes":
-                selectedHander = new TaskOpenNotesCommand();
+            case "editnote":
+                selectedHander = new TaskEditNoteCommand();
                 break;
-            case "deletenotes":
-                selectedHander = new TaskDeleteNotesCommand();
+            case "deletenote":
+                selectedHander = new TaskDeleteNoteCommand();
+                break;
+            case "edittitle":
+                selectedHander = new TaskEditTitleCommand();
                 break;
             default:
-                if(printErrors)
+                if (printErrors)
                     ConsoleWriter.Print("Invalid command. Try 'jarvis task --help' for more information.");
                 break;
         }
@@ -346,6 +350,45 @@ public class TaskStopCommand : CommandHandlerBase
     }
 }
 
+public class TaskEditTitleCommand : CommandHandlerBase
+{
+    public TaskEditTitleCommand()
+    {
+
+    }
+
+    protected override bool ShowHelp()
+    {
+        ConsoleWriter.Print("USAGE : \n" +
+                "jarvis task edittitle <taskID> <title> \t\t| task id is the ID of the task want to edit. Title being the new Title for the task\n"
+                );
+        return true;
+    }
+
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count != 2)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        string title = arguments_ReadOnly[1];
+
+        if (application.taskManager.DoesTaskExist(id))
+        {
+            application.taskManager.GetTask_Editable(id).title = title;
+            ConsoleWriter.Print("Task with id : {0} renamed to - {1}", id, title);
+        }
+        else
+            ConsoleWriter.Print("Task not found with id : " + id);
+
+        return true;
+    }
+}
+
 public class TaskActiveCommand : CommandHandlerBase
 {
     public TaskActiveCommand()
@@ -532,7 +575,7 @@ public class TaskListCommand : CommandHandlerBase
                         task.id,
                         (task.categories != null && task.categories.Length > 0 ? Utils.Conversions.ArrayToString(task.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                         task.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/)
-                            + (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTES + task.id) ? "+(N)" : ""),
+                            + (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + task.id) ? "+(N)" : ""),
                         (isInProgress ? "In Progress" : task.StatusString),
                         (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) + " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + " )")
                         ); ;
@@ -606,7 +649,7 @@ public class TaskShowCommand : CommandHandlerBase
                     (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") +
                     ("(" + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) +
                     " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + ")"),
-                    (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTES + task.id) ? "YES" : "NO")
+                    (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + task.id) ? "YES" : "NO")
                     );
 
             }
@@ -861,8 +904,8 @@ public class TaskCatNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task catnotes <taskID> \t\t| Prints the notes of a task. You can also use printnotes instead of catnotes\n" +
-                "jarvis task printnotes <taskID> \t\t| Same as catnotes\n"
+                "jarvis task cat <taskID> \t\t| Prints the notes of a task. You can also use printnote instead of cat\n" +
+                "jarvis task printnote <taskID> \t\t| Same as cat\n"
                 );
         return true;
     }
@@ -881,12 +924,12 @@ public class TaskCatNotesCommand : CommandHandlerBase
         
         if (application.taskManager.DoesTaskExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTES + id) )
+            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id) )
                 ConsoleWriter.Print("Notes not found for the task with id : {0}", id);
             else 
             {
                 ConsoleWriter.PrintInColor("NOTES :", application.DesignData.HighlightColorForText);
-                ConsoleWriter.PrintText(Utils.FileHandler.Read(JConstants.PATH_TO_TASKS_NOTES + id));
+                ConsoleWriter.PrintText(Utils.FileHandler.Read(JConstants.PATH_TO_TASKS_NOTE + id));
             }
         }
         else
@@ -896,9 +939,9 @@ public class TaskCatNotesCommand : CommandHandlerBase
     }
 }
 
-public class TaskOpenNotesCommand : CommandHandlerBase
+public class TaskEditNoteCommand : CommandHandlerBase
 {
-    public TaskOpenNotesCommand()
+    public TaskEditNoteCommand()
     {
 
     }
@@ -906,8 +949,9 @@ public class TaskOpenNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task opennotes <taskID> \t\t| Opens notes for a task. If notes doesnt exist, you might want to try addnotes first!\n" + 
-                "jarvis task opennotes <taskID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
+                "jarvis task editnote <taskID> \t\t| Opens notes for a task. If notes doesnt exist, you might want to try createnote first!\n" + 
+                "jarvis task editnote <taskID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
+                "jarvis task editnote <taskID> --append:<Message> \t\t| Added the message directly to the note\n" + 
                 "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
                 );
         return true;
@@ -932,15 +976,29 @@ public class TaskOpenNotesCommand : CommandHandlerBase
             return true;
         }
 
+        syntaxError = false;
+        string appendMessage = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--append", string.Empty, null, null, out syntaxError);
+
+        if (syntaxError)
+        {
+            ConsoleWriter.Print("Invalid syntax for --append argument.");
+            return true;
+        }
+
         if (application.taskManager.DoesTaskExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTES + id) )
+            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id) )
                 ConsoleWriter.Print("Notes not found for the task with id : {0}", id);
+            else if ( !appendMessage.IsEmpty() )
+            {
+                ConsoleWriter.Print("Message appended to the notes");
+                Utils.AppendToFile(JConstants.PATH_TO_TASKS_NOTE + id, appendMessage );
+            }
             else 
             {
                 ConsoleWriter.Print("Opening Notes");
                 Utils.OpenAFileInEditor(
-                    JConstants.PATH_TO_TASKS_NOTES + id, 
+                    JConstants.PATH_TO_TASKS_NOTE + id, 
                     externalProgram.IsEmpty() ? application.DesignData.defaultExternalEditor : externalProgram,
                     true /* wait for the program to end*/);
                 ConsoleWriter.Print("Closing Notes");
@@ -952,9 +1010,9 @@ public class TaskOpenNotesCommand : CommandHandlerBase
     }
 }
 
-public class TaskAddNotesCommand : CommandHandlerBase
+public class TaskcreatenoteCommand : CommandHandlerBase
 {
-    public TaskAddNotesCommand()
+    public TaskcreatenoteCommand()
     {
 
     }
@@ -962,7 +1020,7 @@ public class TaskAddNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task addnotes <taskID> \t\t| Creates new notes for a task. You can try opennotes after this!\n"
+                "jarvis task createnote <taskID> \t\t| Creates new notes for a task. You can try editnote after this!\n"
                 );
         return true;
     }
@@ -988,9 +1046,9 @@ public class TaskAddNotesCommand : CommandHandlerBase
 
         if (application.taskManager.DoesTaskExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTES + id) )
+            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id) )
             {
-                Utils.FileHandler.Create(JConstants.PATH_TO_TASKS_NOTES + id);
+                Utils.FileHandler.Create(JConstants.PATH_TO_TASKS_NOTE + id);
                 ConsoleWriter.Print("Notes created");
             }
             else
@@ -1003,9 +1061,9 @@ public class TaskAddNotesCommand : CommandHandlerBase
     }
 }
 
-public class TaskDeleteNotesCommand : CommandHandlerBase
+public class TaskDeleteNoteCommand : CommandHandlerBase
 {
-    public TaskDeleteNotesCommand()
+    public TaskDeleteNoteCommand()
     {
 
     }
@@ -1013,7 +1071,7 @@ public class TaskDeleteNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task deletenotes <taskID> \t\t| deletes the notes.\n"
+                "jarvis task deletenote <taskID> \t\t| deletes the notes.\n"
                 );
         return true;
     }
@@ -1031,9 +1089,9 @@ public class TaskDeleteNotesCommand : CommandHandlerBase
 
         if (application.taskManager.DoesTaskExist(id))
         {
-            if( Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTES + id) )
+            if( Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id) )
             {
-                Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTES + id);
+                Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id);
                 ConsoleWriter.Print("Notes deleted");
             }
             else

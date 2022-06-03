@@ -294,7 +294,6 @@ public static class Utils
         public static void Append(string path, string txt)
         {
             Assert(DoesFileExist(path));
-
             File.AppendAllText( path, txt);
         }
 
@@ -331,6 +330,11 @@ public static class Utils
             return true;
         }
         return false;
+    }
+
+    public static void AppendToFile( string filePath, string text, bool newline = true )
+    {
+        FileHandler.Append(filePath, newline ? "\n" + text : text );
     }
 
     public static void OpenAFileInEditor(string filePath, string editor = "vim", bool waitForTheProgramToEnd = false)

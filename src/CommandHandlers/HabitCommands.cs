@@ -23,12 +23,13 @@ public class HabitHandler : CommandHandlerBase
         "jarvis habit show \t\t| to show details of a habit\n" +
         "jarvis habit disable \t\t| to disable a habit\n" +
         "jarvis habit re-enable \t\t| to re-enable a disabled habit\n" + 
+        "Jarvis habit edittitle \t\t| To edit the title habit\n" +
         "\n" +
         "NOTES\n" + 
-        "jarvis habit addnotes" + "\t\t| create new notes for a habit. You can open it using opennotes\n" + 
-        "jarvis habit deletenotes" + "\t\t| delete notes for a habit\n" + 
-        "jarvis habit opennotes" + "\t\t| open notes for a habit. If the notes doesnt exit, try addnotes first\n" +
-        "jarvis habit printnotes" + "\t\t| print the notes. ( you can also use catnotes instead of printnotes)\n"
+        "jarvis habit createnote" + "\t\t| create new notes for a habit. You can open it using editnote\n" + 
+        "jarvis habit deletenote" + "\t\t| delete notes for a habit\n" + 
+        "jarvis habit editnote" + "\t\t| open notes for a habit. If the notes doesnt exit, try createnote first\n" +
+        "jarvis habit printnote" + "\t\t| print the notes. ( you can also use cat instead of printnote)\n"
 
         );
 
@@ -63,18 +64,21 @@ public class HabitHandler : CommandHandlerBase
             case "re-enable":
                 selectedHander = new HabitReEnableCommand();
                 break;
-                case "catnotes":
-            case "printnotes":
+                case "cat":
+            case "printnote":
                 selectedHander = new HabitCatNotesCommand();
                 break;
-            case "addnotes":
-                selectedHander = new HabitAddNotesCommand();
+            case "createnote":
+                selectedHander = new HabitcreatenoteCommand();
                 break;
-            case "opennotes":
-                selectedHander = new HabitOpenNotesCommand();
+            case "editnote":
+                selectedHander = new HabitEditNoteCommand();
                 break;
-            case "deletenotes":
-                selectedHander = new HabitDeleteNotesCommand();
+            case "deletenote":
+                selectedHander = new HabitDeleteNoteCommand();
+                break;
+            case "edittitle":
+                selectedHander = new HabitEditTitleCommand();
                 break;
             default:
                 if(printErrors)
@@ -228,7 +232,7 @@ public class HabitListCommand : CommandHandlerBase
                     habit.id,
                     (habit.categories != null && habit.categories.Length > 0 ? Utils.Conversions.ArrayToString(habit.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                     habit.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/)
-                        + (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTES + habit.id) ? "+(N)" : ""),
+                        + (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + habit.id) ? "+(N)" : ""),
                     habit.GetLastUpdatedOn().ShortForm(),
                     habit.GetStreak(),
                     habit.GetSuccessRate(),
@@ -505,7 +509,7 @@ public class HabitShowCommand : CommandHandlerBase
                 "AVG IN LAST MONTH : {5,-15}",
                 hb.GetStreak(),
                 hb.StatusStr,
-                (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTES + hb.id) ? "YES" : "NO"),
+                (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + hb.id) ? "YES" : "NO"),
                 hb.GetLastUpdatedOn().ShortFormWithDay(),
                 (hb.GetStreak() >= 7 && hb.GetEntryCount() >= 7 ? hb.GetEntryCount(7 - 1) / 7.0f : "Need more data to show this"),
                 (hb.GetStreak() >= 30 && hb.GetEntryCount() >= 30 ? hb.GetEntryCount(28 - 1) / 7.0f : "Need more data to show this")
@@ -532,6 +536,46 @@ public class HabitShowCommand : CommandHandlerBase
     }
 }
 
+public class HabitEditTitleCommand : CommandHandlerBase
+{
+    public HabitEditTitleCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        ConsoleWriter.Print("USAGE : \n" +
+                "jarvis habit edittitle <id> <new title> // this is to rename the habit title!"
+                );
+        return true;
+    }
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count != 2)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        string title = arguments_ReadOnly[1];
+
+        Habit hb = application.habitManager.GetHabit_ReadOnly(id);
+
+        if (hb == null)
+        {
+            ConsoleWriter.Print("Habit with id : {0} not found!", id);
+            return true;
+        }
+
+        application.habitManager.GetHabit_Editable(id).title = title;
+        ConsoleWriter.Print("Habit with id : {0} renamed to - {1}", id, title);
+
+        return true;
+    }
+}
+
 public class HabitCatNotesCommand : CommandHandlerBase
 {
     public HabitCatNotesCommand()
@@ -542,8 +586,8 @@ public class HabitCatNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit catnotes <habitID> \t\t| Prints the notes of a habit. You can also use printnotes instead of catnotes\n" +
-                "jarvis habit printnotes <habitID> \t\t| Same as catnotes\n"
+                "jarvis habit cat <habitID> \t\t| Prints the notes of a habit. You can also use printnote instead of cat\n" +
+                "jarvis habit printnote <habitID> \t\t| Same as cat\n"
                 );
         return true;
     }
@@ -562,12 +606,12 @@ public class HabitCatNotesCommand : CommandHandlerBase
         
         if (application.habitManager.DoesHabitExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTES + id) )
+            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + id) )
                 ConsoleWriter.Print("Notes not found for the habit with id : {0}", id);
             else 
             {
                 ConsoleWriter.PrintInColor("NOTES :", application.DesignData.HighlightColorForText);
-                ConsoleWriter.PrintText(Utils.FileHandler.Read(JConstants.PATH_TO_HABITS_NOTES + id));
+                ConsoleWriter.PrintText(Utils.FileHandler.Read(JConstants.PATH_TO_HABITS_NOTE + id));
             }
         }
         else
@@ -577,9 +621,9 @@ public class HabitCatNotesCommand : CommandHandlerBase
     }
 }
 
-public class HabitOpenNotesCommand : CommandHandlerBase
+public class HabitEditNoteCommand : CommandHandlerBase
 {
-    public HabitOpenNotesCommand()
+    public HabitEditNoteCommand()
     {
 
     }
@@ -587,8 +631,9 @@ public class HabitOpenNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit opennotes <habitID> \t\t| Opens notes for a habit. If notes doesnt exist, you might want to try addnotes first!\n" + 
-                "jarvis habit opennotes <habitID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
+                "jarvis habit editnote <habitID> \t\t| Opens notes for a habit. If notes doesnt exist, you might want to try createnote first!\n" + 
+                "jarvis habit editnote <habitID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
+                "jarvis habit editnote <habitID> --append:<Message> \t\t| Added the message directly to the note\n" + 
                 "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
                 );
         return true;
@@ -613,15 +658,29 @@ public class HabitOpenNotesCommand : CommandHandlerBase
             return true;
         }
 
+        syntaxError = false;
+        string appendMessage = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--append", string.Empty, null, null, out syntaxError);
+
+        if (syntaxError)
+        {
+            ConsoleWriter.Print("Invalid syntax for --append argument.");
+            return true;
+        }
+
         if (application.habitManager.DoesHabitExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTES + id) )
+            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + id) )
                 ConsoleWriter.Print("Notes not found for the habit with id : {0}", id);
+            else if ( !appendMessage.IsEmpty() )
+            {
+                ConsoleWriter.Print("Message appended to the notes");
+                Utils.AppendToFile(JConstants.PATH_TO_HABITS_NOTE+ id, appendMessage );
+            }
             else 
             {
                 ConsoleWriter.Print("Opening Notes");
                 Utils.OpenAFileInEditor(
-                    JConstants.PATH_TO_HABITS_NOTES + id, 
+                    JConstants.PATH_TO_HABITS_NOTE + id, 
                     externalProgram.IsEmpty() ? application.DesignData.defaultExternalEditor : externalProgram,
                     true /* wait for the program to end*/);
                 ConsoleWriter.Print("Closing Notes");
@@ -633,9 +692,9 @@ public class HabitOpenNotesCommand : CommandHandlerBase
     }
 }
 
-public class HabitAddNotesCommand : CommandHandlerBase
+public class HabitcreatenoteCommand : CommandHandlerBase
 {
-    public HabitAddNotesCommand()
+    public HabitcreatenoteCommand()
     {
 
     }
@@ -643,7 +702,7 @@ public class HabitAddNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit addnotes <habitID> \t\t| Creates new notes for a habit. You can try opennotes after this!\n"
+                "jarvis habit createnote <habitID> \t\t| Creates new notes for a habit. You can try editnote after this!\n"
                 );
         return true;
     }
@@ -669,9 +728,9 @@ public class HabitAddNotesCommand : CommandHandlerBase
 
         if (application.habitManager.DoesHabitExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTES + id) )
+            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + id) )
             {
-                Utils.FileHandler.Create(JConstants.PATH_TO_HABITS_NOTES + id);
+                Utils.FileHandler.Create(JConstants.PATH_TO_HABITS_NOTE + id);
                 ConsoleWriter.Print("Notes created");
             }
             else
@@ -684,9 +743,9 @@ public class HabitAddNotesCommand : CommandHandlerBase
     }
 }
 
-public class HabitDeleteNotesCommand : CommandHandlerBase
+public class HabitDeleteNoteCommand : CommandHandlerBase
 {
-    public HabitDeleteNotesCommand()
+    public HabitDeleteNoteCommand()
     {
 
     }
@@ -694,7 +753,7 @@ public class HabitDeleteNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit deletenotes <habitID> \t\t| deletes the notes.\n"
+                "jarvis habit deletenote <habitID> \t\t| deletes the notes.\n"
                 );
         return true;
     }
@@ -712,9 +771,9 @@ public class HabitDeleteNotesCommand : CommandHandlerBase
 
         if (application.habitManager.DoesHabitExist(id))
         {
-            if( Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTES + id) )
+            if( Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + id) )
             {
-                Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTES + id);
+                Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + id);
                 ConsoleWriter.Print("Notes deleted");
             }
             else
