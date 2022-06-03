@@ -23,10 +23,10 @@ namespace Jarvis
         public static string HABITS_FILENAME { get { return JConstants.PATH_TO_DATA + ("Habits.json"); } }
         public static string TASK_LOG_FILENAME { get { return JConstants.PATH_TO_DATA + ("TaskLog.json"); } }
 
-        public static string PATH_TO_TASKS_NOTES { get { return JConstants.PATH_TO_DATA + ("Tasks/"); } }
-        public static string PATH_TO_HABITS_NOTES { get { return JConstants.PATH_TO_DATA + ("Habits/"); } }
+        public static string PATH_TO_TASKS_NOTE { get { return JConstants.PATH_TO_DATA + ("Tasks/"); } }
+        public static string PATH_TO_HABITS_NOTE { get { return JConstants.PATH_TO_DATA + ("Habits/"); } }
         public static string PATH_TO_TASK_LOG_NOTES { get { return JConstants.PATH_TO_DATA + ("TaskLog/"); } }
-        public static string PATH_TO_JOURNAL_NOTES { get { return JConstants.PATH_TO_DATA + ("Journal/"); } }
+        public static string PATH_TO_JOURNAL_NOTE { get { return JConstants.PATH_TO_DATA + ("Journal/"); } }
 
         public static string DESIGNDATA_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Design-Template.json"); } }
         public static string TASKS_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Tasks-Template.json"); } }
