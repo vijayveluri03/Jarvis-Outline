@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Linq;
 
 
 public static class Utils
@@ -162,12 +163,12 @@ public static class Utils
 
             proc.StartInfo.Arguments = (runSilently ? "/C" : "/K") + " " + command;
             proc.StartInfo.UseShellExecute = createNewWindow;   // this will run in a seperate window 
-            proc.StartInfo.RedirectStandardOutput = !printOutput;   
+            proc.StartInfo.RedirectStandardOutput = !printOutput;
             //proc.StartInfo.CreateNoWindow = !createNewWindow; // this is not working as expected 
-            
+
             proc.Start();
 
-            if ( waitForProgramToExit )
+            if (waitForProgramToExit)
                 proc.WaitForExit();
 
             //ConsoleWriter.Print("EXITTED");
@@ -178,7 +179,7 @@ public static class Utils
                 Console.WriteLine(proc.StandardOutput.ReadLine());
 #endif
         }
-        public static void ExecuteCommand(string program, string arguments, bool printOutput = true, bool waitForProgramToExit = false )
+        public static void ExecuteCommand(string program, string arguments, bool printOutput = true, bool waitForProgramToExit = false)
         {
             Process proc = new System.Diagnostics.Process();
 
@@ -190,12 +191,12 @@ public static class Utils
 
             proc.StartInfo.Arguments = arguments;
             proc.StartInfo.UseShellExecute = true;   // this will run in a seperate window 
-            proc.StartInfo.RedirectStandardOutput = !printOutput;   
+            proc.StartInfo.RedirectStandardOutput = !printOutput;
             //proc.StartInfo.CreateNoWindow = !createNewWindow; // this is not working as expected 
-            
+
             proc.Start();
 
-            if ( waitForProgramToExit )
+            if (waitForProgramToExit)
                 proc.WaitForExit();
 
             /* todo - This hangs atm - This is supposed to print the details which are sent to Standard out */
@@ -203,6 +204,47 @@ public static class Utils
             while ( printOutput && !proc.StandardOutput.EndOfStream)
                 Console.WriteLine(proc.StandardOutput.ReadLine());
 #endif
+        }
+        public static string[] SplitCommandLine(string commandLine)
+        {
+            bool inQuotes = false;
+
+            var args = Split(commandLine, c =>
+                                     {
+                                         if (c == '\"')
+                                             inQuotes = !inQuotes;
+
+                                         return !inQuotes && c == ' ';
+                                     })
+                              .Select(arg => TrimMatchingQuotes(arg.Trim(), '\"'))
+                              .Where(arg => !string.IsNullOrEmpty(arg));
+            return args.ToArray();
+        }
+        private static string TrimMatchingQuotes(string input, char quote)
+        {
+            if ((input.Length >= 2) &&
+                (input[0] == quote) && (input[input.Length - 1] == quote))
+                return input.Substring(1, input.Length - 2);
+
+            return input;
+        }
+        private static List<string> Split(string str,
+                                                Func<char, bool> controller)
+        {
+            int nextPiece = 0;
+            List<string> args = new List<string>();
+
+            for (int c = 0; c < str.Length; c++)
+            {
+                if (controller(str[c]))
+                {
+                    args.Add( str.Substring(nextPiece, c - nextPiece) );
+                    nextPiece = c + 1;
+                }
+            }
+
+            args.Add( str.Substring(nextPiece) );
+            return args;
         }
     }
 

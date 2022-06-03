@@ -25,22 +25,36 @@ class Program
         }
         ConsoleWriter.Print("****** DEBUG ******");
 #endif
+        bool customCLI = args.Contains<string>("--enter");
 
         ConsoleWriter.Initialize();
         Jarvis.JApplication app = new Jarvis.JApplication();
         app.Initialize();
-        
-        List<List<string>> commands = SplitSingleCompositeCommandToSimpleOnes(args);
 
-        foreach (var command in commands)
+        do
         {
-            List<string>[] arguments = SplitCommandIntoManditoryAndOptional(command);
-            Utils.Assert( arguments.Length == 2);   // 0 being manditory and 1 being optional
-            
-            ConsoleWriter.EmptyLine();
+            if (customCLI)
+            {
+                ConsoleWriter.EmptyLine();
 
-            (new CommandSelector()).TryHandle(arguments[0] /*Manditory arguments*/, arguments[1] /*Optional*/, app);
-        }
+                string customJarvisCommand = Utils.CLI.GetUserInputString("JARVIS>", ""); ;
+                if (customJarvisCommand.ToLower() == "exit")
+                    break;
+
+                args = Utils.CLI.SplitCommandLine(customJarvisCommand);
+            }
+
+            List<List<string>> commands = SplitSingleCompositeCommandToSimpleOnes(args);
+            foreach (var command in commands)
+            {
+                List<string>[] arguments = SplitCommandIntoManditoryAndOptional(command);
+                Utils.Assert(arguments.Length == 2);   // 0 being manditory and 1 being optional
+
+                ConsoleWriter.EmptyLine();
+
+                (new CommandSelector()).TryHandle(arguments[0] /*Manditory arguments*/, arguments[1] /*Optional*/, app);
+            }
+        } while( customCLI);
 
         app.Save();
 
@@ -88,35 +102,6 @@ class Program
         }
         return new []{ valueArguments, optionalArguments };
     }
-    public static IEnumerable<string> SplitCommandLine(string commandLine)
-    {
-        bool inQuotes = false;
 
-        return Split(commandLine, c =>
-                                 {
-                                     if (c == '\"')
-                                         inQuotes = !inQuotes;
-
-                                     return !inQuotes && c == ' ';
-                                 })
-                          .Select(arg => arg.Trim().TrimMatchingQuotes('\"'))
-                          .Where(arg => !string.IsNullOrEmpty(arg));
-    }
-    public static IEnumerable<string> Split(string str,
-                                            Func<char, bool> controller)
-    {
-        int nextPiece = 0;
-
-        for (int c = 0; c < str.Length; c++)
-        {
-            if (controller(str[c]))
-            {
-                yield return str.Substring(nextPiece, c - nextPiece);
-                nextPiece = c + 1;
-            }
-        }
-
-        yield return str.Substring(nextPiece);
-    }
 
 }

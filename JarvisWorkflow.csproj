@@ -3,7 +3,7 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <AssemblyName>JarvisCustomCLI</AssemblyName>
+    <AssemblyName>Jarvis</AssemblyName>
     <Configurations>Debug;Release;ReleaseCLI;DebugCLI</Configurations>
   </PropertyGroup>
 
@@ -12,11 +12,11 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='ReleaseCLI|AnyCPU'">
-    <DefineConstants>TRACE;RELEASE_LOG,JARVIS_CUSTOM_CLI</DefineConstants>
+    <DefineConstants>TRACE;RELEASE_LOG,CUSTOM_CLI</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='DebugCLI|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;JARVIS_CUSTOM_CLI</DefineConstants>
+    <DefineConstants>TRACE;DEBUG;CUSTOM_CLI</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
