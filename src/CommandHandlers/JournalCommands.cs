@@ -21,8 +21,9 @@ public class JournalHandler : CommandHandlerBase
         "jarvis journal show \t\t| to show details of a journal\n" +
         "\n" +
         "NOTES\n" + 
-        "jarvis journal editnotes" + "\t\t| open notes for a journal. If the notes doesnt exit, try createnotes first\n" +
-        "jarvis journal printnotes" + "\t\t| print the notes. ( you can also use cat instead of printnotes)\n"
+        "jarvis journal editnote" + "\t\t| open notes for a journal. If the notes doesnt exit, try createnote first\n" +
+        "jarvis journal appendnote" + "\t\t| Append notes to the existing one. \n" +
+        "jarvis journal printnote" + "\t\t| print the notes. ( you can also use cat instead of printnote)\n"
 
         );
 
@@ -46,11 +47,11 @@ public class JournalHandler : CommandHandlerBase
                 selectedHander = new JournalShowCommand();
                 break;
             case "cat":
-            case "printnotes":
+            case "printnote":
                 selectedHander = new JournalCatNotesCommand();
                 break;
-            case "editnotes":
-                selectedHander = new JournalEditNotesCommand();
+            case "editnote":
+                selectedHander = new JournalEditNoteCommand();
                 break;
             default:
                 if(printErrors)
@@ -95,7 +96,7 @@ public class JournalAddCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis journal add <title> \t\t| this will create a new journal entry. You can add to that entry using 'editnotes'" 
+                "jarvis journal add <title> \t\t| this will create a new journal entry. You can add to that entry using 'editnote'" 
                 );
         return true;
     }
@@ -251,8 +252,8 @@ public class JournalCatNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis journal cat <journalID> \t\t| Prints the notes of a journal. You can also use printnotes instead of cat\n" +
-                "jarvis journal printnotes <journalID> \t\t| Same as cat\n"
+                "jarvis journal cat <journalID> \t\t| Prints the notes of a journal. You can also use printnote instead of cat\n" +
+                "jarvis journal printnote <journalID> \t\t| Same as cat\n"
                 );
         return true;
     }
@@ -286,9 +287,9 @@ public class JournalCatNotesCommand : CommandHandlerBase
     }
 }
 
-public class JournalEditNotesCommand : CommandHandlerBase
+public class JournalEditNoteCommand : CommandHandlerBase
 {
-    public JournalEditNotesCommand()
+    public JournalEditNoteCommand()
     {
 
     }
@@ -296,8 +297,8 @@ public class JournalEditNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis journal editnotes <journalID> \t\t| Opens notes for a journal. If notes doesnt exist, you might want to try createnotes first!\n" + 
-                "jarvis journal editnotes <journalID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
+                "jarvis journal editnote <journalID> \t\t| Opens notes for a journal. If notes doesnt exist, you might want to try createnote first!\n" + 
+                "jarvis journal editnote <journalID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
                 "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
                 );
         return true;

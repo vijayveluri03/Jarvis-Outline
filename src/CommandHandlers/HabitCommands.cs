@@ -25,10 +25,11 @@ public class HabitHandler : CommandHandlerBase
         "jarvis habit re-enable \t\t| to re-enable a disabled habit\n" + 
         "\n" +
         "NOTES\n" + 
-        "jarvis habit createnotes" + "\t\t| create new notes for a habit. You can open it using editnotes\n" + 
-        "jarvis habit deletenotes" + "\t\t| delete notes for a habit\n" + 
-        "jarvis habit editnotes" + "\t\t| open notes for a habit. If the notes doesnt exit, try createnotes first\n" +
-        "jarvis habit printnotes" + "\t\t| print the notes. ( you can also use cat instead of printnotes)\n"
+        "jarvis habit createnote" + "\t\t| create new notes for a habit. You can open it using editnote\n" + 
+        "jarvis habit deletenote" + "\t\t| delete notes for a habit\n" + 
+        "jarvis habit editnote" + "\t\t| open notes for a habit. If the notes doesnt exit, try createnote first\n" +
+        "jarvis habit appendnote" + "\t\t| Append notes to the existing one. If the notes doesnt exit, try createnote first\n" +
+        "jarvis habit printnote" + "\t\t| print the notes. ( you can also use cat instead of printnote)\n"
 
         );
 
@@ -64,17 +65,17 @@ public class HabitHandler : CommandHandlerBase
                 selectedHander = new HabitReEnableCommand();
                 break;
                 case "cat":
-            case "printnotes":
+            case "printnote":
                 selectedHander = new HabitCatNotesCommand();
                 break;
-            case "createnotes":
-                selectedHander = new HabitCreateNotesCommand();
+            case "createnote":
+                selectedHander = new HabitcreatenoteCommand();
                 break;
-            case "editnotes":
-                selectedHander = new HabitEditNotesCommand();
+            case "editnote":
+                selectedHander = new HabitEditNoteCommand();
                 break;
-            case "deletenotes":
-                selectedHander = new HabitDeleteNotesCommand();
+            case "deletenote":
+                selectedHander = new HabitDeleteNoteCommand();
                 break;
             default:
                 if(printErrors)
@@ -542,8 +543,8 @@ public class HabitCatNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit cat <habitID> \t\t| Prints the notes of a habit. You can also use printnotes instead of cat\n" +
-                "jarvis habit printnotes <habitID> \t\t| Same as cat\n"
+                "jarvis habit cat <habitID> \t\t| Prints the notes of a habit. You can also use printnote instead of cat\n" +
+                "jarvis habit printnote <habitID> \t\t| Same as cat\n"
                 );
         return true;
     }
@@ -577,9 +578,9 @@ public class HabitCatNotesCommand : CommandHandlerBase
     }
 }
 
-public class HabitEditNotesCommand : CommandHandlerBase
+public class HabitEditNoteCommand : CommandHandlerBase
 {
-    public HabitEditNotesCommand()
+    public HabitEditNoteCommand()
     {
 
     }
@@ -587,8 +588,8 @@ public class HabitEditNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit editnotes <habitID> \t\t| Opens notes for a habit. If notes doesnt exist, you might want to try createnotes first!\n" + 
-                "jarvis habit editnotes <habitID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
+                "jarvis habit editnote <habitID> \t\t| Opens notes for a habit. If notes doesnt exist, you might want to try createnote first!\n" + 
+                "jarvis habit editnote <habitID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
                 "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
                 );
         return true;
@@ -633,9 +634,9 @@ public class HabitEditNotesCommand : CommandHandlerBase
     }
 }
 
-public class HabitCreateNotesCommand : CommandHandlerBase
+public class HabitcreatenoteCommand : CommandHandlerBase
 {
-    public HabitCreateNotesCommand()
+    public HabitcreatenoteCommand()
     {
 
     }
@@ -643,7 +644,7 @@ public class HabitCreateNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit createnotes <habitID> \t\t| Creates new notes for a habit. You can try editnotes after this!\n"
+                "jarvis habit createnote <habitID> \t\t| Creates new notes for a habit. You can try editnote after this!\n"
                 );
         return true;
     }
@@ -684,9 +685,9 @@ public class HabitCreateNotesCommand : CommandHandlerBase
     }
 }
 
-public class HabitDeleteNotesCommand : CommandHandlerBase
+public class HabitDeleteNoteCommand : CommandHandlerBase
 {
-    public HabitDeleteNotesCommand()
+    public HabitDeleteNoteCommand()
     {
 
     }
@@ -694,7 +695,7 @@ public class HabitDeleteNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit deletenotes <habitID> \t\t| deletes the notes.\n"
+                "jarvis habit deletenote <habitID> \t\t| deletes the notes.\n"
                 );
         return true;
     }

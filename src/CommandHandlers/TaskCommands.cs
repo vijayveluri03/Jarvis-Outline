@@ -40,10 +40,11 @@ public class TaskHandler : CommandHandlerBase
                 
                 "\n" +
                 "NOTES\n" + 
-                "jarvis task createnotes" + "\t\t| create new notes for a task. You can open it using editnotes\n" + 
-                "jarvis task deletenotes" + "\t\t| delete notes for a task\n" + 
-                "jarvis task editnotes" + "\t\t| open notes for a task. If the notes doesnt exit, try createnotes first\n" +
-                "jarvis task printnotes" + "\t\t| print the notes. ( you can also use cat instead of printnotes)\n"
+                "jarvis task createnote" + "\t\t| create new notes for a task. You can open it using editnote\n" + 
+                "jarvis task deletenote" + "\t\t| delete notes for a task\n" + 
+                "jarvis task editnote" + "\t\t| open notes for a task. If the notes doesnt exit, try createnote first\n" +
+                "jarvis habit appendnote" + "\t\t| Append notes to the existing one. If the notes doesnt exit, try createnote first\n" +
+                "jarvis task printnote" + "\t\t| print the notes. ( you can also use cat instead of printnote)\n"
                 
                 );
         return true;
@@ -97,17 +98,17 @@ public class TaskHandler : CommandHandlerBase
                 selectedHander = new TaskReportCommand();
                 break;
             case "cat":
-            case "printnotes":
+            case "printnote":
                 selectedHander = new TaskCatNotesCommand();
                 break;
-            case "createnotes":
-                selectedHander = new TaskCreateNotesCommand();
+            case "createnote":
+                selectedHander = new TaskcreatenoteCommand();
                 break;
-            case "editnotes":
-                selectedHander = new TaskEditNotesCommand();
+            case "editnote":
+                selectedHander = new TaskEditNoteCommand();
                 break;
-            case "deletenotes":
-                selectedHander = new TaskDeleteNotesCommand();
+            case "deletenote":
+                selectedHander = new TaskDeleteNoteCommand();
                 break;
             default:
                 if(printErrors)
@@ -861,8 +862,8 @@ public class TaskCatNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task cat <taskID> \t\t| Prints the notes of a task. You can also use printnotes instead of cat\n" +
-                "jarvis task printnotes <taskID> \t\t| Same as cat\n"
+                "jarvis task cat <taskID> \t\t| Prints the notes of a task. You can also use printnote instead of cat\n" +
+                "jarvis task printnote <taskID> \t\t| Same as cat\n"
                 );
         return true;
     }
@@ -896,9 +897,9 @@ public class TaskCatNotesCommand : CommandHandlerBase
     }
 }
 
-public class TaskEditNotesCommand : CommandHandlerBase
+public class TaskEditNoteCommand : CommandHandlerBase
 {
-    public TaskEditNotesCommand()
+    public TaskEditNoteCommand()
     {
 
     }
@@ -906,8 +907,8 @@ public class TaskEditNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task editnotes <taskID> \t\t| Opens notes for a task. If notes doesnt exist, you might want to try createnotes first!\n" + 
-                "jarvis task editnotes <taskID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
+                "jarvis task editnote <taskID> \t\t| Opens notes for a task. If notes doesnt exist, you might want to try createnote first!\n" + 
+                "jarvis task editnote <taskID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
                 "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
                 );
         return true;
@@ -952,9 +953,9 @@ public class TaskEditNotesCommand : CommandHandlerBase
     }
 }
 
-public class TaskCreateNotesCommand : CommandHandlerBase
+public class TaskcreatenoteCommand : CommandHandlerBase
 {
-    public TaskCreateNotesCommand()
+    public TaskcreatenoteCommand()
     {
 
     }
@@ -962,7 +963,7 @@ public class TaskCreateNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task createnotes <taskID> \t\t| Creates new notes for a task. You can try editnotes after this!\n"
+                "jarvis task createnote <taskID> \t\t| Creates new notes for a task. You can try editnote after this!\n"
                 );
         return true;
     }
@@ -1003,9 +1004,9 @@ public class TaskCreateNotesCommand : CommandHandlerBase
     }
 }
 
-public class TaskDeleteNotesCommand : CommandHandlerBase
+public class TaskDeleteNoteCommand : CommandHandlerBase
 {
-    public TaskDeleteNotesCommand()
+    public TaskDeleteNoteCommand()
     {
 
     }
@@ -1013,7 +1014,7 @@ public class TaskDeleteNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task deletenotes <taskID> \t\t| deletes the notes.\n"
+                "jarvis task deletenote <taskID> \t\t| deletes the notes.\n"
                 );
         return true;
     }
