@@ -25,9 +25,9 @@ public class HabitHandler : CommandHandlerBase
         "jarvis habit re-enable \t\t| to re-enable a disabled habit\n" + 
         "\n" +
         "NOTES\n" + 
-        "jarvis habit addnotes" + "\t\t| create new notes for a habit. You can open it using opennotes\n" + 
+        "jarvis habit addnotes" + "\t\t| create new notes for a habit. You can open it using editnotes\n" + 
         "jarvis habit deletenotes" + "\t\t| delete notes for a habit\n" + 
-        "jarvis habit opennotes" + "\t\t| open notes for a habit. If the notes doesnt exit, try addnotes first\n" +
+        "jarvis habit editnotes" + "\t\t| open notes for a habit. If the notes doesnt exit, try addnotes first\n" +
         "jarvis habit printnotes" + "\t\t| print the notes. ( you can also use cat instead of printnotes)\n"
 
         );
@@ -70,8 +70,8 @@ public class HabitHandler : CommandHandlerBase
             case "addnotes":
                 selectedHander = new HabitAddNotesCommand();
                 break;
-            case "opennotes":
-                selectedHander = new HabitOpenNotesCommand();
+            case "editnotes":
+                selectedHander = new HabitEditNotesCommand();
                 break;
             case "deletenotes":
                 selectedHander = new HabitDeleteNotesCommand();
@@ -577,9 +577,9 @@ public class HabitCatNotesCommand : CommandHandlerBase
     }
 }
 
-public class HabitOpenNotesCommand : CommandHandlerBase
+public class HabitEditNotesCommand : CommandHandlerBase
 {
-    public HabitOpenNotesCommand()
+    public HabitEditNotesCommand()
     {
 
     }
@@ -587,8 +587,8 @@ public class HabitOpenNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit opennotes <habitID> \t\t| Opens notes for a habit. If notes doesnt exist, you might want to try addnotes first!\n" + 
-                "jarvis habit opennotes <habitID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
+                "jarvis habit editnotes <habitID> \t\t| Opens notes for a habit. If notes doesnt exist, you might want to try addnotes first!\n" + 
+                "jarvis habit editnotes <habitID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
                 "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
                 );
         return true;
@@ -643,7 +643,7 @@ public class HabitAddNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit addnotes <habitID> \t\t| Creates new notes for a habit. You can try opennotes after this!\n"
+                "jarvis habit addnotes <habitID> \t\t| Creates new notes for a habit. You can try editnotes after this!\n"
                 );
         return true;
     }

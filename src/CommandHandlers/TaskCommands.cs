@@ -40,9 +40,9 @@ public class TaskHandler : CommandHandlerBase
                 
                 "\n" +
                 "NOTES\n" + 
-                "jarvis task addnotes" + "\t\t| create new notes for a task. You can open it using opennotes\n" + 
+                "jarvis task addnotes" + "\t\t| create new notes for a task. You can open it using editnotes\n" + 
                 "jarvis task deletenotes" + "\t\t| delete notes for a task\n" + 
-                "jarvis task opennotes" + "\t\t| open notes for a task. If the notes doesnt exit, try addnotes first\n" +
+                "jarvis task editnotes" + "\t\t| open notes for a task. If the notes doesnt exit, try addnotes first\n" +
                 "jarvis task printnotes" + "\t\t| print the notes. ( you can also use cat instead of printnotes)\n"
                 
                 );
@@ -103,8 +103,8 @@ public class TaskHandler : CommandHandlerBase
             case "addnotes":
                 selectedHander = new TaskAddNotesCommand();
                 break;
-            case "opennotes":
-                selectedHander = new TaskOpenNotesCommand();
+            case "editnotes":
+                selectedHander = new TaskEditNotesCommand();
                 break;
             case "deletenotes":
                 selectedHander = new TaskDeleteNotesCommand();
@@ -896,9 +896,9 @@ public class TaskCatNotesCommand : CommandHandlerBase
     }
 }
 
-public class TaskOpenNotesCommand : CommandHandlerBase
+public class TaskEditNotesCommand : CommandHandlerBase
 {
-    public TaskOpenNotesCommand()
+    public TaskEditNotesCommand()
     {
 
     }
@@ -906,8 +906,8 @@ public class TaskOpenNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task opennotes <taskID> \t\t| Opens notes for a task. If notes doesnt exist, you might want to try addnotes first!\n" + 
-                "jarvis task opennotes <taskID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
+                "jarvis task editnotes <taskID> \t\t| Opens notes for a task. If notes doesnt exist, you might want to try addnotes first!\n" + 
+                "jarvis task editnotes <taskID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
                 "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
                 );
         return true;
@@ -962,7 +962,7 @@ public class TaskAddNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task addnotes <taskID> \t\t| Creates new notes for a task. You can try opennotes after this!\n"
+                "jarvis task addnotes <taskID> \t\t| Creates new notes for a task. You can try editnotes after this!\n"
                 );
         return true;
     }

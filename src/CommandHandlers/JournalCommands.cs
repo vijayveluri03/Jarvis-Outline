@@ -21,7 +21,7 @@ public class JournalHandler : CommandHandlerBase
         "jarvis journal show \t\t| to show details of a journal\n" +
         "\n" +
         "NOTES\n" + 
-        "jarvis journal opennotes" + "\t\t| open notes for a journal. If the notes doesnt exit, try addnotes first\n" +
+        "jarvis journal editnotes" + "\t\t| open notes for a journal. If the notes doesnt exit, try addnotes first\n" +
         "jarvis journal printnotes" + "\t\t| print the notes. ( you can also use cat instead of printnotes)\n"
 
         );
@@ -49,8 +49,8 @@ public class JournalHandler : CommandHandlerBase
             case "printnotes":
                 selectedHander = new JournalCatNotesCommand();
                 break;
-            case "opennotes":
-                selectedHander = new JournalOpenNotesCommand();
+            case "editnotes":
+                selectedHander = new JournalEditNotesCommand();
                 break;
             default:
                 if(printErrors)
@@ -95,7 +95,7 @@ public class JournalAddCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis journal add <title> \t\t| this will create a new journal entry. You can add to that entry using 'opennotes'" 
+                "jarvis journal add <title> \t\t| this will create a new journal entry. You can add to that entry using 'editnotes'" 
                 );
         return true;
     }
@@ -286,9 +286,9 @@ public class JournalCatNotesCommand : CommandHandlerBase
     }
 }
 
-public class JournalOpenNotesCommand : CommandHandlerBase
+public class JournalEditNotesCommand : CommandHandlerBase
 {
-    public JournalOpenNotesCommand()
+    public JournalEditNotesCommand()
     {
 
     }
@@ -296,8 +296,8 @@ public class JournalOpenNotesCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         ConsoleWriter.Print("USAGE : \n" +
-                "jarvis journal opennotes <journalID> \t\t| Opens notes for a journal. If notes doesnt exist, you might want to try addnotes first!\n" + 
-                "jarvis journal opennotes <journalID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
+                "jarvis journal editnotes <journalID> \t\t| Opens notes for a journal. If notes doesnt exist, you might want to try addnotes first!\n" + 
+                "jarvis journal editnotes <journalID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
                 "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
                 );
         return true;
