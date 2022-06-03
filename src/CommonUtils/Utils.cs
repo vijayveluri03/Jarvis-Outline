@@ -1,10 +1,11 @@
-﻿using System;
+﻿#define FILE_CACHE
+
+using System;
 using System.IO;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Linq;
-
 
 public static class Utils
 {
@@ -36,17 +37,16 @@ public static class Utils
                 return defaultInput;
             return input;
         }
+        
         public static string GetUserInputString(string message, ConsoleColor color, string defaultInput = "")
         {
             if (!string.IsNullOrEmpty(defaultInput))
                 message += "( defaults to '" + defaultInput + "')";
 
             ConsoleWriter.PushColor(color);
-
             ConsoleWriter.PrintWithOutLineBreak(message);
-            string input = Console.ReadLine();
-
             ConsoleWriter.PopColor();
+            string input = Console.ReadLine();
 
             if (string.IsNullOrEmpty(input) && !string.IsNullOrEmpty(defaultInput))
                 return defaultInput;
@@ -310,9 +310,29 @@ public static class Utils
 
     public static class FileHandler
     {
+        private static Dictionary<string, bool> fileExistanceCache = new Dictionary<string, bool>();
         public static bool DoesFileExist(string path)
         {
-            return File.Exists(path);
+#if FILE_CACHE
+            if (fileExistanceCache.ContainsKey(path))
+                return fileExistanceCache[path];
+#endif
+
+#if DEBUG
+            ConsoleWriter.Print("File operation!");
+#endif
+            if (File.Exists(path))
+            {
+#if FILE_CACHE
+                fileExistanceCache.Add(path, true);
+#endif
+                return true;
+            }
+#if FILE_CACHE
+            fileExistanceCache.Add(path, false);
+#endif
+
+            return false;
         }
 
         public static bool Create(string path, bool overwriteIfExists = false)
@@ -320,8 +340,17 @@ public static class Utils
             if (DoesFileExist(path) && !overwriteIfExists)
                 return false;
 
+#if DEBUG
+            ConsoleWriter.Print("File operation!");
+#endif
+
             StreamWriter stream = File.CreateText(path);
             stream.Close();
+
+#if FILE_CACHE
+            fileExistanceCache[path] = true;
+#endif
+
             return true;
         }
 
@@ -330,25 +359,48 @@ public static class Utils
             if (!DoesFileExist(path))
                 return string.Empty;
 
+#if DEBUG
+            ConsoleWriter.Print("File operation!");
+#endif
+
             return File.ReadAllText(path);
         }
 
         public static void Append(string path, string txt)
         {
             Assert(DoesFileExist(path));
+
+#if DEBUG
+            ConsoleWriter.Print("File operation!");
+#endif
+
             File.AppendAllText( path, txt);
         }
 
         public static void Clean (string path)
         {
             Assert(DoesFileExist(path));
+
+#if DEBUG
+            ConsoleWriter.Print("File operation!");
+#endif
+
             File.WriteAllText(path, string.Empty);
         }
 
         public static void Remove (string path)
         {
             Assert(DoesFileExist(path));
+
+#if DEBUG
+            ConsoleWriter.Print("File operation!");
+#endif
+
             File.Delete(path);
+
+#if FILE_CACHE
+            fileExistanceCache[path] = false;
+#endif
         }
 
     }

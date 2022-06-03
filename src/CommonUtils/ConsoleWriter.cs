@@ -25,6 +25,8 @@ public static class ConsoleWriter
     {
         Utils.Assert(foregroundTextColorStack.Count > 0);
         foregroundTextColorStack.Pop();
+        if( foregroundTextColorStack.Count > 0 )
+            Console.ForegroundColor = foregroundTextColorStack.Peek();
     }
 
     // Print message in console

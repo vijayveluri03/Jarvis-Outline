@@ -12,7 +12,8 @@ class Program
     {
 #if DEBUG
         //string debugCommand = "task list & task report";
-        string debugCommand = "game snake";
+        //string debugCommand = "game snake";
+        string debugCommand = "--enter";
         //string debugCommand = "habit show 1";
         //string debugCommand = "task list --cat:asdf:fefe";
         args = debugCommand.Split(' ');
@@ -37,6 +38,7 @@ class Program
 
         bool customCLI = args.Contains<string>("--enter") || args.Contains<string>("--doyourthing");
         bool firstTime = true;
+        var commandSelector = new CommandSelector();
 
         ConsoleWriter.Initialize();
         Jarvis.JApplication app = new Jarvis.JApplication();
@@ -62,7 +64,7 @@ class Program
                     firstTime = false;
                 }
 
-                string customJarvisCommand = Utils.CLI.GetUserInputString("JARVIS>");
+                string customJarvisCommand = Utils.CLI.GetUserInputString("JARVIS>", app.DesignData.HighlightColorForText);
                 if (customJarvisCommand.ToLower() == "exit")
                     break;
 
@@ -86,7 +88,7 @@ class Program
 
                 ConsoleWriter.EmptyLine();
 
-                (new CommandSelector()).TryHandle(arguments[0] /*Manditory arguments*/, arguments[1] /*Optional*/, app);
+                commandSelector.TryHandle(arguments[0] /*Manditory arguments*/, arguments[1] /*Optional*/, app);
             }
         } while( customCLI);
 
