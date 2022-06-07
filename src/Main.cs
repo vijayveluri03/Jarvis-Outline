@@ -68,6 +68,9 @@ class Program
                 if (customJarvisCommand.ToLower() == "exit")
                     break;
 
+                if (customJarvisCommand.ToLower() == "save")
+                    app.Save();
+
                 args = Utils.CLI.SplitCommandLine(customJarvisCommand);
             }
 

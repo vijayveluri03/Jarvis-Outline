@@ -69,9 +69,12 @@ public class HabitHandler : CommandHandlerBase
                 selectedHander = new HabitCatNotesCommand();
                 break;
             case "createnote":
+            case "newnote":
+            case "addnote":
                 selectedHander = new HabitcreatenoteCommand();
                 break;
             case "editnote":
+            case "opennote":
                 selectedHander = new HabitEditNoteCommand();
                 break;
             case "deletenote":

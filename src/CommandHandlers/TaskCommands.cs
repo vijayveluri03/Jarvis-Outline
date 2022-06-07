@@ -102,9 +102,12 @@ public class TaskHandler : CommandHandlerBase
                 selectedHander = new TaskCatNotesCommand();
                 break;
             case "createnote":
+            case "newnote":
+            case "addnote":
                 selectedHander = new TaskcreatenoteCommand();
                 break;
             case "editnote":
+            case "opennote":
                 selectedHander = new TaskEditNoteCommand();
                 break;
             case "deletenote":
