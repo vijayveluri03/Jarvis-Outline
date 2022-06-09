@@ -15,9 +15,9 @@ public class GameHandler : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "Jarvis game snake  \t\t| To play a simple game\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+                SharedLogic.PrintHelp("Jarvis game snake ", "To play a simple game\n");
+                
         return true;
     }
 
@@ -73,9 +73,8 @@ public class HungryEkansCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis game snake\n" 
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis game snake");
         return true;
     }
 

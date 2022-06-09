@@ -15,17 +15,18 @@ public class JournalHandler : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-        "Jarvis journal add  \t\t| To add a journal\n" +
-        "Jarvis journal list \t\t| to list all the journals\n" +
-        "jarvis journal show \t\t| to show details of a journal\n" +
-        "Jarvis journal edittitle  \t\t| to edit the title of journal\n" +
-        "\n" +
-        "NOTES\n" + 
-        "jarvis journal editnote" + "\t\t| open notes for a journal. If the notes doesnt exit, try createnote first\n" +
-        "jarvis journal printnote" + "\t\t| print the notes. ( you can also use cat instead of printnote)\n"
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis journal add ", "To add a new journal entry");
+        SharedLogic.PrintHelp("Jarvis journal list", "To list all the journal entries");
+        SharedLogic.PrintHelp("Jarvis journal show", "Show more details of an entry");
 
-        );
+        SharedLogic.PrintHelp("\nADVANCED"); 
+        SharedLogic.PrintHelp("Jarvis journal edittitle ", "To edit the title of an entry");
+
+        SharedLogic.PrintHelp("\nNOTES"); 
+        SharedLogic.PrintHelp("Jarvis journal note" , "Open journal entry");
+        SharedLogic.PrintHelp("Jarvis journal printnote", "Print the journal entry");
+        SharedLogic.PrintHelp("Jarvis journal cat", "Same as printnotes");
 
         return true;
     }
@@ -50,7 +51,7 @@ public class JournalHandler : CommandHandlerBase
             case "printnote":
                 selectedHander = new JournalCatNotesCommand();
                 break;
-            case "editnote":
+            case "note":
                 selectedHander = new JournalEditNoteCommand();
                 break;
             case "edittitle":
@@ -80,7 +81,6 @@ public class JournalHandler : CommandHandlerBase
         {
             ConsoleWriter.Print("Invalid arguments! \n");
             ShowHelp();
-
             return false;
         }
 
@@ -98,9 +98,8 @@ public class JournalAddCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis journal add <title> \t\t| this will create a new journal entry. You can add to that entry using 'editnote'" 
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis journal add <title>", "This will create a new journal entry. use 'Jarvis journal note' command to add to it!");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -117,9 +116,7 @@ public class JournalAddCommand : CommandHandlerBase
         var entry = SharedLogic.CreateNewJournalEntry(application.journalManager, title);
         application.journalManager.AddJournal(entry);
 
-        Utils.FileHandler.Create(JConstants.PATH_TO_JOURNAL_NOTE + entry.id);
-
-        ConsoleWriter.Print("New Journal added with id : {0}. You can open the notes and fill it up. ", entry.id);
+        ConsoleWriter.Print("New Journal entry added with id : {0}. You can open/edit the notes using 'jarvis journal note'", entry.id);
         return true;
     }
 }
@@ -132,12 +129,8 @@ public class JournalListCommand : CommandHandlerBase
     }
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis journal list   // lists all the journals\n" 
-                
-
-                //"jarvis journal list --detailed // show more details \n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis journal list", "lists all the entries\n" );
         return true;
     }
 
@@ -180,7 +173,7 @@ public class JournalListCommand : CommandHandlerBase
             }
         }
         else
-            ConsoleWriter.Print("No journals found! Try adding a few using \"jarvis add\"");
+            ConsoleWriter.Print("No journals found! Try adding a few using \"jarvis journal add\"");
 
         return true;
     }
@@ -195,9 +188,8 @@ public class JournalShowCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis journal show <id> // This will show all the details of a journal!"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis journal show <id>", "This will show all the details of a journal!");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -253,9 +245,8 @@ public class JournalEditTitleCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis journal edittitle <id> <new title>"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis journal edittitle <id> <new title>", "Renames the entry title");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -294,10 +285,9 @@ public class JournalCatNotesCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis journal cat <journalID> \t\t| Prints the notes of a journal. You can also use printnote instead of cat\n" +
-                "jarvis journal printnote <journalID> \t\t| Same as cat\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis journal cat <journalID>", "Prints the notes of a journal entry. You can also use printnote instead of cat");
+        SharedLogic.PrintHelp("Jarvis journal printnote <journalID>", "Same as cat");
         return true;
     }
 
@@ -339,12 +329,13 @@ public class JournalEditNoteCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis journal editnote <journalID> \t\t| Opens notes for a journal. If notes doesnt exist, you might want to try createnote first!\n" + 
-                "jarvis journal editnote <journalID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
-                "jarvis journal editnote <journalID> --append:<Message> \t\t| Added the message directly to the note\n" + 
-                "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis journal note <journalID>", "Opens notes for a journal");
+        SharedLogic.PrintHelp("Jarvis journal note <journalID> --ext:<editorname>", "Provide external editor name of your choice. Example : code or vim");
+        SharedLogic.PrintHelp("Jarvis journal note <journalID> --append:<Message>", "Append the message directly to the note");
+        SharedLogic.PrintHelp("Jarvis journal note <journalID> --appendlog:<Message>", "Append the message directly to the note, with a timestamp!");
+        SharedLogic.PrintHelp("\nMORE INFO :");
+        SharedLogic.PrintHelp("You can change the default editor (to open the notes) in the DesignData.json under 'defaultExternalEditor'");
         return true;
     }
 
@@ -376,11 +367,28 @@ public class JournalEditNoteCommand : CommandHandlerBase
             return true;
         }
 
+        string appendLogMessage = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--appendlog", string.Empty, null, null, out syntaxError);
+
+        if (syntaxError)
+        {
+            ConsoleWriter.Print("Invalid syntax for --appendlog argument.");
+            return true;
+        }
+
+        if ( !appendLogMessage.IsEmpty() )
+        {
+            appendMessage = "Log on " +  DateTime.Now.ToShortDateString() + " " + appendLogMessage;
+        }
+
         if (application.journalManager.DoesJournalExist(id))
         {
             if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_JOURNAL_NOTE + id) )
-                ConsoleWriter.Print("Notes not found for the journal with id : {0}", id);
-            else if ( !appendMessage.IsEmpty() )
+            {
+                Utils.FileHandler.Create(JConstants.PATH_TO_JOURNAL_NOTE + id);
+                ConsoleWriter.Print("New note created");
+            }
+
+            if ( !appendMessage.IsEmpty() )
             {
                 ConsoleWriter.Print("Message appended to the notes");
                 Utils.AppendToFile(JConstants.PATH_TO_JOURNAL_NOTE + id, appendMessage );

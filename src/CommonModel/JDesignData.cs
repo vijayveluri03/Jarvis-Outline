@@ -51,7 +51,7 @@ namespace Jarvis
         [JsonProperty] public string userName = string.Empty;
         [JsonProperty] public DateTime lastLoginDate = DateTime.MinValue;
         [JsonProperty] public TaskProgress taskProgress = new TaskProgress();
-        [JsonProperty] public string lastCommandUsed = "";
+        [JsonIgnore] public string lastCommandUsed = "";
 
         [JsonIgnore] private bool dirty = false;
 

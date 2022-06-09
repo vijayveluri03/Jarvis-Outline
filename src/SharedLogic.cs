@@ -46,6 +46,13 @@ namespace Jarvis
             return ed;
         }
 
+        public static void PrintHelp( string statement, string comments = "", int reservedSpaceForStatement = 30, int reservedSpaceForComments = 30 ) 
+        {
+            if ( !comments.IsEmpty())
+                comments = "| " + comments;
+            ConsoleWriter.Print("{0," + -reservedSpaceForStatement + "} {1," + -reservedSpaceForComments + "}", statement, comments);
+        }
+
         public static class UI
         {
 

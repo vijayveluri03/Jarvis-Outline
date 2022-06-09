@@ -58,7 +58,7 @@ namespace Jarvis
             return totalTime;
         }
 
-        public int GetTotalTimeSpent(int id)
+        public int GetTotalTimeSpentInMins(int id)
         {
             int totalTime = 0;
             foreach (var log in logs.entries)

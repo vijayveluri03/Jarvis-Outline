@@ -15,38 +15,31 @@ public class TaskHandler : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "Jarvis task add  \t\t| To add a task\n" +
-                "Jarvis task list \t\t| to list all the tasks\n" +
-                
-                "\n" +
-                "Jarvis task delete \t\t| to remove a task\n" +
-                "Jarvis task complete \t\t| to complete a task\n" +
-                "Jarvis task discard \t\t| to discard a task\n" +
-                "Jarvis task archieve \t\t| to archieve a task\n" +
-                "Jarvis task open \t\t| to re-open a task\n" +
-                
-                "\n" +
-                "LOG TIME\n" + 
-                "Jarvis task start \t\t| to track the time of a task\n" +
-                "Jarvis task stop \t\t| to stop time tracking\n" +
-                "Jarvis task active \t\t| to show if any time record is in progress\n" +
-                "jarvis task recordtimelog \t\t| to record an offline task\n" +
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task add ", "To add a task");
+        SharedLogic.PrintHelp("Jarvis task list", "to list all the tasks");
 
-                "\n" +
-                "ADVANCED\n" +
-                "Jarvis task show \t\t| to show a task\n" +
-                "jarvis task report \t\t| to show all the work done in the last day/week\n" +
-                "Jarvis task edittitle \t\t| To edit the title of a task\n" +
-                
-                "\n" +
-                "NOTES\n" + 
-                "jarvis task createnote" + "\t\t| create new notes for a task. You can open it using editnote\n" + 
-                "jarvis task deletenote" + "\t\t| delete notes for a task\n" + 
-                "jarvis task editnote" + "\t\t| open notes for a task. If the notes doesnt exit, try createnote first\n" +
-                "jarvis task printnote" + "\t\t| print the notes. ( you can also use cat instead of printnote)\n"
-                
-                );
+        SharedLogic.PrintHelp("Jarvis task delete", "to remove a task");
+        SharedLogic.PrintHelp("Jarvis task complete", "to complete a task");
+        SharedLogic.PrintHelp("Jarvis task discard", "to discard a task");
+        SharedLogic.PrintHelp("Jarvis task archieve", "to archieve a task.");
+        SharedLogic.PrintHelp("Jarvis task open", "to re-open a task");
+
+        SharedLogic.PrintHelp("\nLOG TIME");
+        SharedLogic.PrintHelp("Jarvis task start", "to start time log");
+        SharedLogic.PrintHelp("Jarvis task stop", "to stop time log");
+        SharedLogic.PrintHelp("Jarvis task active", "to show if any time record is in progress");
+        SharedLogic.PrintHelp("Jarvis task recordtimelog", "to record an offline task");
+
+        SharedLogic.PrintHelp("\nADVANCED");
+        SharedLogic.PrintHelp("Jarvis task show", "to show more details of a task");
+        SharedLogic.PrintHelp("Jarvis task report", "to show all the work done in the last day/week");
+        SharedLogic.PrintHelp("Jarvis task edittitle", "To edit the title of a task");
+
+        SharedLogic.PrintHelp("\nNOTES");
+        SharedLogic.PrintHelp("Jarvis task note", "open note for a task");
+        SharedLogic.PrintHelp("Jarvis task printnote", "print the notes. ( you can also use cat instead of printnote");
+        SharedLogic.PrintHelp("Jarvis task deletenote", "delete note for a task");
         return true;
     }
 
@@ -101,12 +94,12 @@ public class TaskHandler : CommandHandlerBase
             case "printnote":
                 selectedHander = new TaskCatNotesCommand();
                 break;
-            case "createnote":
-            case "newnote":
-            case "addnote":
-                selectedHander = new TaskcreatenoteCommand();
-                break;
-            case "editnote":
+            //case "createnote":
+            //case "newnote":
+            //case "addnote":
+            //    selectedHander = new TaskcreatenoteCommand();
+            //    break;
+            case "note":
             case "opennote":
                 selectedHander = new TaskEditNoteCommand();
                 break;
@@ -122,12 +115,12 @@ public class TaskHandler : CommandHandlerBase
                 break;
         }
 
-        if ( selectedHander != null )
+        if (selectedHander != null)
         {
             argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
             argumentsForSpecializedHandler.RemoveAt(0);
         }
-        else 
+        else
             argumentsForSpecializedHandler = null;
 
         return selectedHander;
@@ -142,7 +135,7 @@ public class TaskHandler : CommandHandlerBase
             ShowHelp();
             return true;
         }
-        
+
         Utils.Assert(false, "Shouldnt be here");
         return true;
     }
@@ -158,14 +151,17 @@ public class TaskAddCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task add <category> <title>\n" +
-                "Category can be office,learn,chores,health. you can add more in the design data as per your need.\n\n" +
-                "use --story or -s to create a story\n" +
-                "use --collection or -c to create a collection\n" + 
-                "\n" + 
-                "use --archieve to sent it straight to archieve category\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task add <category> <title>");
+        SharedLogic.PrintHelp("Jarvis task add <category> <title> --story", "A story is collection of tasks" );
+        SharedLogic.PrintHelp("Jarvis task add <category> <title> --collection", "Creates a collection instead of a task). Collections are to club many simple tasks. Like Grocery list. Easy to keep them in one place");
+        SharedLogic.PrintHelp("Jarvis task add <category> <title> --archieve", "To directly send it to archieve");
+        
+        SharedLogic.PrintHelp("\nMORE INFO");
+        SharedLogic.PrintHelp("Category can be office,learn,chores,health. you can add more in the DesignData.json as per your need.");
+        SharedLogic.PrintHelp("use --story or -s to create a story (instead of a task)");
+        SharedLogic.PrintHelp("use --collection or -c to create a collection (instead of a task)");
+        SharedLogic.PrintHelp("use --archieve to send it straight to archieve category");
         return true;
     }
 
@@ -191,11 +187,11 @@ public class TaskAddCommand : CommandHandlerBase
             return true;
         }
 
-        var entry = SharedLogic.CreateNewTask( 
-            application.taskManager, 
-            categories, 
-            title, 
-            isStory ? Task.Type.Story : ( isCollection ? Task.Type.Collection : Task.Type.Task),
+        var entry = SharedLogic.CreateNewTask(
+            application.taskManager,
+            categories,
+            title,
+            isStory ? Task.Type.Story : (isCollection ? Task.Type.Collection : Task.Type.Task),
             isArchieve ? Task.Status.Archieve : Task.Status.Open);
 
         application.taskManager.AddTask(entry);
@@ -215,9 +211,8 @@ public class TaskRemoveCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task remove <taskID>  \t\t| task id is the ID of the task you are trying to remove\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task remove <taskID> ", "Task id is the ID of the task you are trying to remove");
         return true;
     }
 
@@ -257,9 +252,9 @@ public class TaskStartCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task start <taskID> \t\t| task id is the ID of the task you are trying to start time tracking\n"
-                );
+        SharedLogic.PrintHelp("USAGE :");
+        SharedLogic.PrintHelp("Jarvis task start <taskID>", "Start time tracking");
+                
         return true;
     }
 
@@ -300,11 +295,11 @@ public class TaskStopCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-            "jarvis task stop\n" +
-            "jarvis task stop <comments> \n" + 
-            "jarvis task stop --discard \t\t| to ignore the recording alltogether" 
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task stop" , "Stops time tracking a task");
+        SharedLogic.PrintHelp("Jarvis task stop <comments>");
+        SharedLogic.PrintHelp("Jarvis task stop --discard", "to ignore the recording alltogether");
+
         return true;
     }
 
@@ -323,13 +318,13 @@ public class TaskStopCommand : CommandHandlerBase
             return true;
         }
 
-        string comments = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : string.Empty; 
+        string comments = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : string.Empty;
         int id = application.UserData.taskProgress.taskIDInProgress;
         int timeTakenInMinutes = (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes;
         bool discard = optionalArguments_ReadOnly.Contains("--discard");
         application.UserData.StopTask();
 
-        if(discard)
+        if (discard)
         {
             ConsoleWriter.Print("Stopped and discarded progress on Task with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
             return true;
@@ -362,9 +357,8 @@ public class TaskEditTitleCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task edittitle <taskID> <title> \t\t| task id is the ID of the task want to edit. Title being the new Title for the task\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task edittitle <taskID> <title>", "rename the title");
         return true;
     }
 
@@ -400,9 +394,8 @@ public class TaskActiveCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-            "jarvis task active"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task active", "Shows if any time tracking is active");
         return true;
     }
 
@@ -425,7 +418,7 @@ public class TaskActiveCommand : CommandHandlerBase
         int timeTakenInMinutes = (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes;
 
         ConsoleWriter.Print("Task in progress, with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
-        ConsoleWriter.Print("Total time recorded : {0}", Utils.Time.MinutesToHoursString( timeTakenInMinutes ) );
+        ConsoleWriter.Print("Total time recorded : {0}", Utils.Time.MinutesToHoursString(timeTakenInMinutes));
         return true;
     }
 }
@@ -438,19 +431,17 @@ public class TaskListCommand : CommandHandlerBase
     }
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task list   \t\t| lists all the tasks which are open\n"
-                 +
-                "jarvis task list --all \t\t| Shows all the tasks including archieved, discarded and completed\n" +
-                "jarvis task list --archieve \t\t| Shows all the tasks archieve\n" +
-                "jarvis task list --open \t\t| Shows all the open tasks ( this is also the default setting )\n" +
-                "jarvis task list --complete \t\t| Shows all the tasks complete\n" +
-                "jarvis task list --discard \t\t| Shows all the tasks discard\n" +
-                "jarvis task list --story \t\t| Shows only stories\n" +
-                "jarvis task list --collection \t\t| Shows only stories\n" +
-                "jarvis task list --task \t\t| Shows only tasks\n" +
-                "jarvis task list --cat:<category> \t\t| Shows only those category\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task list", "lists all the tasks which are open");
+        SharedLogic.PrintHelp("Jarvis task list --all", "Shows all the tasks including archieved, discarded and completed");
+        SharedLogic.PrintHelp("Jarvis task list --archieve", "Shows all the tasks archieved");
+        SharedLogic.PrintHelp("Jarvis task list --open", "Shows only the open tasks ( this is also the default setting )");
+        SharedLogic.PrintHelp("Jarvis task list --complete", "Shows only the tasks completed");
+        SharedLogic.PrintHelp("Jarvis task list --discard", "Shows only the tasks discard");
+        SharedLogic.PrintHelp("Jarvis task list --story", "Shows only stories");
+        SharedLogic.PrintHelp("Jarvis task list --collection", "Shows only collections");
+        SharedLogic.PrintHelp("Jarvis task list --task", "Shows only tasks");
+        SharedLogic.PrintHelp("Jarvis task list --cat:<category>", "Shows only those category");
         return true;
     }
 
@@ -477,10 +468,10 @@ public class TaskListCommand : CommandHandlerBase
         bool isTask = optionalArguments_ReadOnly.Contains("--task");
 
         bool syntaxErrorInCategoryFilter = false;
-        string categoryFilter = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--cat", string.Empty, null, null, out syntaxErrorInCategoryFilter );
-        if( syntaxErrorInCategoryFilter )
+        string categoryFilter = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--cat", string.Empty, null, null, out syntaxErrorInCategoryFilter);
+        if (syntaxErrorInCategoryFilter)
         {
-            ConsoleWriter.Print("Invalid syntax for --cat argument."); 
+            ConsoleWriter.Print("Invalid syntax for --cat argument.");
             categoryFilter = string.Empty;
             return true;
         }
@@ -580,7 +571,7 @@ public class TaskListCommand : CommandHandlerBase
                         task.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/)
                             + (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + task.id) ? "+(N)" : ""),
                         (isInProgress ? "In Progress" : task.StatusString),
-                        (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) + " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + " )")
+                        (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) + " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentInMins(task.id)) + " )")
                         ); ;
 
                     lineCount++;
@@ -608,9 +599,8 @@ public class TaskShowCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task show <taskID> \t\t| task id is the ID of the task you are trying to see\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task show <taskID>", "Show more details of a task");
         return true;
     }
 
@@ -651,22 +641,22 @@ public class TaskShowCommand : CommandHandlerBase
                     task.TypeString,
                     (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") +
                     ("(" + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) +
-                    " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpent(task.id)) + ")"),
+                    " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentInMins(task.id)) + ")"),
                     (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + task.id) ? "YES" : "NO")
                     );
 
             }
-            
+
             ConsoleWriter.Print();
 
             {
                 SortedDictionary<DateTime, int> timeLogs = new SortedDictionary<DateTime, int>();
 
-                foreach( var logEntry in application.logManager.logs.entries)
+                foreach (var logEntry in application.logManager.logs.entries)
                 {
-                    if ( logEntry.id == id )
+                    if (logEntry.id == id)
                     {
-                        if( !timeLogs.ContainsKey(logEntry.date.ZeroTime()))
+                        if (!timeLogs.ContainsKey(logEntry.date.ZeroTime()))
                             timeLogs[logEntry.date.ZeroTime()] = 0;
                         timeLogs[logEntry.date.ZeroTime()] += logEntry.timeTakenInMinutes;
                     }
@@ -704,29 +694,64 @@ public class TaskSetStatusCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task complete <taskID>  \t\t| task id is the ID of the task under which the subtask would be created\n" +
-                "jarvis task archieve <taskID>  \t\t| task id is the ID of the task under which the subtask would be created\n" +
-                "jarvis task discard <taskID>  \t\t| task id is the ID of the task under which the subtask would be created\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task complete <taskID> <time>", "time is in hours. the amount of work which was put into it. example : jarvis task complete 1 1 | this is when you completed task with ID 1 in 1 hour");
+        SharedLogic.PrintHelp("Jarvis task archieve <taskID> ", "Archieve a task");
+        SharedLogic.PrintHelp("Jarvis task discard <taskID> ", "Discard a task");
+
         return true;
     }
 
     protected override bool Run(Jarvis.JApplication application)
     {
-        if (arguments_ReadOnly.Count != 1)
+        if (status == Task.Status.Archieve || status == Task.Status.Open || status == Task.Status.Discard)
         {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ShowHelp();
-            return true;
+            if (arguments_ReadOnly.Count != 1)
+            {
+                ConsoleWriter.Print("Invalid arguments! \n");
+                ShowHelp();
+                return true;
+            }
+        }
+        if (status == Task.Status.Complete)
+        {
+            if (arguments_ReadOnly.Count != 2)
+            {
+                ConsoleWriter.Print("Invalid arguments! Please provide ID and hours \n");
+                ShowHelp();
+                return true;
+            }
         }
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        int timeInHours = 0;
+        if (status == Task.Status.Complete)
+            timeInHours = Utils.Conversions.Atoi(arguments_ReadOnly[1]);
 
         if (application.taskManager.DoesTaskExist(id))
         {
-            application.taskManager.GetTask_Editable(id).SetStatus(this.status);
-            ConsoleWriter.Print("Task with id : {0} marked as {1}", id, application.taskManager.GetTask_Editable(id).StatusString);
+            var task = application.taskManager.GetTask_Editable(id);
+            task.SetStatus(this.status);
+            ConsoleWriter.Print("Task with id : {0} marked as {1}", id, task.StatusString);
+
+            if (status == Task.Status.Complete)
+            {
+                //@ todo - Clean this code up. move it somewhere else. 
+                // Add record to log manager
+                {
+                    LogEntry le = new LogEntry();
+                    le.id = id;
+                    le.date = DateTime.Now;
+                    le.comment = "";
+                    le.timeTakenInMinutes = timeInHours * 60;
+
+                    application.logManager.AddEntry(le);
+
+                    ConsoleWriter.Print("Total time spent on this task {0} hours ", Utils.Time.MinutesToHoursString( application.logManager.GetTotalTimeSpentInMins(id) ));
+                }
+
+            }
+
         }
         else
             ConsoleWriter.Print("Task not found with id : " + id);
@@ -746,10 +771,10 @@ public class TaskRecordTimeLogCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task recordtimelog <taskID> <time in mins> <comments>\n" +
-                "jarvis task recordtimelog <taskID> <time in mins> <comments> <--when:-1>   \t\t| How many days before ?. -1 this timelog is of yesterday. -2 for a day before that. by default, this is 0, as in the time log is created for today."
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task recordtimelog <taskID> <time in hours> <comments>", "Force record a time log ( instead of start and stop )");
+        SharedLogic.PrintHelp("Jarvis task recordtimelog <taskID> <time in hours> <comments> <--when:-1>  ", "How many days before ?. -1 this timelog is of yesterday. -2 for a day before that. by default, this is 0, as in the time log is created for today.");
+
         return true;
     }
 
@@ -763,13 +788,13 @@ public class TaskRecordTimeLogCommand : CommandHandlerBase
         }
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
-        int timeTakenInMinutes = Utils.Conversions.Atoi(arguments_ReadOnly[1]);
+        int timeTakenInHours = Utils.Conversions.Atoi(arguments_ReadOnly[1]);
         string comments = arguments_ReadOnly.Count() > 2 ? arguments_ReadOnly[2] : string.Empty;
 
         bool syntaxErrorForWhenArgument = false;
         int deltaTime = Utils.CLI.ExtractIntFromCLIParameter(optionalArguments_ReadOnly, "--when", 0, null, null, out syntaxErrorForWhenArgument);
 
-        if( syntaxErrorForWhenArgument)
+        if (syntaxErrorForWhenArgument)
         {
             ConsoleWriter.Print("syntax invalid for --when argument. please try again");
             return true;
@@ -783,7 +808,7 @@ public class TaskRecordTimeLogCommand : CommandHandlerBase
                 le.id = id;
                 le.date = DateTime.Now.AddDays(deltaTime);
                 le.comment = comments;
-                le.timeTakenInMinutes = timeTakenInMinutes;
+                le.timeTakenInMinutes = timeTakenInHours * 60;
 
                 application.logManager.AddEntry(le);
 
@@ -832,9 +857,8 @@ public class TaskReportCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task report"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task report", "Shows the report with all the work done in the last week");
         return true;
     }
 
@@ -852,9 +876,9 @@ public class TaskReportCommand : CommandHandlerBase
             int totalMinutes = 0;
             IDictionary<string, int> categoryTimeMap = GetReportFor(application.taskManager, application.logManager.logs.entries, 0, out totalMinutes);
 
-            ConsoleWriter.PrintInColor("{0,-20} {1,-7} hours", 
-                application.DesignData.HighlightColorForText, 
-                "FOR TODAY", 
+            ConsoleWriter.PrintInColor("{0,-20} {1,-7} hours",
+                application.DesignData.HighlightColorForText,
+                "FOR TODAY",
                 Utils.Time.MinutesToHoursString(totalMinutes));
 
             if (categoryTimeMap.Count > 0)
@@ -873,9 +897,9 @@ public class TaskReportCommand : CommandHandlerBase
 
             categoryTimeMap = GetReportFor(application.taskManager, application.logManager.logs.entries, 6, out totalMinutes);
 
-            ConsoleWriter.PrintInColor("{0,-20} {1,-7} hours {2,-7} {3, -7} hours(avg)", 
-                application.DesignData.HighlightColorForText, 
-                "FOR LAST 7 DAYS", 
+            ConsoleWriter.PrintInColor("{0,-20} {1,-7} hours {2,-7} {3, -7} hours(avg)",
+                application.DesignData.HighlightColorForText,
+                "FOR LAST 7 DAYS",
                 Utils.Time.MinutesToHoursString(totalMinutes), " ", Utils.Time.HoursToHoursString(Utils.Time.MinutesToHours(totalMinutes) / 7));
 
             if (categoryTimeMap.Count > 0)
@@ -906,10 +930,9 @@ public class TaskCatNotesCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task cat <taskID> \t\t| Prints the notes of a task. You can also use printnote instead of cat\n" +
-                "jarvis task printnote <taskID> \t\t| Same as cat\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task cat <taskID>", "Prints the notes of a task. You can also use printnote instead of cat");
+        SharedLogic.PrintHelp("Jarvis task printnote <taskID>", "Same as cat");
         return true;
     }
 
@@ -924,12 +947,12 @@ public class TaskCatNotesCommand : CommandHandlerBase
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
-        
+
         if (application.taskManager.DoesTaskExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id) )
+            if (!Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id))
                 ConsoleWriter.Print("Notes not found for the task with id : {0}", id);
-            else 
+            else
             {
                 ConsoleWriter.PrintInColor("NOTES :", application.DesignData.HighlightColorForText);
                 ConsoleWriter.PrintText(Utils.FileHandler.Read(JConstants.PATH_TO_TASKS_NOTE + id));
@@ -951,12 +974,13 @@ public class TaskEditNoteCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task editnote <taskID> \t\t| Opens notes for a task. If notes doesnt exist, you might want to try createnote first!\n" + 
-                "jarvis task editnote <taskID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
-                "jarvis task editnote <taskID> --append:<Message> \t\t| Added the message directly to the note\n" + 
-                "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task note <taskID>", "Opens notes for a task.");
+        SharedLogic.PrintHelp("Jarvis task note <taskID> --ext:<editorname>", "provide external editor name of your choice, to open the notes in. Example : code or vim");
+        SharedLogic.PrintHelp("Jarvis task note <taskID> --append:<Message>", "Append a message directly to a note");
+        SharedLogic.PrintHelp("Jarvis task note <taskID> --appendlog:<Message>", "Appends a message directly to a note, with a timestamp");
+        SharedLogic.PrintHelp("\nADVANCED");
+        SharedLogic.PrintHelp("You can change the default editor in the DesignData.json under 'defaultExternalEditor'");
         return true;
     }
 
@@ -971,11 +995,11 @@ public class TaskEditNoteCommand : CommandHandlerBase
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
         bool syntaxError = false;
-        string externalProgram = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--ext", string.Empty, null, null, out syntaxError );
+        string externalProgram = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--ext", string.Empty, null, null, out syntaxError);
 
-        if ( syntaxError ) 
+        if (syntaxError)
         {
-            ConsoleWriter.Print("Invalid syntax for --ext argument."); 
+            ConsoleWriter.Print("Invalid syntax for --ext argument.");
             return true;
         }
 
@@ -988,20 +1012,37 @@ public class TaskEditNoteCommand : CommandHandlerBase
             return true;
         }
 
+        string appendLogMessage = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--appendlog", string.Empty, null, null, out syntaxError);
+
+        if (syntaxError)
+        {
+            ConsoleWriter.Print("Invalid syntax for --appendlog argument.");
+            return true;
+        }
+
+        if (!appendLogMessage.IsEmpty())
+        {
+            appendMessage = "Log on " + DateTime.Now.ToShortDateString() + " " + appendLogMessage;
+        }
+
         if (application.taskManager.DoesTaskExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id) )
-                ConsoleWriter.Print("Notes not found for the task with id : {0}", id);
-            else if ( !appendMessage.IsEmpty() )
+            if (!Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id))
+            {
+                Utils.FileHandler.Create(JConstants.PATH_TO_TASKS_NOTE + id);
+                ConsoleWriter.Print("new note created");
+            }
+
+            if (!appendMessage.IsEmpty())
             {
                 ConsoleWriter.Print("Message appended to the notes");
-                Utils.AppendToFile(JConstants.PATH_TO_TASKS_NOTE + id, appendMessage );
+                Utils.AppendToFile(JConstants.PATH_TO_TASKS_NOTE + id, appendMessage);
             }
-            else 
+            else
             {
                 ConsoleWriter.Print("Opening Notes");
                 Utils.OpenAFileInEditor(
-                    JConstants.PATH_TO_TASKS_NOTE + id, 
+                    JConstants.PATH_TO_TASKS_NOTE + id,
                     externalProgram.IsEmpty() ? application.DesignData.defaultExternalEditor : externalProgram,
                     true /* wait for the program to end*/);
                 ConsoleWriter.Print("Closing Notes");
@@ -1009,57 +1050,6 @@ public class TaskEditNoteCommand : CommandHandlerBase
         }
         else
             ConsoleWriter.Print("Task not found with id : " + id);
-        return true;
-    }
-}
-
-public class TaskcreatenoteCommand : CommandHandlerBase
-{
-    public TaskcreatenoteCommand()
-    {
-
-    }
-
-    protected override bool ShowHelp()
-    {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task createnote <taskID> \t\t| Creates new notes for a task. You can try editnote after this!\n"
-                );
-        return true;
-    }
-
-    protected override bool Run(Jarvis.JApplication application)
-    {
-        if (arguments_ReadOnly.Count != 1)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ShowHelp();
-            return true;
-        }
-
-        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
-        bool syntaxError = false;
-        string externalProgram = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--ext", string.Empty, null, null, out syntaxError );
-
-        if ( syntaxError ) 
-        {
-            ConsoleWriter.Print("Invalid syntax for --ext argument."); 
-            return true;
-        }
-
-        if (application.taskManager.DoesTaskExist(id))
-        {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id) )
-            {
-                Utils.FileHandler.Create(JConstants.PATH_TO_TASKS_NOTE + id);
-                ConsoleWriter.Print("Notes created");
-            }
-            else
-                ConsoleWriter.Print("Notes already exists for task with id : " + id);
-        }
-        else
-            ConsoleWriter.Print("Task not found with id : " + id);
-
         return true;
     }
 }
@@ -1073,9 +1063,8 @@ public class TaskDeleteNoteCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis task deletenote <taskID> \t\t| deletes the notes.\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task deletenote <taskID>", "deletes the notes");
         return true;
     }
 
@@ -1092,7 +1081,7 @@ public class TaskDeleteNoteCommand : CommandHandlerBase
 
         if (application.taskManager.DoesTaskExist(id))
         {
-            if( Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id) )
+            if (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id))
             {
                 Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id);
                 ConsoleWriter.Print("Notes deleted");

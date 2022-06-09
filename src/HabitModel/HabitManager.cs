@@ -108,6 +108,7 @@ namespace Jarvis
         {
             entries.Clear();
             previousStreak = 0;
+            startDate = DateTime.Now.ZeroTime();
         }
     }
 

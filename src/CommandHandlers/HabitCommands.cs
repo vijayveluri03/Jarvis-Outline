@@ -15,24 +15,22 @@ public class HabitHandler : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-        "Jarvis habit add  \t\t| To add a habit\n" +
-        "Jarvis habit streakup \t\t| to increase the steak of a habits\n" +
-        "Jarvis habit reset \t\t| to reset a habits\n" +
-        "Jarvis habit list \t\t| to list all the habits\n" +
-        "jarvis habit show \t\t| to show details of a habit\n" +
-        "jarvis habit disable \t\t| to disable a habit\n" +
-        "jarvis habit re-enable \t\t| to re-enable a disabled habit\n" + 
-        "Jarvis habit edittitle \t\t| To edit the title habit\n" +
-        "\n" +
-        "NOTES\n" + 
-        "jarvis habit createnote" + "\t\t| create new notes for a habit. You can open it using editnote\n" + 
-        "jarvis habit deletenote" + "\t\t| delete notes for a habit\n" + 
-        "jarvis habit editnote" + "\t\t| open notes for a habit. If the notes doesnt exit, try createnote first\n" +
-        "jarvis habit printnote" + "\t\t| print the notes. ( you can also use cat instead of printnote)\n"
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis habit add ", "To add a new habit");
+        SharedLogic.PrintHelp("Jarvis habit streakup", "to increase the steak of a habit");
+        SharedLogic.PrintHelp("Jarvis habit reset", "to reset a habit");
+        SharedLogic.PrintHelp("Jarvis habit list", "to list all the habit");
+        SharedLogic.PrintHelp("Jarvis habit show", "to show details of a habit");
 
-        );
+        SharedLogic.PrintHelp("\nADVANCED"); 
+        SharedLogic.PrintHelp("Jarvis habit disable", "to disable a habit");
+        SharedLogic.PrintHelp("Jarvis habit re-enable", "to re-enable a disabled habit"); 
+        SharedLogic.PrintHelp("Jarvis habit edittitle", "To edit the title of a habit");
 
+        SharedLogic.PrintHelp("\nNOTES"); 
+        SharedLogic.PrintHelp("Jarvis habit note" , "open note for a habit");
+        SharedLogic.PrintHelp("Jarvis habit printnote" , "print the notes. ( you can also use 'cat' instead of 'printnote')");
+        SharedLogic.PrintHelp("Jarvis habit deletenote" , "delete note for a habit"); 
         return true;
     }
 
@@ -68,12 +66,12 @@ public class HabitHandler : CommandHandlerBase
             case "printnote":
                 selectedHander = new HabitCatNotesCommand();
                 break;
-            case "createnote":
-            case "newnote":
-            case "addnote":
-                selectedHander = new HabitcreatenoteCommand();
-                break;
-            case "editnote":
+            //case "createnote":
+            //case "newnote":
+            //case "addnote":
+            //    selectedHander = new HabitcreatenoteCommand();
+            //    break;
+            case "note":
             case "opennote":
                 selectedHander = new HabitEditNoteCommand();
                 break;
@@ -125,11 +123,12 @@ public class HabitAddCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit add <category> <title>\n" +
-                "jarvis habit add <category> <title> --previousstreak:<count>  // This sets the streak to a base value\n" +
-                "Category can be office,learn,chores,health. you can add more in the design data as per your need.\n\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis habit add <category> <title>");
+        SharedLogic.PrintHelp("Jarvis habit add <category> <title> --previousstreak:<count>", "This sets the starting streak for a habit. if you have already been doing this habit for a while, you can use this, to start from there ");
+
+        SharedLogic.PrintHelp("\nMORE INFO");
+        SharedLogic.PrintHelp("Category can be 'office', 'learn', 'chores', 'health'. you can add more in the DesignData.json as per your need.");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -176,12 +175,9 @@ public class HabitListCommand : CommandHandlerBase
     }
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit list   // lists all the habits\n" +
-                "jarvis habit list --cat:<category> // Shows only those category\n"
-
-                //"jarvis habit list --detailed // show more details \n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis habit list", "Lists all the habits");
+        SharedLogic.PrintHelp("Jarvis habit list --cat:<category>", "Lists all the habits under this category");
         return true;
     }
 
@@ -264,10 +260,9 @@ public class HabitStreakUpCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit streakup <id>\n" +
-                "jarvis habit streakup <id>  <--when:-1>   // How many days before ?. -1 this timelog is of yesterday. -2 for a day before that. by default, this is 0, as in the time log is created for today."
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis habit streakup <id>", "Streaks up a habit");
+        SharedLogic.PrintHelp("Jarvis habit streakup <id>  <--when:-1>", "If you forgot to streakup yesterday? -1 for yesterday. -2 for a day before that. by default, this is 0, as in today.");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -330,9 +325,8 @@ public class HabitDisableCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit disable <id>"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis habit disable <id>", "To disable a habit");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -375,9 +369,9 @@ public class HabitReEnableCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit re-enable <id>"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis habit re-enable <id>", "To re-enable a disabled habit");
+
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -420,9 +414,8 @@ public class HabitResetCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit reset <id> // This will reset the streak of a habit!"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis habit reset <id>", "This will reset the streak of a habit! For a fresh start!");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -465,9 +458,8 @@ public class HabitShowCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit show <id> // This will show all the details of a habit!"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis habit show <id>", "This will show all the details of a habit!");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -521,20 +513,6 @@ public class HabitShowCommand : CommandHandlerBase
 
         ConsoleWriter.Print();
 
-        {
-            ConsoleWriter.PrintInColor("LAST 30 DAY ACTIVITY : ", application.DesignData.HighlightColorForText);
-            ConsoleWriter.Print("'+' - streak up entry present on that day | '-' - No entry available on that day | weekends are coloured.\n");
-            for (int day = 0; day <= 30; day++)
-            {
-                DateTime date = DateTime.Now.ZeroTime().AddDays(-1 * day);
-                bool isWeekend = date.DayOfWeek == DayOfWeek.Sunday || date.DayOfWeek == DayOfWeek.Saturday;
-                bool isEntryAvailable = hb.IsEntryOn(date);
-
-                ConsoleWriter.PrintWithColorWithOutLineBreak(isEntryAvailable ? " + " : " - ", isWeekend ? application.DesignData.HighlightColorForText_3 : application.DesignData.DefaultColorForText);
-            }
-            ConsoleWriter.EmptyLine();
-        }
-
         return true;
     }
 }
@@ -547,9 +525,8 @@ public class HabitEditTitleCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit edittitle <id> <new title> // this is to rename the habit title!"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis habit edittitle <id> <new title>", "This is to rename the habit title!");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -588,10 +565,9 @@ public class HabitCatNotesCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit cat <habitID> \t\t| Prints the notes of a habit. You can also use printnote instead of cat\n" +
-                "jarvis habit printnote <habitID> \t\t| Same as cat\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis habit cat <habitID>", "Prints the notes of a habit. You can also use 'printnote' instead of cat");
+        SharedLogic.PrintHelp("Jarvis habit printnote <habitID>", "Same as cat");
         return true;
     }
 
@@ -633,12 +609,13 @@ public class HabitEditNoteCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit editnote <habitID> \t\t| Opens notes for a habit. If notes doesnt exist, you might want to try createnote first!\n" + 
-                "jarvis habit editnote <habitID> --ext:<editorname> \t\t| provide external editor program name of your choice. Example : code or vim\n" + 
-                "jarvis habit editnote <habitID> --append:<Message> \t\t| Added the message directly to the note\n" + 
-                "You can change the default editor in the DesignData.json under 'defaultExternalEditor'\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis habit note <habitID>", "Opens notes for a habit");
+        SharedLogic.PrintHelp("Jarvis habit note <habitID> --ext:<editorname>", "Provide external editor name of your choice, to open the notes in. Example : code or vim");
+        SharedLogic.PrintHelp("Jarvis habit note <habitID> --append:<Message>", "Appends a message directly to the note");
+        SharedLogic.PrintHelp("Jarvis habit note <habitID> --appendlog:<Message>", "Appends a message directly to a note, with a timestamp");
+        SharedLogic.PrintHelp("\nADVANCED");
+        SharedLogic.PrintHelp("You can change the default editor (to open your notes in) in the DesignData.json under 'defaultExternalEditor'");
         return true;
     }
 
@@ -670,11 +647,28 @@ public class HabitEditNoteCommand : CommandHandlerBase
             return true;
         }
 
+        string appendLogMessage = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--appendlog", string.Empty, null, null, out syntaxError);
+
+        if (syntaxError)
+        {
+            ConsoleWriter.Print("Invalid syntax for --appendlog argument.");
+            return true;
+        }
+
+        if ( !appendLogMessage.IsEmpty() )
+        {
+            appendMessage = "Log on " +  DateTime.Now.ToShortDateString() + " " + appendLogMessage;
+        }
+
         if (application.habitManager.DoesHabitExist(id))
         {
             if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + id) )
-                ConsoleWriter.Print("Notes not found for the habit with id : {0}", id);
-            else if ( !appendMessage.IsEmpty() )
+            {
+                Utils.FileHandler.Create(JConstants.PATH_TO_HABITS_NOTE + id);
+                ConsoleWriter.Print("New note created");
+            }
+
+            if ( !appendMessage.IsEmpty() )
             {
                 ConsoleWriter.Print("Message appended to the notes");
                 Utils.AppendToFile(JConstants.PATH_TO_HABITS_NOTE+ id, appendMessage );
@@ -695,56 +689,6 @@ public class HabitEditNoteCommand : CommandHandlerBase
     }
 }
 
-public class HabitcreatenoteCommand : CommandHandlerBase
-{
-    public HabitcreatenoteCommand()
-    {
-
-    }
-
-    protected override bool ShowHelp()
-    {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit createnote <habitID> \t\t| Creates new notes for a habit. You can try editnote after this!\n"
-                );
-        return true;
-    }
-
-    protected override bool Run(Jarvis.JApplication application)
-    {
-        if (arguments_ReadOnly.Count != 1)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ShowHelp();
-            return true;
-        }
-
-        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
-        bool syntaxError = false;
-        string externalProgram = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--ext", string.Empty, null, null, out syntaxError );
-
-        if ( syntaxError ) 
-        {
-            ConsoleWriter.Print("Invalid syntax for --ext argument."); 
-            return true;
-        }
-
-        if (application.habitManager.DoesHabitExist(id))
-        {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + id) )
-            {
-                Utils.FileHandler.Create(JConstants.PATH_TO_HABITS_NOTE + id);
-                ConsoleWriter.Print("Notes created");
-            }
-            else
-                ConsoleWriter.Print("Notes already exists for habit with id : " + id);
-        }
-        else
-            ConsoleWriter.Print("habit not found with id : " + id);
-
-        return true;
-    }
-}
 
 public class HabitDeleteNoteCommand : CommandHandlerBase
 {
@@ -755,9 +699,8 @@ public class HabitDeleteNoteCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-                "jarvis habit deletenote <habitID> \t\t| deletes the notes.\n"
-                );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis habit deletenote <habitID>", "Deletes the notes");
         return true;
     }
 

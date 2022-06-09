@@ -63,13 +63,19 @@ class Program
                         
                     firstTime = false;
                 }
+                string lastCommand = app.UserData.GetLastCommand();
+                string cursorText = lastCommand.IsEmpty() ? "JARVIS>" : "JARVIS " + lastCommand.ToUpper() + ">";
+                string customJarvisCommand = Utils.CLI.GetUserInputString(cursorText, app.DesignData.HighlightColorForText);
 
-                string customJarvisCommand = Utils.CLI.GetUserInputString("JARVIS>", app.DesignData.HighlightColorForText);
+                //@todo - Move these somewhere else
                 if (customJarvisCommand.ToLower() == "exit")
                     break;
 
                 if (customJarvisCommand.ToLower() == "save")
+                {
                     app.Save();
+                    continue;
+                }
 
                 args = Utils.CLI.SplitCommandLine(customJarvisCommand);
             }

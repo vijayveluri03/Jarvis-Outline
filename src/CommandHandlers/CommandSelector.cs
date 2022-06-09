@@ -32,6 +32,7 @@ public class CommandSelector : CommandHandlerBase
     }
     protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler, bool printErrors)
     {
+        // @todo printErrors is not being used 
         string command = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
         CommandHandlerBase selectedHander = GetCommandHandler(command);
         //bool help = optionalArguments.Contains("--help");
@@ -44,11 +45,8 @@ public class CommandSelector : CommandHandlerBase
             argumentsForSpecializedHandler.RemoveAt(0);     // stripping the command from the arguments before sending it along
         }
         else
-        {   // command not provided. We are trying to see if we can use the last used command. 
-
-            if ( printErrors )
-                ConsoleWriter.Print("Invalid command. Try 'jarvis --help' for more information");
-            //selectedHander = GetCommandHandler(application.UserData.GetLastCommand());
+        {   
+            selectedHander = GetCommandHandler(application.UserData.GetLastCommand());
             argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);  // since the command is not provided anyway, there is nothing to strip
         }
 
@@ -57,12 +55,14 @@ public class CommandSelector : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
-        ConsoleWriter.Print("USAGE : \n" +
-            "Jarvis task <arguments> \t\t| For more info on arguments, try 'Jarvis task' or 'Jarvis task --help'\n" +
-            "Jarvis habit <arguments> \t\t| For more info on arguments, try 'Jarvis habit' or 'Jarvis habit --help'\n" +
-            "Jarvis journal <arguments> \t\t| For more info on arguments, try 'Jarvis journal' or 'Jarvis journal --help'\n" +
-            "Jarvis game snake \t\t| For a fun game :) "
-            );
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis task <arguments>", "'Jarvis task' or 'Jarvis task --help' for more information on arguments");
+        SharedLogic.PrintHelp("Jarvis habit <arguments>", "'Jarvis habit' or 'Jarvis habit --help' for more information on arguments");
+        SharedLogic.PrintHelp("Jarvis journal <arguments>", "'Jarvis journal' or 'Jarvis journal --help' for more information on arguments");
+        SharedLogic.PrintHelp("Jarvis game snake", "For a fun game :) ");
+        SharedLogic.PrintHelp("\nADVANCED");
+        SharedLogic.PrintHelp("\ntry jarvis --enter", "This is a CLI interface built to make jarvis commands easier");
+
         return true;
     }
 
