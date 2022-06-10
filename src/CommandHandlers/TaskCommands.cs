@@ -724,9 +724,9 @@ public class TaskSetStatusCommand : CommandHandlerBase
         }
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
-        int timeInHours = 0;
+        float timeInHours = 0;
         if (status == Task.Status.Complete)
-            timeInHours = Utils.Conversions.Atoi(arguments_ReadOnly[1]);
+            timeInHours = Utils.Conversions.Atof(arguments_ReadOnly[1]);
 
         if (application.taskManager.DoesTaskExist(id))
         {
@@ -743,7 +743,7 @@ public class TaskSetStatusCommand : CommandHandlerBase
                     le.id = id;
                     le.date = DateTime.Now;
                     le.comment = "";
-                    le.timeTakenInMinutes = timeInHours * 60;
+                    le.timeTakenInMinutes = (int)(timeInHours * 60);
 
                     application.logManager.AddEntry(le);
 

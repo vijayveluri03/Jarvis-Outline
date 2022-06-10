@@ -284,6 +284,14 @@ public static class Utils
                 return num;
             return fallback;
         }
+
+        public static float Atof(string txt, float fallback = -1)
+        {
+            float num = fallback;
+            if (float.TryParse(txt, out num))
+                return num;
+            return fallback;
+        }
     }
 
     public static class Math
