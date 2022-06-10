@@ -46,11 +46,15 @@ namespace Jarvis
             return ed;
         }
 
-        public static void PrintHelp( string statement, string comments = "", int reservedSpaceForStatement = 30, int reservedSpaceForComments = 30 ) 
+        public static void PrintHelp( string statement, string comments = "", int reservedSpaceForStatement = 30, int fallbackReserveSpaceIfOverflowing = 60 ) 
         {
             if ( !comments.IsEmpty())
                 comments = "| " + comments;
-            ConsoleWriter.Print("{0," + -reservedSpaceForStatement + "} {1," + -reservedSpaceForComments + "}", statement, comments);
+
+            if ( statement.Length >= reservedSpaceForStatement )
+                reservedSpaceForStatement = fallbackReserveSpaceIfOverflowing;
+
+            ConsoleWriter.Print("{0," + -reservedSpaceForStatement + "} {1}", statement, comments);
         }
 
         public static class UI

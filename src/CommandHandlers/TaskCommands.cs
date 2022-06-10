@@ -16,7 +16,7 @@ public class TaskHandler : CommandHandlerBase
     protected override bool ShowHelp()
     {
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("Jarvis task add ", "To add a task");
+        SharedLogic.PrintHelp("Jarvis task add", "To add a task");
         SharedLogic.PrintHelp("Jarvis task list", "to list all the tasks");
 
         SharedLogic.PrintHelp("Jarvis task delete", "to remove a task");
@@ -40,6 +40,11 @@ public class TaskHandler : CommandHandlerBase
         SharedLogic.PrintHelp("Jarvis task note", "open note for a task");
         SharedLogic.PrintHelp("Jarvis task printnote", "print the notes. ( you can also use cat instead of printnote");
         SharedLogic.PrintHelp("Jarvis task deletenote", "delete note for a task");
+
+        SharedLogic.PrintHelp("\nHELP");
+        SharedLogic.PrintHelp("All the commands have their own help section. Use the argument '--help'");
+        SharedLogic.PrintHelp("Example - 'jarvis task add --help' for more examples on how to use it. Try it!");
+        SharedLogic.PrintHelp("This works for every single command! Cheers!");
         return true;
     }
 
@@ -129,14 +134,8 @@ public class TaskHandler : CommandHandlerBase
     protected override bool Run(Jarvis.JApplication application)
     {
 
-        if (arguments_ReadOnly.Count < 1)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ShowHelp();
-            return true;
-        }
-
-        Utils.Assert(false, "Shouldnt be here");
+        ConsoleWriter.Print("Invalid arguments! \n");
+        ShowHelp();
         return true;
     }
 }
@@ -157,6 +156,11 @@ public class TaskAddCommand : CommandHandlerBase
         SharedLogic.PrintHelp("Jarvis task add <category> <title> --collection", "Creates a collection instead of a task). Collections are to club many simple tasks. Like Grocery list. Easy to keep them in one place");
         SharedLogic.PrintHelp("Jarvis task add <category> <title> --archieve", "To directly send it to archieve");
         
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis task add chores \"Buy a T-Shirt\"");
+        SharedLogic.PrintHelp("jarvis task add chores \"Shopping list\" --collection", "Creates a collection");
+        SharedLogic.PrintHelp("jarvis task add chores \"Go to Goa!\" --story", "Creates a story");
+
         SharedLogic.PrintHelp("\nMORE INFO");
         SharedLogic.PrintHelp("Category can be office,learn,chores,health. you can add more in the DesignData.json as per your need.");
         SharedLogic.PrintHelp("use --story or -s to create a story (instead of a task)");
@@ -213,6 +217,9 @@ public class TaskRemoveCommand : CommandHandlerBase
     {
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task remove <taskID> ", "Task id is the ID of the task you are trying to remove");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis task remove 1", "If you want to remove a task with ID : 1");
         return true;
     }
 
@@ -254,6 +261,9 @@ public class TaskStartCommand : CommandHandlerBase
     {
         SharedLogic.PrintHelp("USAGE :");
         SharedLogic.PrintHelp("Jarvis task start <taskID>", "Start time tracking");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis task start 1", "Start recording time for task 1");
                 
         return true;
     }
@@ -296,10 +306,12 @@ public class TaskStopCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("Jarvis task stop" , "Stops time tracking a task");
+        SharedLogic.PrintHelp("Jarvis task stop" , "Stops time tracking a task which is active. If no task is active, no action will be performed.");
         SharedLogic.PrintHelp("Jarvis task stop <comments>");
         SharedLogic.PrintHelp("Jarvis task stop --discard", "to ignore the recording alltogether");
 
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis task stop", "Stop recording time for a task which is active.");
         return true;
     }
 
@@ -359,6 +371,9 @@ public class TaskEditTitleCommand : CommandHandlerBase
     {
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task edittitle <taskID> <title>", "rename the title");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis task edittitle 1 \"Buy Blue T-shirt\"", "rename the title of task : 1 to 'Buy blue T-shirt'");
         return true;
     }
 
@@ -395,7 +410,10 @@ public class TaskActiveCommand : CommandHandlerBase
     protected override bool ShowHelp()
     {
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("Jarvis task active", "Shows if any time tracking is active");
+        SharedLogic.PrintHelp("Jarvis task active", "Shows if time tracking is active for any task");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis task active");
         return true;
     }
 
@@ -442,6 +460,14 @@ public class TaskListCommand : CommandHandlerBase
         SharedLogic.PrintHelp("Jarvis task list --collection", "Shows only collections");
         SharedLogic.PrintHelp("Jarvis task list --task", "Shows only tasks");
         SharedLogic.PrintHelp("Jarvis task list --cat:<category>", "Shows only those category");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis task list");
+        SharedLogic.PrintHelp("jarvis task list --all");
+        SharedLogic.PrintHelp("jarvis task list --story");
+        SharedLogic.PrintHelp("jarvis task list --archieve", "Shows the archieved list");
+        SharedLogic.PrintHelp("jarvis task list --complete", "Shows the completed list");
+        SharedLogic.PrintHelp("jarvis task list --cat:office", "filter by category");
         return true;
     }
 
@@ -601,6 +627,9 @@ public class TaskShowCommand : CommandHandlerBase
     {
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task show <taskID>", "Show more details of a task");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis task show 1", "Show more details for task : 1" );
         return true;
     }
 
@@ -699,6 +728,11 @@ public class TaskSetStatusCommand : CommandHandlerBase
         SharedLogic.PrintHelp("Jarvis task archieve <taskID> ", "Archieve a task");
         SharedLogic.PrintHelp("Jarvis task discard <taskID> ", "Discard a task");
 
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis task complete 1 2", "Task with ID 1 is now completed and a time of 2 hours is recorded");
+        SharedLogic.PrintHelp("jarvis task archieve 1", "Task with ID 1 is archieved");
+        SharedLogic.PrintHelp("jarvis task discard 1", "Task with ID 1 is discarded");
+
         return true;
     }
 
@@ -774,6 +808,9 @@ public class TaskRecordTimeLogCommand : CommandHandlerBase
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task recordtimelog <taskID> <time in hours> <comments>", "Force record a time log ( instead of start and stop )");
         SharedLogic.PrintHelp("Jarvis task recordtimelog <taskID> <time in hours> <comments> <--when:-1>  ", "How many days before ?. -1 this timelog is of yesterday. -2 for a day before that. by default, this is 0, as in the time log is created for today.");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis task recordtimelog 1 2", "A time of 2 hours is recorded for a Task with ID 1");
 
         return true;
     }
@@ -933,6 +970,9 @@ public class TaskCatNotesCommand : CommandHandlerBase
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task cat <taskID>", "Prints the notes of a task. You can also use printnote instead of cat");
         SharedLogic.PrintHelp("Jarvis task printnote <taskID>", "Same as cat");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis task cat 1", "show the notes for task 1");
         return true;
     }
 
@@ -981,6 +1021,12 @@ public class TaskEditNoteCommand : CommandHandlerBase
         SharedLogic.PrintHelp("Jarvis task note <taskID> --appendlog:<Message>", "Appends a message directly to a note, with a timestamp");
         SharedLogic.PrintHelp("\nADVANCED");
         SharedLogic.PrintHelp("You can change the default editor in the DesignData.json under 'defaultExternalEditor'");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis task note 1", "Edit the notes for task : 1");
+        SharedLogic.PrintHelp("jarvis task note 1 --ext:code", "Edit the notes for task : 1, within the visual studio code");
+        SharedLogic.PrintHelp("jarvis task note 1 --append:\"Buy milk\"", "Add 'buy milk' to the notes!");
+
         return true;
     }
 

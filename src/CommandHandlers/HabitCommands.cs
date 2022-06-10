@@ -31,6 +31,12 @@ public class HabitHandler : CommandHandlerBase
         SharedLogic.PrintHelp("Jarvis habit note" , "open note for a habit");
         SharedLogic.PrintHelp("Jarvis habit printnote" , "print the notes. ( you can also use 'cat' instead of 'printnote')");
         SharedLogic.PrintHelp("Jarvis habit deletenote" , "delete note for a habit"); 
+
+        SharedLogic.PrintHelp("\nHELP");
+        SharedLogic.PrintHelp("All the commands have their own help section. Use the argument '--help'");
+        SharedLogic.PrintHelp("Example - 'jarvis habit add --help' for more examples on how to use it. Try it!");
+        SharedLogic.PrintHelp("This works for every single command! Cheers!");
+
         return true;
     }
 
@@ -100,16 +106,8 @@ public class HabitHandler : CommandHandlerBase
 
     protected override bool Run(Jarvis.JApplication application)
     {
-
-        if (arguments_ReadOnly.Count < 1)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ShowHelp();
-
-            return false;
-        }
-
-        Utils.Assert(false, "Shouldnt be here");
+        ConsoleWriter.Print("Invalid arguments! \n");
+        ShowHelp();
         return true;
     }
 }
@@ -126,6 +124,9 @@ public class HabitAddCommand : CommandHandlerBase
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis habit add <category> <title>");
         SharedLogic.PrintHelp("Jarvis habit add <category> <title> --previousstreak:<count>", "This sets the starting streak for a habit. if you have already been doing this habit for a while, you can use this, to start from there ");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis habit add health \"Wake up at 6AM everyday!\"");
 
         SharedLogic.PrintHelp("\nMORE INFO");
         SharedLogic.PrintHelp("Category can be 'office', 'learn', 'chores', 'health'. you can add more in the DesignData.json as per your need.");
@@ -178,6 +179,9 @@ public class HabitListCommand : CommandHandlerBase
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis habit list", "Lists all the habits");
         SharedLogic.PrintHelp("Jarvis habit list --cat:<category>", "Lists all the habits under this category");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis habit list");
         return true;
     }
 
@@ -263,6 +267,9 @@ public class HabitStreakUpCommand : CommandHandlerBase
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis habit streakup <id>", "Streaks up a habit");
         SharedLogic.PrintHelp("Jarvis habit streakup <id>  <--when:-1>", "If you forgot to streakup yesterday? -1 for yesterday. -2 for a day before that. by default, this is 0, as in today.");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis habit streakup 1", "Streakup a habit with id 1");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -327,6 +334,9 @@ public class HabitDisableCommand : CommandHandlerBase
     {
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis habit disable <id>", "To disable a habit");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis habit disable 1", "Disable a habit with id 1");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -372,6 +382,9 @@ public class HabitReEnableCommand : CommandHandlerBase
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis habit re-enable <id>", "To re-enable a disabled habit");
 
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis habit re-enable 1", "Re-enable a habit with id 1");
+
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -416,6 +429,9 @@ public class HabitResetCommand : CommandHandlerBase
     {
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis habit reset <id>", "This will reset the streak of a habit! For a fresh start!");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis habit reset 1", "Resets a habit with ID 1. This will reset all the streak!");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -460,6 +476,9 @@ public class HabitShowCommand : CommandHandlerBase
     {
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis habit show <id>", "This will show all the details of a habit!");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis habit show 1", "Show more details for habit with id 1");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -527,6 +546,9 @@ public class HabitEditTitleCommand : CommandHandlerBase
     {
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis habit edittitle <id> <new title>", "This is to rename the habit title!");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis habit edittitle 1 \"Wake up at 7 AM\"", "rename the title of habit : 1 to 'Wake up at 7 AM'");
         return true;
     }
     protected override bool Run(Jarvis.JApplication application)
@@ -568,6 +590,9 @@ public class HabitCatNotesCommand : CommandHandlerBase
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis habit cat <habitID>", "Prints the notes of a habit. You can also use 'printnote' instead of cat");
         SharedLogic.PrintHelp("Jarvis habit printnote <habitID>", "Same as cat");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis habit cat 1", "Prints the notes for habit with id 1");
         return true;
     }
 
@@ -614,8 +639,14 @@ public class HabitEditNoteCommand : CommandHandlerBase
         SharedLogic.PrintHelp("Jarvis habit note <habitID> --ext:<editorname>", "Provide external editor name of your choice, to open the notes in. Example : code or vim");
         SharedLogic.PrintHelp("Jarvis habit note <habitID> --append:<Message>", "Appends a message directly to the note");
         SharedLogic.PrintHelp("Jarvis habit note <habitID> --appendlog:<Message>", "Appends a message directly to a note, with a timestamp");
+
         SharedLogic.PrintHelp("\nADVANCED");
         SharedLogic.PrintHelp("You can change the default editor (to open your notes in) in the DesignData.json under 'defaultExternalEditor'");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis habit note 1", "Edit the notes for habit : 1");
+        SharedLogic.PrintHelp("jarvis habit note 1 --ext:code", "Edit the notes for habit : 1, within the visual studio code");
+        SharedLogic.PrintHelp("jarvis habit note 1 --append:\"Buy milk\"", "Add 'buy milk' to the notes!");
         return true;
     }
 

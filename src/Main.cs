@@ -13,7 +13,8 @@ class Program
 #if DEBUG
         //string debugCommand = "task list & task report";
         //string debugCommand = "game snake";
-        string debugCommand = "--enter";
+        //string debugCommand = "--enter";
+        string debugCommand = "";
         //string debugCommand = "habit show 1";
         //string debugCommand = "task list --cat:asdf:fefe";
         args = debugCommand.Split(' ');
