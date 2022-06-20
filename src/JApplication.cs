@@ -34,7 +34,7 @@ namespace Jarvis
                 string programWD = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "/";
                 // Loading Design and user data.
 #if DEBUG
-                programWD = "c:/Users/vveluri/mybin/";
+                programWD = "c:/Users/vijay/mybin/";
 #endif
                 JConstants.WORKING_DIRECTORY = programWD;
             }

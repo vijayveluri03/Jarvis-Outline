@@ -13,8 +13,8 @@ class Program
 #if DEBUG
         //string debugCommand = "task list & task report";
         //string debugCommand = "game snake";
-        //string debugCommand = "--enter";
-        string debugCommand = "";
+        string debugCommand = "--enter";
+        //string debugCommand = "";
         //string debugCommand = "habit show 1";
         //string debugCommand = "task list --cat:asdf:fefe";
         args = debugCommand.Split(' ');
@@ -88,6 +88,10 @@ class Program
             List<List<string>> commands = SplitSingleCompositeCommandToSimpleOnes(args);
             foreach (var command in commands)
             {
+                // Normally we would not have 'jarvis' as a part of the command, as the CLI strips it from the arguments 
+                // but that doesnt happen if we are in the custom CLI, where we have to manually handle it. 
+
+                RemoveJarvisPrefixFromCommand(command);
                 // Split a the optional arguments to a seperate list. 
                 // ex: JARVIS>task list --story --cat:health
                 // the optional params which start with '-' or '--' are stripped for the command into another 
@@ -128,6 +132,12 @@ class Program
         return commands;
     }
 
+    public static void RemoveJarvisPrefixFromCommand(List<string> command)
+    {
+        if (command != null && command.Count > 0)
+            if (command[0] == "jarvis")
+                command.RemoveAt(0);
+    }
     public static List<string>[] SplitCommandIntoManditoryAndOptional(List<string> arguments)
     {
         List<string> valueArguments = new List<string>(arguments);

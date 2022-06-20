@@ -140,6 +140,12 @@ namespace Jarvis
             dirty = true;
         }
 
+        public void RemoveHabit(Habit ed)
+        {
+            Data.entries.Remove(ed);
+            dirty = true;
+        }
+
         private void Load(string fileName)
         {
             using (StreamReader r = new StreamReader(fileName))

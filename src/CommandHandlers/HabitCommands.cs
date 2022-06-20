@@ -22,7 +22,8 @@ public class HabitHandler : CommandHandlerBase
         SharedLogic.PrintHelp("Jarvis habit list", "to list all the habit");
         SharedLogic.PrintHelp("Jarvis habit show", "to show details of a habit");
 
-        SharedLogic.PrintHelp("\nADVANCED"); 
+        SharedLogic.PrintHelp("\nADVANCED");
+        SharedLogic.PrintHelp("Jarvis habit delete", "to delete a habit");
         SharedLogic.PrintHelp("Jarvis habit disable", "to disable a habit");
         SharedLogic.PrintHelp("Jarvis habit re-enable", "to re-enable a disabled habit"); 
         SharedLogic.PrintHelp("Jarvis habit edittitle", "To edit the title of a habit");
@@ -61,6 +62,9 @@ public class HabitHandler : CommandHandlerBase
                 break;
             case "show":
                 selectedHander = new HabitShowCommand();
+                break;
+            case "delete":
+                selectedHander = new HabitDeleteCommand();
                 break;
             case "disable":
                 selectedHander = new HabitDisableCommand();
@@ -323,6 +327,47 @@ public class HabitStreakUpCommand : CommandHandlerBase
         return true;
     }
 }
+public class HabitDeleteCommand : CommandHandlerBase
+{
+    public HabitDeleteCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("Jarvis habit delete <id>", "To delete a habit");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("jarvis habit deelte 1", "deletes a habit with id 1");
+        return true;
+    }
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count != 1)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+
+        Habit hb = application.habitManager.GetHabit_Editable(id);
+
+        if (hb == null)
+        {
+            ConsoleWriter.Print("Habit with id : {0} not found!", id);
+            return true;
+        }
+
+        application.habitManager.RemoveHabit(hb);
+
+        ConsoleWriter.Print("Habit with id : {0} removed!", id);
+        return true;
+    }
+}
+
 
 public class HabitDisableCommand : CommandHandlerBase
 {
