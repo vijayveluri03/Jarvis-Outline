@@ -17,7 +17,7 @@ public class GameHandler : CommandHandlerBase
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-                SharedLogic.PrintHelp("Jarvis game snake ", "To play a simple game\n");
+                SharedLogic.PrintHelp("  >game snake ", "To play a simple game\n");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -34,7 +34,7 @@ public class GameHandler : CommandHandlerBase
                 break;
             default:
                 if(printErrors)
-                    ConsoleWriter.Print("Invalid command. Try 'jarvis game --help' for more information");
+                    ConsoleWriter.Print("Invalid command. Try 'game --help' for more information");
                 break;
         }
 
@@ -76,7 +76,7 @@ public class HungryEkansCommand : CommandHandlerBase
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("Jarvis game snake");
+        SharedLogic.PrintHelp("  >game snake");
         SharedLogic.FlushHelpText();
         return true;
     }
