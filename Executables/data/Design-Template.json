@@ -19,5 +19,14 @@
       "fun"
     ]
   },
+  "tasks": {
+    "statusList": [
+      "open",
+      "complete",
+      "discard",
+      "archieve"
+    ],
+    "defaultStatus": "open"
+  },
   "defaultExternalEditor": "notepad"
 }

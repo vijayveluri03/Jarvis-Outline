@@ -15,15 +15,12 @@ public class TaskHandler : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task add", "To add a task");
         SharedLogic.PrintHelp("Jarvis task list", "to list all the tasks");
 
-        SharedLogic.PrintHelp("Jarvis task delete", "to remove a task");
-        SharedLogic.PrintHelp("Jarvis task complete", "to complete a task");
-        SharedLogic.PrintHelp("Jarvis task discard", "to discard a task");
-        SharedLogic.PrintHelp("Jarvis task archieve", "to archieve a task.");
-        SharedLogic.PrintHelp("Jarvis task open", "to re-open a task");
+        SharedLogic.PrintHelp("Jarvis task setstatus", "to set a task as open/complete");
 
         SharedLogic.PrintHelp("\nLOG TIME");
         SharedLogic.PrintHelp("Jarvis task start", "to start time log");
@@ -45,6 +42,7 @@ public class TaskHandler : CommandHandlerBase
         SharedLogic.PrintHelp("All the commands have their own help section. Use the argument '--help'");
         SharedLogic.PrintHelp("Example - 'jarvis task add --help' for more examples on how to use it. Try it!");
         SharedLogic.PrintHelp("This works for every single command! Cheers!");
+        SharedLogic.FlushHelpText();
         return true;
     }
 
@@ -80,17 +78,8 @@ public class TaskHandler : CommandHandlerBase
             case "recordtimelog":
                 selectedHander = new TaskRecordTimeLogCommand();
                 break;
-            case "complete":
-                selectedHander = new TaskSetStatusCommand(Task.Status.Complete);
-                break;
-            case "discard":
-                selectedHander = new TaskSetStatusCommand(Task.Status.Discard);
-                break;
-            case "open":
-                selectedHander = new TaskSetStatusCommand(Task.Status.Open);
-                break;
-            case "archieve":
-                selectedHander = new TaskSetStatusCommand(Task.Status.Archieve);
+            case "setstatus":
+                selectedHander = new TaskSetStatusCommand();
                 break;
             case "report":
                 selectedHander = new TaskReportCommand();
@@ -150,22 +139,24 @@ public class TaskAddCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task add <category> <title>");
         SharedLogic.PrintHelp("Jarvis task add <category> <title> --story", "A story is collection of tasks" );
         SharedLogic.PrintHelp("Jarvis task add <category> <title> --collection", "Creates a collection instead of a task). Collections are to club many simple tasks. Like Grocery list. Easy to keep them in one place");
-        SharedLogic.PrintHelp("Jarvis task add <category> <title> --archieve", "To directly send it to archieve");
+        SharedLogic.PrintHelp("Jarvis task add <category> <title> --status:<status>", "To directly assign a status after creation");
         
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("jarvis task add chores \"Buy a T-Shirt\"");
         SharedLogic.PrintHelp("jarvis task add chores \"Shopping list\" --collection", "Creates a collection");
         SharedLogic.PrintHelp("jarvis task add chores \"Go to Goa!\" --story", "Creates a story");
+        SharedLogic.PrintHelp("jarvis task add chores \"Go to Goa!\" --story --status:complete", "Creates a story, and status is set as complete.");
 
         SharedLogic.PrintHelp("\nMORE INFO");
-        SharedLogic.PrintHelp("Category can be office,learn,chores,health. you can add more in the DesignData.json as per your need.");
+        SharedLogic.PrintHelp("Category can be office,learn,chores,health. you can add more in the Data/Design.json as per your need.");
         SharedLogic.PrintHelp("use --story or -s to create a story (instead of a task)");
         SharedLogic.PrintHelp("use --collection or -c to create a collection (instead of a task)");
-        SharedLogic.PrintHelp("use --archieve to send it straight to archieve category");
+        SharedLogic.FlushHelpText();
         return true;
     }
 
@@ -182,7 +173,6 @@ public class TaskAddCommand : CommandHandlerBase
         string title = arguments_ReadOnly[1];
         bool isStory = optionalArguments_ReadOnly.Contains("--story") || optionalArguments_ReadOnly.Contains("-s");
         bool isCollection = optionalArguments_ReadOnly.Contains("--collection") || optionalArguments_ReadOnly.Contains("-c");
-        bool isArchieve = optionalArguments_ReadOnly.Contains("--archieve");
 
         if (!application.DesignData.DoesCategoryExist(categories))
         {
@@ -191,12 +181,31 @@ public class TaskAddCommand : CommandHandlerBase
             return true;
         }
 
+
+        bool syntaxError = false;
+        string status = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--status", "", null, null, out syntaxError);
+
+        if (syntaxError)
+        {
+            ConsoleWriter.Print("syntax invalid for --status argument. please try again");
+            return true;
+        }
+
+        if (status.IsEmpty())
+            status = application.DesignData.DefaultStatus;
+
+        if (!application.DesignData.DoesStatusExist(status))
+        {
+            ConsoleWriter.Print("Invalid status. It has to be one of the following -> " + application.DesignData.GetStatusesAsCommaSeperatedString() + " or you can create new ones in Data/Design.json");
+            return true;
+        }
+
         var entry = SharedLogic.CreateNewTask(
             application.taskManager,
             categories,
             title,
             isStory ? Task.Type.Story : (isCollection ? Task.Type.Collection : Task.Type.Task),
-            isArchieve ? Task.Status.Archieve : Task.Status.Open);
+            status);
 
         application.taskManager.AddTask(entry);
 
@@ -215,11 +224,13 @@ public class TaskRemoveCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task remove <taskID> ", "Task id is the ID of the task you are trying to remove");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("jarvis task remove 1", "If you want to remove a task with ID : 1");
+        SharedLogic.FlushHelpText();
         return true;
     }
 
@@ -232,11 +243,10 @@ public class TaskRemoveCommand : CommandHandlerBase
             return true;
         }
 
-        string[] ids = arguments_ReadOnly[0].Split(',');
+        int[] ids = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
 
-        foreach (var idStr in ids)
+        foreach (var id in ids)
         {
-            int id = Utils.Conversions.Atoi(idStr, -1);
             if (application.taskManager.RemoveTaskIfExists(id))
             {
                 application.logManager.RemoveAllEntries(id);
@@ -259,12 +269,14 @@ public class TaskStartCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE :");
         SharedLogic.PrintHelp("Jarvis task start <taskID>", "Start time tracking");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("jarvis task start 1", "Start recording time for task 1");
-                
+        SharedLogic.FlushHelpText();
+
         return true;
     }
 
@@ -305,6 +317,7 @@ public class TaskStopCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task stop" , "Stops time tracking a task which is active. If no task is active, no action will be performed.");
         SharedLogic.PrintHelp("Jarvis task stop <comments>");
@@ -312,6 +325,7 @@ public class TaskStopCommand : CommandHandlerBase
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("jarvis task stop", "Stop recording time for a task which is active.");
+        SharedLogic.FlushHelpText();
         return true;
     }
 
@@ -369,11 +383,13 @@ public class TaskEditTitleCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task edittitle <taskID> <title>", "rename the title");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("jarvis task edittitle 1 \"Buy Blue T-shirt\"", "rename the title of task : 1 to 'Buy blue T-shirt'");
+        SharedLogic.FlushHelpText();
         return true;
     }
 
@@ -409,11 +425,13 @@ public class TaskActiveCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task active", "Shows if time tracking is active for any task");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("jarvis task active");
+        SharedLogic.FlushHelpText();
         return true;
     }
 
@@ -449,13 +467,10 @@ public class TaskListCommand : CommandHandlerBase
     }
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task list", "lists all the tasks which are open");
-        SharedLogic.PrintHelp("Jarvis task list --all", "Shows all the tasks including archieved, discarded and completed");
-        SharedLogic.PrintHelp("Jarvis task list --archieve", "Shows all the tasks archieved");
-        SharedLogic.PrintHelp("Jarvis task list --open", "Shows only the open tasks ( this is also the default setting )");
-        SharedLogic.PrintHelp("Jarvis task list --complete", "Shows only the tasks completed");
-        SharedLogic.PrintHelp("Jarvis task list --discard", "Shows only the tasks discard");
+        SharedLogic.PrintHelp("Jarvis task list --status:<status>", "Shows tasks with that status. See examples for how to use it.");
         SharedLogic.PrintHelp("Jarvis task list --story", "Shows only stories");
         SharedLogic.PrintHelp("Jarvis task list --collection", "Shows only collections");
         SharedLogic.PrintHelp("Jarvis task list --task", "Shows only tasks");
@@ -463,11 +478,13 @@ public class TaskListCommand : CommandHandlerBase
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("jarvis task list");
-        SharedLogic.PrintHelp("jarvis task list --all");
         SharedLogic.PrintHelp("jarvis task list --story");
-        SharedLogic.PrintHelp("jarvis task list --archieve", "Shows the archieved list");
-        SharedLogic.PrintHelp("jarvis task list --complete", "Shows the completed list");
+        SharedLogic.PrintHelp("Jarvis task list --status:archieve", "Shows all the tasks archieved");
+        SharedLogic.PrintHelp("Jarvis task list --status:open", "Shows only the open tasks ( this is also the default setting )");
+        SharedLogic.PrintHelp("Jarvis task list --status:complete", "Shows only the tasks completed");
+        SharedLogic.PrintHelp("Jarvis task list --status:discard", "Shows only the tasks discard");
         SharedLogic.PrintHelp("jarvis task list --cat:office", "filter by category");
+        SharedLogic.FlushHelpText();
         return true;
     }
 
@@ -481,31 +498,49 @@ public class TaskListCommand : CommandHandlerBase
         }
 
         int lineCount = 0;
-        int titleArea = 40;
+        int titleArea = (optionalArguments_ReadOnly.Contains("-e") || optionalArguments_ReadOnly.Contains("--expand")) ? 120 : 40;
         int categoryArea = 15;
+        int newLineAfter = 5;
 
-        bool isArchieved = optionalArguments_ReadOnly.Contains("--archieve");
-        bool isCompleted = optionalArguments_ReadOnly.Contains("--complete");
-        bool isDiscarded = optionalArguments_ReadOnly.Contains("--discard");
-        bool isOpen = optionalArguments_ReadOnly.Contains("--open");
+        string status;
+        {
+            bool syntaxError = false;
+            status = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--status", "", null, null, out syntaxError);
+
+            if (syntaxError)
+            {
+                ConsoleWriter.Print("syntax invalid for --status argument. please try again");
+                return true;
+            }
+
+            if ( !status.IsEmpty() && !application.DesignData.DoesStatusExist(status))
+            {
+                ConsoleWriter.Print("Invalid status. It has to be one of the following -> " + application.DesignData.GetStatusesAsCommaSeperatedString() + " or you can create new ones in Data/Design.json");
+                return true;
+            }
+        }
+
 
         bool isStory = optionalArguments_ReadOnly.Contains("--story");
         bool isCollection = optionalArguments_ReadOnly.Contains("--collection");
         bool isTask = optionalArguments_ReadOnly.Contains("--task");
 
-        bool syntaxErrorInCategoryFilter = false;
-        string categoryFilter = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--cat", string.Empty, null, null, out syntaxErrorInCategoryFilter);
-        if (syntaxErrorInCategoryFilter)
+        string categoryFilter;
         {
-            ConsoleWriter.Print("Invalid syntax for --cat argument.");
-            categoryFilter = string.Empty;
-            return true;
-        }
-        else if (categoryFilter != string.Empty && !application.DesignData.DoesCategoryExist(categoryFilter))
-        {
-            ConsoleWriter.Print("Invalid category");
-            categoryFilter = string.Empty;
-            return true;
+            bool syntaxErrorInCategoryFilter = false;
+            categoryFilter = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--cat", string.Empty, null, null, out syntaxErrorInCategoryFilter);
+            if (syntaxErrorInCategoryFilter)
+            {
+                ConsoleWriter.Print("Invalid syntax for --cat argument.");
+                categoryFilter = string.Empty;
+                return true;
+            }
+            else if (categoryFilter != string.Empty && !application.DesignData.DoesCategoryExist(categoryFilter))
+            {
+                ConsoleWriter.Print("Invalid category");
+                categoryFilter = string.Empty;
+                return true;
+            }
         }
 
         // By default all are shown
@@ -513,32 +548,14 @@ public class TaskListCommand : CommandHandlerBase
             isStory = isTask = isCollection = true;
 
         // by default only open ones are shown, unless specified in which case open ones are not shown. 
-        bool showOpenByDefault = true;
-
-        if (isArchieved || isCompleted || isDiscarded)
-            showOpenByDefault = false;
-        if (isOpen)
-            showOpenByDefault = true;
-
-        if (optionalArguments_ReadOnly.Contains("--all") || optionalArguments_ReadOnly.Contains("-a"))
-        {
-            isArchieved = isCompleted = isDiscarded = isOpen = true;
-        }
+        if (status.IsEmpty())
+            status = application.DesignData.DefaultStatus;
 
         Dictionary<string, List<Task>> filteredTasks = new Dictionary<string, List<Task>>();
 
         foreach (var task in application.taskManager.Data.entries)
         {
-            if (task.IsOpen && !showOpenByDefault)
-                continue;
-
-            if (task.IsComplete && !isCompleted)
-                continue;
-
-            if (task.IsDiscarded && !isDiscarded)
-                continue;
-
-            if (task.IsArchieved && !isArchieved)
+            if (task.status != status)
                 continue;
 
             if (task.IsTask && !isTask)
@@ -603,13 +620,13 @@ public class TaskListCommand : CommandHandlerBase
                     lineCount++;
 
                     //@todo
-                    if (lineCount % 5 == 0)
+                    if (lineCount % newLineAfter == 0)
                         ConsoleWriter.Print();
                 }
             }
         }
         else
-            ConsoleWriter.Print("No tasks found! Try adding a few using \"jarvis add\"");
+            ConsoleWriter.Print("No tasks found!");
 
         return true;
     }
@@ -625,11 +642,13 @@ public class TaskShowCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task show <taskID>", "Show more details of a task");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("jarvis task show 1", "Show more details for task : 1" );
+        SharedLogic.FlushHelpText();
         return true;
     }
 
@@ -716,84 +735,94 @@ public class TaskShowCommand : CommandHandlerBase
 
 public class TaskSetStatusCommand : CommandHandlerBase
 {
-    public TaskSetStatusCommand(Task.Status status)
+    public TaskSetStatusCommand()
     {
-        this.status = status;
     }
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("Jarvis task complete <taskID> <time>", "time is in hours. the amount of work which was put into it. example : jarvis task complete 1 1 | this is when you completed task with ID 1 in 1 hour");
-        SharedLogic.PrintHelp("Jarvis task archieve <taskID> ", "Archieve a task");
-        SharedLogic.PrintHelp("Jarvis task discard <taskID> ", "Discard a task");
+        SharedLogic.PrintHelp("Jarvis task setstatus <taskID> <status>", "This will set the status to open/complete/discard");
+        SharedLogic.PrintHelp("Jarvis task setstatus <taskID> <status> --time:<time>", "If you want to also record the time taken");
+
+        SharedLogic.PrintHelp("\nWHAT'S STATUS");
+        SharedLogic.PrintHelp("You can set the following status to a task/story/collection : ");
+        SharedLogic.PrintHelp("open");
+        SharedLogic.PrintHelp("complete");
+        SharedLogic.PrintHelp("archieve");
+        SharedLogic.PrintHelp("discard");
+        SharedLogic.PrintHelp("You can add new statuses or change any of the existing statuses in the data/Design.Json. Feel free to add more as you wish!");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("jarvis task complete 1 2", "Task with ID 1 is now completed and a time of 2 hours is recorded");
-        SharedLogic.PrintHelp("jarvis task archieve 1", "Task with ID 1 is archieved");
-        SharedLogic.PrintHelp("jarvis task discard 1", "Task with ID 1 is discarded");
+        SharedLogic.PrintHelp("jarvis task setstatus 1 complete", "Task with ID 1 is now completed");
+        SharedLogic.PrintHelp("jarvis task setstatus 1 complete --time:2", "Task with ID 1 is now completed. 2 hours is recorded to the task log");
+        SharedLogic.PrintHelp("jarvis task setstatus 1 open", "Task with ID 1 is open");
+        SharedLogic.PrintHelp("jarvis task setstatus 1 discard", "Task with ID 1 is discarded");
+        SharedLogic.FlushHelpText();
 
         return true;
     }
 
     protected override bool Run(Jarvis.JApplication application)
     {
-        if (status == Task.Status.Archieve || status == Task.Status.Open || status == Task.Status.Discard)
+        if (arguments_ReadOnly.Count != 2)
         {
-            if (arguments_ReadOnly.Count != 1)
-            {
-                ConsoleWriter.Print("Invalid arguments! \n");
-                ShowHelp();
-                return true;
-            }
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
         }
-        if (status == Task.Status.Complete)
+        
+        int[] ids = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
+        string status = arguments_ReadOnly[1];
+
+        bool syntaxError = false;
+        int timeInHours = Utils.CLI.ExtractIntFromCLIParameter(optionalArguments_ReadOnly, "--time", 0, null, null, out syntaxError);
+
+        if (syntaxError)
         {
-            if (arguments_ReadOnly.Count != 2)
-            {
-                ConsoleWriter.Print("Invalid arguments! Please provide ID and hours \n");
-                ShowHelp();
-                return true;
-            }
+            ConsoleWriter.Print("syntax invalid for --time argument. please try again");
+            return true;
         }
 
-        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
-        float timeInHours = 0;
-        if (status == Task.Status.Complete)
-            timeInHours = Utils.Conversions.Atof(arguments_ReadOnly[1]);
-
-        if (application.taskManager.DoesTaskExist(id))
+        if ( !application.DesignData.DoesStatusExist(status))
         {
-            var task = application.taskManager.GetTask_Editable(id);
-            task.SetStatus(this.status);
-            ConsoleWriter.Print("Task with id : {0} marked as {1}", id, task.StatusString);
+            ConsoleWriter.Print("Invalid status. It has to be one of the following -> " + application.DesignData.GetStatusesAsCommaSeperatedString() + " or you can create new ones in Data/Design.json");
+            return true;
+        }
 
-            if (status == Task.Status.Complete)
+        foreach (var id in ids)
+        {
+            if (application.taskManager.DoesTaskExist(id))
             {
-                //@ todo - Clean this code up. move it somewhere else. 
-                // Add record to log manager
+                var task = application.taskManager.GetTask_Editable(id);
+                task.SetStatus(status);
+                ConsoleWriter.Print("Task with id : {0} marked as {1}", id, task.StatusString);
+
+                if (timeInHours > 0)
                 {
-                    LogEntry le = new LogEntry();
-                    le.id = id;
-                    le.date = DateTime.Now;
-                    le.comment = "";
-                    le.timeTakenInMinutes = (int)(timeInHours * 60);
+                    //@ todo - Clean this code up. move it somewhere else. 
+                    // Add record to log manager
+                    {
+                        LogEntry le = new LogEntry();
+                        le.id = id;
+                        le.date = DateTime.Now;
+                        le.comment = "";
+                        le.timeTakenInMinutes = (int)(timeInHours * 60);
 
-                    application.logManager.AddEntry(le);
+                        application.logManager.AddEntry(le);
 
-                    ConsoleWriter.Print("Total time spent on this task {0} hours ", Utils.Time.MinutesToHoursString( application.logManager.GetTotalTimeSpentInMins(id) ));
+                        ConsoleWriter.Print("Total time spent on this task {0} hours ", Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentInMins(id)));
+                    }
                 }
-
             }
-
+            else
+                ConsoleWriter.Print("Task not found with id : " + id);
         }
-        else
-            ConsoleWriter.Print("Task not found with id : " + id);
 
         return true;
     }
 
-    private Task.Status status;
 }
 
 
@@ -805,12 +834,14 @@ public class TaskRecordTimeLogCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task recordtimelog <taskID> <time in hours> <comments>", "Force record a time log ( instead of start and stop )");
         SharedLogic.PrintHelp("Jarvis task recordtimelog <taskID> <time in hours> <comments> <--when:-1>  ", "How many days before ?. -1 this timelog is of yesterday. -2 for a day before that. by default, this is 0, as in the time log is created for today.");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("jarvis task recordtimelog 1 2", "A time of 2 hours is recorded for a Task with ID 1");
+        SharedLogic.FlushHelpText();
 
         return true;
     }
@@ -828,10 +859,10 @@ public class TaskRecordTimeLogCommand : CommandHandlerBase
         int timeTakenInHours = Utils.Conversions.Atoi(arguments_ReadOnly[1]);
         string comments = arguments_ReadOnly.Count() > 2 ? arguments_ReadOnly[2] : string.Empty;
 
-        bool syntaxErrorForWhenArgument = false;
-        int deltaTime = Utils.CLI.ExtractIntFromCLIParameter(optionalArguments_ReadOnly, "--when", 0, null, null, out syntaxErrorForWhenArgument);
+        bool syntaxError = false;
+        int deltaTime = Utils.CLI.ExtractIntFromCLIParameter(optionalArguments_ReadOnly, "--when", 0, null, null, out syntaxError);
 
-        if (syntaxErrorForWhenArgument)
+        if (syntaxError)
         {
             ConsoleWriter.Print("syntax invalid for --when argument. please try again");
             return true;
@@ -894,8 +925,10 @@ public class TaskReportCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task report", "Shows the report with all the work done in the last week");
+        SharedLogic.FlushHelpText();
         return true;
     }
 
@@ -967,12 +1000,14 @@ public class TaskCatNotesCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task cat <taskID>", "Prints the notes of a task. You can also use printnote instead of cat");
         SharedLogic.PrintHelp("Jarvis task printnote <taskID>", "Same as cat");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("jarvis task cat 1", "show the notes for task 1");
+        SharedLogic.FlushHelpText();
         return true;
     }
 
@@ -1014,18 +1049,20 @@ public class TaskEditNoteCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task note <taskID>", "Opens notes for a task.");
         SharedLogic.PrintHelp("Jarvis task note <taskID> --ext:<editorname>", "provide external editor name of your choice, to open the notes in. Example : code or vim");
         SharedLogic.PrintHelp("Jarvis task note <taskID> --append:<Message>", "Append a message directly to a note");
         SharedLogic.PrintHelp("Jarvis task note <taskID> --appendlog:<Message>", "Appends a message directly to a note, with a timestamp");
         SharedLogic.PrintHelp("\nADVANCED");
-        SharedLogic.PrintHelp("You can change the default editor in the DesignData.json under 'defaultExternalEditor'");
+        SharedLogic.PrintHelp("You can change the default editor in the Data/Design.json under 'defaultExternalEditor'");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("jarvis task note 1", "Edit the notes for task : 1");
         SharedLogic.PrintHelp("jarvis task note 1 --ext:code", "Edit the notes for task : 1, within the visual studio code");
         SharedLogic.PrintHelp("jarvis task note 1 --append:\"Buy milk\"", "Add 'buy milk' to the notes!");
+        SharedLogic.FlushHelpText();
 
         return true;
     }
@@ -1109,8 +1146,10 @@ public class TaskDeleteNoteCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis task deletenote <taskID>", "deletes the notes");
+        SharedLogic.FlushHelpText();
         return true;
     }
 

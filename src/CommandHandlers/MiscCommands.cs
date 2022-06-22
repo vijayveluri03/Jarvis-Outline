@@ -15,9 +15,10 @@ public class GameHandler : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
                 SharedLogic.PrintHelp("Jarvis game snake ", "To play a simple game\n");
-                
+        SharedLogic.FlushHelpText();
         return true;
     }
 
@@ -73,8 +74,10 @@ public class HungryEkansCommand : CommandHandlerBase
 
     protected override bool ShowHelp()
     {
+        SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("Jarvis game snake");
+        SharedLogic.FlushHelpText();
         return true;
     }
 

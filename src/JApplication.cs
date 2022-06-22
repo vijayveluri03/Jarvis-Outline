@@ -45,7 +45,7 @@ namespace Jarvis
             ConsoleWriter.PushColor(designData.DefaultColorForText);
 
             userData = JUserData.Load();
-            taskManager = new TaskManager();
+            taskManager = new TaskManager(designData.DefaultStatus, designData.DoesStatusExist);
             habitManager = new HabitManager();
             logManager = new TaskTimeManagement();
             journalManager = new JournalManager();
