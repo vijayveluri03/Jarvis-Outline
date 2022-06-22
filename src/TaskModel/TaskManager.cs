@@ -7,14 +7,6 @@ namespace Jarvis
 {
     public class Task
     {
-        public enum Status
-        {
-            Open,
-            Complete,
-            Archieve,
-            Discard
-        }
-
         public enum Type
         {
             Task,
@@ -30,18 +22,13 @@ namespace Jarvis
         // Unique ID
         public int id;
 
-        public Status taskStatus = Status.Open;
+        public string status = string.Empty;
 
         public Type type = Type.Task;
 
         [JsonIgnore] public bool isDirty = false;
 
         // Getters 
-        [JsonIgnore] public bool IsOpen { get { return taskStatus == Status.Open; } }
-        [JsonIgnore] public bool IsComplete { get { return taskStatus == Status.Complete; } }
-        [JsonIgnore] public bool IsDiscarded { get { return taskStatus == Status.Discard; } }
-        [JsonIgnore] public bool IsArchieved { get { return taskStatus == Status.Archieve; } }
-        [JsonIgnore] public bool IsClosed { get { return IsDiscarded || IsComplete; } }
         [JsonIgnore] public bool IsTask { get { return type == Type.Task; } }
         [JsonIgnore] public bool IsStory { get { return type == Type.Story; } }
         [JsonIgnore] public bool IsCollection { get { return type == Type.Collection; } }
@@ -51,12 +38,8 @@ namespace Jarvis
         {
             get
             {
-                if (IsOpen) return "Open";
-                if (IsComplete) return "Completed";
-                if (IsDiscarded) return "Discarded";
-                if (IsArchieved) return "Archieved";
-                Utils.Assert(false);
-                return "Unknown";
+                if (status.IsEmpty()) return "Unknown";
+                return status;
             }
         }
         [JsonIgnore]
@@ -73,11 +56,7 @@ namespace Jarvis
         }
 
         // Setters ( kinda )
-        public void SetAsComplete() { taskStatus = Status.Complete; }
-        public void SetAsDiscarded() { taskStatus = Status.Discard; }
-        public void SetAsArchive() { taskStatus = Status.Archieve; }
-        public void SetStatus(Status status) { taskStatus = status; }
-
+        public void SetStatus( string status) { this.status = status; }
     }
 
     // List of all the Entries
@@ -92,14 +71,14 @@ namespace Jarvis
         public TaskCollection Data { get; private set; }
         private bool dirty = false;
 
-        public TaskManager()
+        public TaskManager( string defaultStatus, System.Func<string, bool> isStatusValid )
         {
             if (Utils.CreateFileIfNotExit(JConstants.TASKS_FILENAME, JConstants.TASKS_TEMPLATE_FILENAME))
             {
                 ConsoleWriter.Print("Task data copied from Template. This happens on the first launch.");
             }
-
-            Load(JConstants.TASKS_FILENAME);
+            LoadData(JConstants.TASKS_FILENAME);
+            PostLoad(defaultStatus, isStatusValid);
         }
 
         public void AddTask(Task ed)
@@ -123,7 +102,7 @@ namespace Jarvis
         }
 
 
-        private void Load(string fileName)
+        private void LoadData(string fileName)
         {
             using (StreamReader r = new StreamReader(fileName))
             {
@@ -131,13 +110,21 @@ namespace Jarvis
                 TaskCollection data = JsonConvert.DeserializeObject<TaskCollection>(json);
                 Data = data;
             }
+        }
 
+        private void PostLoad(string defaultStatus, System.Func<string, bool> isStatusValid)
+        {
+            // This is for data migration for older versions or from previous statuses to the new ones.
             foreach (Task ed in Data.entries)
             {
-                if (ed.id >= availableID)
-                    availableID = ed.id + 1;
+                if (ed.status.IsEmpty() || !isStatusValid( ed.status))
+                {
+                    ed.SetStatus(defaultStatus);
+                    dirty = true;
+                }
             }
         }
+
         public void Save()
         {
             if (!dirty)
@@ -181,13 +168,15 @@ namespace Jarvis
             return GetTask_ReadOnly(id);
         }
 
-        public int GetAvailableID()
+        public int GenerateNextAvailableID()
         {
-            return availableID++;
+            for ( int id = 1; id < int.MaxValue; id ++ )
+            {
+                if (!DoesTaskExist(id))
+                    return id;
+            }
+            return -1;
         }
-
-        // Private 
-        private int availableID = 1;
     }
 
 }

@@ -99,7 +99,6 @@ namespace Jarvis
             if (command != lastCommandUsed)
             {
                 lastCommandUsed = command;
-                dirty = true;
             }
         }
 
@@ -140,11 +139,18 @@ namespace Jarvis
         {
             [JsonProperty] public string[] listOfCategories;
         }
+        [Serializable]
+        public class Tasks
+        {
+            [JsonProperty] public string[] statusList;
+            [JsonProperty] public string defaultStatus;
+        }
 
         public static JDesignData instance { get; private set; }
 
         [JsonProperty] public LookAndFeelProperties lookAndFeel;
         [JsonProperty] public Categories categories;
+        [JsonProperty] public Tasks tasks;
         [JsonProperty] public string defaultExternalEditor = "code";
 
         // Getters        
@@ -155,6 +161,10 @@ namespace Jarvis
         [JsonIgnore] public ConsoleColor HighlightColorForText_4 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_4); } } // unused
         [JsonIgnore] public ConsoleColor HighlightColorForText_5 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_5); } } // unused
         [JsonIgnore] public ConsoleColor HighlightColorForText_Disabled { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_disabled); } }    // used to represent disabled or inactive stuff
+        [JsonIgnore] private HashSet<string> cachedTaskStatuses = new HashSet<string>();
+
+        [JsonIgnore] public string DefaultStatus { get { return tasks.defaultStatus; } }
+
 
         public static JDesignData Load()
         {
@@ -168,7 +178,27 @@ namespace Jarvis
                 string json = r.ReadToEnd();
                 JDesignData data = JsonConvert.DeserializeObject<JDesignData>(json);
                 instance = data;
+                instance.PostLoad();
                 return data;
+            }
+        }
+
+        private void PostLoad()
+        {
+            foreach (var status in tasks.statusList)
+            {
+                if (cachedTaskStatuses.Contains(status))
+                {
+                    ConsoleWriter.Print("Error : Statuses are repeated in Data/Design.Json");
+                    //@todo raise exception ?
+                    continue;
+                }
+                cachedTaskStatuses.Add(status);
+            }
+            if (!cachedTaskStatuses.Contains(tasks.defaultStatus))
+            {
+                ConsoleWriter.Print("Error : Default status is invalid in Data/Design.Json. It should be one of the pre defined statuses.");
+                //@todo raise exception ?
             }
         }
 
@@ -181,6 +211,12 @@ namespace Jarvis
             }
             return false;
         }
+
+        public bool DoesStatusExist(string category)
+        {
+            return cachedTaskStatuses.Contains(category);
+        }
+
         public bool DoesCategoryExist(string[] categories)
         {
             Utils.Assert(categories.Length > 0);
@@ -190,6 +226,11 @@ namespace Jarvis
                     return false;
             }
             return true;
+        }
+
+        public string GetStatusesAsCommaSeperatedString()
+        {
+            return Utils.Conversions.ArrayToString(tasks.statusList, true);
         }
     }
 }

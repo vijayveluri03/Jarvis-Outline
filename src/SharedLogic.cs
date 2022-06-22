@@ -7,17 +7,19 @@ namespace Jarvis
 {
     public static class SharedLogic
     {
-        public static Task CreateNewEntry(TaskManager taskManager)
-        {
-            Task ed = new Task();
-            ed.id = taskManager.GetAvailableID();
-            return ed;
-        }
 
-        public static Task CreateNewTask(TaskManager taskManager, string[] category, string title, Task.Type type, Task.Status status = Task.Status.Open)
+        public static Task CreateNewTask(TaskManager taskManager, string[] category, string title, Task.Type type, string status)
         {
             Task ed = new Task();
-            ed.id = taskManager.GetAvailableID();
+            ed.id = taskManager.GenerateNextAvailableID();
+
+#if RELEASE_LOG
+            if ( ed.id > 1000 )
+            {
+                ConsoleWriter.Print("Looks like you have a lot of tasks. Considering doing some maintenance!");
+            }
+#endif
+
             ed.categories = category;
             ed.title = title;
             ed.type = type;
@@ -46,20 +48,62 @@ namespace Jarvis
             return ed;
         }
 
-        public static void PrintHelp( string statement, string comments = "", int reservedSpaceForStatement = 30, int fallbackReserveSpaceIfOverflowing = 60 ) 
+        #region UTILS TO PRINT HELP TEXT
+
+        public static void StartCachingHelpText()
+        {
+#if RELEASE_LOG
+            if ( cachedHelpText.Count > 0)
+            {
+                ConsoleWriter.Print("You have unflushed messages in the queue!");
+            }
+#endif
+            currentReservedLengthForHelpText = DEFAULT_RESERVED_SPACE_FOR_HELP;
+            isHelpTextCachingStarted = true;
+        }
+
+        public static void FlushHelpText()
+        {
+            foreach(Pair<string, string> pair in cachedHelpText)
+            {
+                ConsoleWriter.Print("{0," + -currentReservedLengthForHelpText + "} {1}", pair.First, pair.Second);
+            }
+            cachedHelpText.Clear();
+            isHelpTextCachingStarted = false;
+        }
+
+        public static void PrintHelp( string statement, string comments = "", bool addToCache = true, int reservedSpaceForStatement = DEFAULT_RESERVED_SPACE_FOR_HELP, int fallbackReserveSpaceIfOverflowing = FALLBACK_RESERVED_SPACE_FOR_HELP ) 
         {
             if ( !comments.IsEmpty())
                 comments = "| " + comments;
 
-            if ( statement.Length >= reservedSpaceForStatement )
-                reservedSpaceForStatement = fallbackReserveSpaceIfOverflowing;
+            if (addToCache)
+            {
+#if RELEASE_LOG
+                if (!isHelpTextCachingStarted)
+                    ConsoleWriter.Print("Warning: Help Text caching is not started!");
+#endif
+                if (!comments.IsEmpty() && statement.Length >= reservedSpaceForStatement && currentReservedLengthForHelpText < fallbackReserveSpaceIfOverflowing)
+                    currentReservedLengthForHelpText = statement.Length + 1;
 
-            ConsoleWriter.Print("{0," + -reservedSpaceForStatement + "} {1}", statement, comments);
+                cachedHelpText.Add(new Pair<string, string>(statement, comments));
+            }
+            else
+            {
+                if (statement.Length >= reservedSpaceForStatement)
+                    reservedSpaceForStatement = fallbackReserveSpaceIfOverflowing;
+
+                ConsoleWriter.Print("{0," + -reservedSpaceForStatement + "} {1}", statement, comments);
+            }
         }
 
-        public static class UI
-        {
 
-        }
+        private static List<Pair<string, string>> cachedHelpText = new List<Pair<string, string>>();
+        private const int DEFAULT_RESERVED_SPACE_FOR_HELP = 30;
+        private const int FALLBACK_RESERVED_SPACE_FOR_HELP = 60;
+        private static int currentReservedLengthForHelpText = 0;
+        private static bool isHelpTextCachingStarted = false;
+
+        #endregion // UTILS TO PRINT HELP TEXT
     }
 }

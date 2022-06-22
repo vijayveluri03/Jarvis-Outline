@@ -250,6 +250,22 @@ public static class Utils
 
     public static class Conversions
     {
+        public static string[] Split(string str, char delimitter = ',')
+        {
+            return str.Split(',');
+        }
+        public static int[] SplitAndAtoi(string str, char delimitter = ',')
+        {
+            string[] subStrings = str.Split(',');
+            int[] subInts = new int[subStrings.Length];
+
+            for( int i = 0; i < subStrings.Length; i++ )
+            {
+                subInts[i] = int.Parse(subStrings[i]);
+            }
+            return subInts;
+        }
+
         public static string ArrayToString(List<string> array, bool useDelimitter, char delimitter = ',')
         {
             StringBuilder sb = new StringBuilder();
@@ -259,9 +275,13 @@ public static class Utils
                 if (useDelimitter)
                     sb.Append(delimitter);
             }
+
+            // Just to remove the last bit of dilimitter. @todo - find a better way 
+            if (useDelimitter)
+                sb.Remove(sb.Length - 1, 1);
             return sb.ToString();
         }
-        // @todo - I guess we can simply use ienumerable, instead of two seperate methods. 
+
         public static string ArrayToString(string[] array, bool useDelimitter, char delimitter = ',')
         {
             StringBuilder sb = new StringBuilder();
