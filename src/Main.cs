@@ -37,7 +37,12 @@ class Program
         // Why do we need custom interface ?
         // 1. to not have to type jarvis all the time. 2. loads and saves the data only once for an entire session.
 
-        bool customCLI = args.Contains<string>("--enter") || args.Contains<string>("--doyourthing");
+        bool customCLI = false;
+        customCLI = args.Contains<string>("--enter") || args.Contains<string>("--doyourthing");
+#if FORCE_JARVIS_CLI
+        customCLI = true;
+#endif
+
         bool firstTime = true;
         var commandSelector = new CommandSelector();
 
@@ -58,9 +63,14 @@ class Program
 
                 if ( firstTime )
                 {
-                    ConsoleWriter.Print("Entering JARVIS mode. You can enter any jarvis command with out the prefix 'jarvis' here." + 
+                    ConsoleWriter.Print(
+#if !FORCE_JARVIS_CLI
+                        "Entering JARVIS mode. You can enter any jarvis command with out the prefix 'jarvis' here." +
                         "\nExample - JARVIS>task list (or) JARVIS>habit list" +
-                        "\nto exit, simply enter 'exit' with out the quotes\n" );
+#else
+                        "Welcome! This is jarvis mode, where only jarvis commands would work. Try '--help' for more information." +
+#endif
+                        "\nTo exit, simply try 'exit' with out the quotes. Cheers!\n");
                         
                     firstTime = false;
                 }

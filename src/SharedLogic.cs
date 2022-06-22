@@ -83,7 +83,7 @@ namespace Jarvis
                 if (!isHelpTextCachingStarted)
                     ConsoleWriter.Print("Warning: Help Text caching is not started!");
 #endif
-                if (!comments.IsEmpty() && statement.Length >= reservedSpaceForStatement && currentReservedLengthForHelpText < fallbackReserveSpaceIfOverflowing)
+                if (!comments.IsEmpty() && statement.Length >= currentReservedLengthForHelpText && currentReservedLengthForHelpText < fallbackReserveSpaceIfOverflowing)
                     currentReservedLengthForHelpText = statement.Length + 1;
 
                 cachedHelpText.Add(new Pair<string, string>(statement, comments));
@@ -99,7 +99,7 @@ namespace Jarvis
 
 
         private static List<Pair<string, string>> cachedHelpText = new List<Pair<string, string>>();
-        private const int DEFAULT_RESERVED_SPACE_FOR_HELP = 30;
+        private const int DEFAULT_RESERVED_SPACE_FOR_HELP = 20;
         private const int FALLBACK_RESERVED_SPACE_FOR_HELP = 60;
         private static int currentReservedLengthForHelpText = 0;
         private static bool isHelpTextCachingStarted = false;

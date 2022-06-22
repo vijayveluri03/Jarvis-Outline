@@ -57,13 +57,12 @@ public class CommandSelector : CommandHandlerBase
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("Jarvis task <arguments>", "To manage your tasks. try 'Jarvis task' or 'Jarvis task --help' for more information");
-        SharedLogic.PrintHelp("Jarvis habit <arguments>", "To manage your habits. try 'Jarvis habit' or 'Jarvis habit --help' for more information");
-        SharedLogic.PrintHelp("Jarvis journal <arguments>", "To manage your journal. try 'Jarvis journal' or 'Jarvis journal --help' for more information");
-        SharedLogic.PrintHelp("Jarvis game snake", "For a fun game :) ");
+        SharedLogic.PrintHelp("  >task <arguments>", "To manage your tasks. try 'task --help' for more information");
+        SharedLogic.PrintHelp("  >habit <arguments>", "To manage your habits. try 'habit --help' for more information");
+        SharedLogic.PrintHelp("  >journal <arguments>", "To manage your journal. 'journal --help' for more information");
+        SharedLogic.PrintHelp("  >game snake", "For a fun game :) ");
 
         SharedLogic.PrintHelp("\nTIPS");
-        SharedLogic.PrintHelp("Try jarvis --enter", "This is a CLI interface built to for jarvis!");
         SharedLogic.PrintHelp("If you add Jarvis to your system path, you can access jarvis from anywhere in the command prompt ( or terminal )");
 
         SharedLogic.PrintHelp("\nDesigned by Vijay Veluri!");

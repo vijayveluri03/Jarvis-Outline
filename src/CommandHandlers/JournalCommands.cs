@@ -17,21 +17,21 @@ public class JournalHandler : CommandHandlerBase
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("Jarvis journal add ", "To add a new journal entry");
-        SharedLogic.PrintHelp("Jarvis journal list", "To list all the journal entries");
-        SharedLogic.PrintHelp("Jarvis journal show", "Show more details of an entry");
+        SharedLogic.PrintHelp("  >journal add ", "To add a new journal entry");
+        SharedLogic.PrintHelp("  >journal list", "To list all the journal entries");
+        SharedLogic.PrintHelp("  >journal show", "Show more details of an entry");
 
         SharedLogic.PrintHelp("\nADVANCED"); 
-        SharedLogic.PrintHelp("Jarvis journal edittitle ", "To edit the title of an entry");
+        SharedLogic.PrintHelp("  >journal edittitle ", "To edit the title of an entry");
 
         SharedLogic.PrintHelp("\nNOTES"); 
-        SharedLogic.PrintHelp("Jarvis journal note" , "Open journal entry");
-        SharedLogic.PrintHelp("Jarvis journal printnote", "Print the journal entry");
-        SharedLogic.PrintHelp("Jarvis journal cat", "Same as printnotes");
+        SharedLogic.PrintHelp("  >journal note" , "Open journal entry");
+        SharedLogic.PrintHelp("  >journal printnote", "Print the journal entry");
+        SharedLogic.PrintHelp("  >journal cat", "Same as printnotes");
 
         SharedLogic.PrintHelp("\nHELP");
         SharedLogic.PrintHelp("All the commands have their own help section. Use the argument '--help'");
-        SharedLogic.PrintHelp("Example - 'jarvis journal add --help' for more examples on how to use it. Try it!");
+        SharedLogic.PrintHelp("Example - 'journal add --help' for more examples on how to use it. Try it!");
         SharedLogic.PrintHelp("This works for every single command! Cheers!");
         SharedLogic.FlushHelpText();
         return true;
@@ -65,7 +65,7 @@ public class JournalHandler : CommandHandlerBase
                 break;
             default:
                 if(printErrors)
-                    ConsoleWriter.Print("Invalid command. Try 'jarvis journal --help' for more information");
+                    ConsoleWriter.Print("Invalid command. Try 'journal --help' for more information");
                 break;
         }
 
@@ -99,10 +99,10 @@ public class JournalAddCommand : CommandHandlerBase
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("Jarvis journal add <title>", "This will create a new journal entry. use 'Jarvis journal note' command to open and edit it!");
+        SharedLogic.PrintHelp("  >journal add <title>", "This will create a new journal entry. use 'journal note' command to open and edit it!");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("jarvis journal add \"Stuff that i did today!\"", "This will create a journal entry. Use jarvis journal note <id> to open and edit it" );
+        SharedLogic.PrintHelp("  >journal add \"Stuff that i did today!\"", "This will create a journal entry. Use jarvis journal note <id> to open and edit it" );
         SharedLogic.FlushHelpText();
 
         return true;
@@ -121,7 +121,7 @@ public class JournalAddCommand : CommandHandlerBase
         var entry = SharedLogic.CreateNewJournalEntry(application.journalManager, title);
         application.journalManager.AddJournal(entry);
 
-        ConsoleWriter.Print("New Journal entry added with id : {0}. You can open/edit the notes using 'jarvis journal note'", entry.id);
+        ConsoleWriter.Print("New Journal entry added with id : {0}. You can open/edit the notes using 'journal note'", entry.id);
         return true;
     }
 }
@@ -136,10 +136,10 @@ public class JournalListCommand : CommandHandlerBase
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("Jarvis journal list", "lists all the entries\n" );
+        SharedLogic.PrintHelp("  >journal list", "lists all the entries\n" );
 
         SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("jarvis journal list");
+        SharedLogic.PrintHelp("  >journal list");
         SharedLogic.FlushHelpText();
 
         return true;
@@ -184,7 +184,7 @@ public class JournalListCommand : CommandHandlerBase
             }
         }
         else
-            ConsoleWriter.Print("No journals found! Try adding a few using \"jarvis journal add\"");
+            ConsoleWriter.Print("No journals found! Try adding a few using \"journal add\"");
 
         return true;
     }
@@ -201,10 +201,10 @@ public class JournalShowCommand : CommandHandlerBase
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("Jarvis journal show <id>", "This will show all the details of a journal!");
+        SharedLogic.PrintHelp("  >journal show <id>", "This will show all the details of a journal!");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("jarvis journal show 1", "Shows more details for journal with id 1");
+        SharedLogic.PrintHelp("  >journal show 1", "Shows more details for journal with id 1");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -263,10 +263,10 @@ public class JournalEditTitleCommand : CommandHandlerBase
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("Jarvis journal edittitle <id> <new title>", "Renames the entry title");
+        SharedLogic.PrintHelp("  >journal edittitle <id> <new title>", "Renames the entry title");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("jarvis journal edittitle 1 \"Wake up at 7 AM\"", "rename the title of journal : 1 to 'Wake up at 7 AM'");
+        SharedLogic.PrintHelp("  >journal edittitle 1 \"Wake up at 7 AM\"", "rename the title of journal : 1 to 'Wake up at 7 AM'");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -308,11 +308,11 @@ public class JournalCatNotesCommand : CommandHandlerBase
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("Jarvis journal cat <journalID>", "Prints the notes of a journal entry. You can also use printnote instead of cat");
-        SharedLogic.PrintHelp("Jarvis journal printnote <journalID>", "Same as cat");
+        SharedLogic.PrintHelp("  >journal cat <journalID>", "Prints the notes of a journal entry. You can also use printnote instead of cat");
+        SharedLogic.PrintHelp("  >journal printnote <journalID>", "Same as cat");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("jarvis journal cat 1", "Prints the notes for journal with id 1");
+        SharedLogic.PrintHelp("  >journal cat 1", "Prints the notes for journal with id 1");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -357,18 +357,18 @@ public class JournalEditNoteCommand : CommandHandlerBase
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("Jarvis journal note <journalID>", "Opens notes for a journal");
-        SharedLogic.PrintHelp("Jarvis journal note <journalID> --ext:<editorname>", "Provide external editor name of your choice. Example : code or vim");
-        SharedLogic.PrintHelp("Jarvis journal note <journalID> --append:<Message>", "Append the message directly to the note");
-        SharedLogic.PrintHelp("Jarvis journal note <journalID> --appendlog:<Message>", "Append the message directly to the note, with a timestamp!");
+        SharedLogic.PrintHelp("  >journal note <journalID>", "Opens notes for a journal");
+        SharedLogic.PrintHelp("  >journal note <journalID> --ext:<editorname>", "Provide external editor name of your choice. Example : code or vim");
+        SharedLogic.PrintHelp("  >journal note <journalID> --append:<Message>", "Append the message directly to the note");
+        SharedLogic.PrintHelp("  >journal note <journalID> --appendlog:<Message>", "Append the message directly to the note, with a timestamp!");
 
         SharedLogic.PrintHelp("\nMORE INFO :");
         SharedLogic.PrintHelp("You can change the default editor (to open the notes) in the Data/Design.json under 'defaultExternalEditor'");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("jarvis journal note 1", "Edit the notes for journal : 1");
-        SharedLogic.PrintHelp("jarvis journal note 1 --ext:code", "Edit the notes for journal : 1, within the visual studio code");
-        SharedLogic.PrintHelp("jarvis journal note 1 --append:\"Buy milk\"", "Add 'buy milk' to the notes!");
+        SharedLogic.PrintHelp("  >journal note 1", "Edit the notes for journal : 1");
+        SharedLogic.PrintHelp("  >journal note 1 --ext:code", "Edit the notes for journal : 1, within the visual studio code");
+        SharedLogic.PrintHelp("  >journal note 1 --append:\"Buy milk\"", "Add 'buy milk' to the notes!");
         SharedLogic.FlushHelpText();
         return true;
     }
