@@ -1123,6 +1123,7 @@ public class TaskEditNoteCommand : CommandHandlerBase
         SharedLogic.PrintHelp("  >task note <taskID> --ext:<editorname>", "provide external editor name of your choice, to open the notes in. Example : code or vim");
         SharedLogic.PrintHelp("  >task note <taskID> --append:<Message>", "Append a message directly to a note");
         SharedLogic.PrintHelp("  >task note <taskID> --appendlog:<Message>", "Appends a message directly to a note, with a timestamp");
+        SharedLogic.PrintHelp("  >task note <taskID> --appendtask:<taskID>", "Appends the title of a task directly to a note with a prefix task:");
         SharedLogic.PrintHelp("\nADVANCED");
         SharedLogic.PrintHelp("You can change the default editor in the Data/Design.json under 'defaultExternalEditor'");
 
@@ -1155,7 +1156,7 @@ public class TaskEditNoteCommand : CommandHandlerBase
         }
 
         syntaxError = false;
-        string appendMessage = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--append", string.Empty, null, null, out syntaxError);
+        string appendMessage = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--append:", string.Empty, null, null, out syntaxError);
 
         if (syntaxError)
         {
@@ -1163,17 +1164,40 @@ public class TaskEditNoteCommand : CommandHandlerBase
             return true;
         }
 
-        string appendLogMessage = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--appendlog", string.Empty, null, null, out syntaxError);
-
-        if (syntaxError)
+        if (appendMessage.IsEmpty())
         {
-            ConsoleWriter.Print("Invalid syntax for --appendlog argument.");
-            return true;
+            string appendLogMessage = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--appendlog:", string.Empty, null, null, out syntaxError);
+
+            if (syntaxError)
+            {
+                ConsoleWriter.Print("Invalid syntax for --appendlog argument.");
+                return true;
+            }
+            if (!appendLogMessage.IsEmpty())
+            {
+                appendMessage = "Log on " + DateTime.Now.ToShortDateString() + " " + appendLogMessage;
+            }
         }
 
-        if (!appendLogMessage.IsEmpty())
+        if (appendMessage.IsEmpty())
         {
-            appendMessage = "Log on " + DateTime.Now.ToShortDateString() + " " + appendLogMessage;
+            int taskID = Utils.CLI.ExtractIntFromCLIParameter(optionalArguments_ReadOnly, "--appendtask:", -1, null, null, out syntaxError);
+
+            if (syntaxError)
+            {
+                ConsoleWriter.Print("Invalid syntax for --appendlog argument.");
+                return true;
+            }
+            if (taskID != -1)
+            {
+                Task task = application.taskManager.GetTask_ReadOnly(taskID);
+                if (task == null)
+                {
+                    ConsoleWriter.Print("Task not found with id:" + taskID);
+                    return true;
+                }
+                appendMessage = "Task:" + task.title;
+            }
         }
 
         if (application.taskManager.DoesTaskExist(id))
