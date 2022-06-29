@@ -113,7 +113,18 @@ public static class Utils
             else
                 return defaultValue;
         }
-        public static int ExtractIntFromCLIParameter(List<string> arguments, string startingSubstring, int defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
+
+        public static int ExtractIntFromCLIParameter(List<string> arguments, string startingSubString, int defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
+        {
+            return ExtractIntFromCLIParameter(arguments, new List<string> { startingSubString }, defaul, itemNotFoundCB, syntaxNotValidCB, out syntaxError); 
+        }
+
+        public static string ExtractStringFromCLIParameter(List<string> arguments, string startingSubString, string defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
+        {
+            return ExtractStringFromCLIParameter(arguments, new List<string> { startingSubString }, defaul, itemNotFoundCB, syntaxNotValidCB, out syntaxError);
+        }
+
+        public static int ExtractIntFromCLIParameter(List<string> arguments, List<string> startingSubstring, int defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
         {
             syntaxError = false;
             string subString = ExtractStringFromCLIParameter(arguments, startingSubstring, string.Empty, itemNotFoundCB, syntaxNotValidCB, out syntaxError);
@@ -121,35 +132,39 @@ public static class Utils
                 return defaul;
             return Utils.Conversions.Atoi(subString);
         }
-        public static string ExtractStringFromCLIParameter(List<string> arguments, string startingSubstring, string defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
+        public static string ExtractStringFromCLIParameter(List<string> arguments, List<string> startingSubStrings, string defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
         {
             syntaxError = false;
-            string listItem = arguments.FindItemWithSubstring(startingSubstring);
-            if (listItem == null || listItem == string.Empty)
+            foreach (var startingSubstring in startingSubStrings)
             {
-                if (itemNotFoundCB != null)
-                    itemNotFoundCB();
-                return defaul;
-            }
-            if (!listItem.Contains(":"))
-            {
-                syntaxError = true;
-                if (syntaxNotValidCB != null)
-                    syntaxNotValidCB();
-                return defaul;
-            }
+                string listItem = arguments.FindItemWithSubstring(startingSubstring);
+                if (listItem == null || listItem == string.Empty)
+                {
+                    continue;
+                }
+                if (!listItem.Contains(":"))
+                {
+                    syntaxError = true;
+                    if (syntaxNotValidCB != null)
+                        syntaxNotValidCB();
+                    return defaul;
+                }
 
-            string[] subStrings = listItem.Split(':');
+                string[] subStrings = listItem.Split(':');
 
-            if (subStrings.Length <= 1)
-            {
-                syntaxError = true;
-                if (syntaxNotValidCB != null)
-                    syntaxNotValidCB();
-                return defaul;
+                if (subStrings.Length <= 1)
+                {
+                    syntaxError = true;
+                    if (syntaxNotValidCB != null)
+                        syntaxNotValidCB();
+                    return defaul;
+                }
+
+                return subStrings[1];
             }
-
-            return subStrings[1];
+            if (itemNotFoundCB != null)
+                itemNotFoundCB();
+            return defaul;
         }
         public static void ExecuteCommandInConsole(string command, bool runSilently = true, bool printOutput = true, bool createNewWindow = true, bool waitForProgramToExit = false )
         {

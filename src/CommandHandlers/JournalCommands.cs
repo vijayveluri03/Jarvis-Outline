@@ -163,7 +163,8 @@ public class JournalListCommand : CommandHandlerBase
         // output Heading 
         if (journals.Count > 0)
         {
-            ConsoleWriter.Print("{0, -4} {1,-" + titleArea + "} {2, -15}",
+            ConsoleWriter.PrintInColor("{0, -4} {1,-" + titleArea + "} {2, -15}",
+                application.DesignData.HighlightColorForText,
                 "ID", "TITLE", "LOGGED ON"
                 );
 

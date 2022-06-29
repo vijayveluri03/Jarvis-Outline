@@ -20,6 +20,7 @@ public class TaskHandler : CommandHandlerBase
         SharedLogic.PrintHelp("  >task add", "To add a task");
         SharedLogic.PrintHelp("  >task list", "to list all the tasks");
 
+        SharedLogic.PrintHelp("  >task status", "See count of tasks per status");
         SharedLogic.PrintHelp("  >task setstatus", "to set a task as open/complete");
 
         SharedLogic.PrintHelp("\nLOG TIME");
@@ -77,6 +78,9 @@ public class TaskHandler : CommandHandlerBase
                 break;
             case "recordtimelog":
                 selectedHander = new TaskRecordTimeLogCommand();
+                break;
+            case "status":
+                selectedHander = new TaskStatusCommand();
                 break;
             case "setstatus":
                 selectedHander = new TaskSetStatusCommand();
@@ -144,7 +148,7 @@ public class TaskAddCommand : CommandHandlerBase
         SharedLogic.PrintHelp("  >task add <category> <title>");
         SharedLogic.PrintHelp("  >task add <category> <title> --story", "A story is collection of tasks" );
         SharedLogic.PrintHelp("  >task add <category> <title> --collection", "Creates a collection instead of a task). Collections are to club many simple tasks. Like Grocery list. Easy to keep them in one place");
-        SharedLogic.PrintHelp("  >task add <category> <title> --status:<status>", "To directly assign a status after creation");
+        SharedLogic.PrintHelp("  >task add <category> <title> --status:<status>", "To directly assign a status after creation. (shortform -s)");
         
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("  >task add chores \"Buy a T-Shirt\"");
@@ -183,7 +187,7 @@ public class TaskAddCommand : CommandHandlerBase
 
 
         bool syntaxError = false;
-        string status = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--status", "", null, null, out syntaxError);
+        string status = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, new List<string> { "--status", "-s" }, "", null, null, out syntaxError);
 
         if (syntaxError)
         {
@@ -470,7 +474,7 @@ public class TaskListCommand : CommandHandlerBase
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("  >task list", "lists all the tasks which are open");
-        SharedLogic.PrintHelp("  >task list --status:<status>", "Shows tasks with that status. See examples for how to use it.");
+        SharedLogic.PrintHelp("  >task list --status:<status>", "Shows tasks with that status. See examples for how to use it. ( shortform -s)");
         SharedLogic.PrintHelp("  >task list --story", "Shows only stories");
         SharedLogic.PrintHelp("  >task list --collection", "Shows only collections");
         SharedLogic.PrintHelp("  >task list --task", "Shows only tasks");
@@ -505,7 +509,7 @@ public class TaskListCommand : CommandHandlerBase
         string status;
         {
             bool syntaxError = false;
-            status = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--status", "", null, null, out syntaxError);
+            status = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, new List<string> { "--status", "-s" }, "", null, null, out syntaxError);
 
             if (syntaxError)
             {
@@ -513,7 +517,7 @@ public class TaskListCommand : CommandHandlerBase
                 return true;
             }
 
-            if ( !status.IsEmpty() && !application.DesignData.DoesStatusExist(status))
+            if ( !status.IsEmpty() && !application.DesignData.DoesStatusExistFuzzySearch(status))
             {
                 ConsoleWriter.Print("Invalid status. It has to be one of the following -> " + application.DesignData.GetStatusesAsCommaSeperatedString() + " or you can create new ones in Data/Design.json");
                 return true;
@@ -524,6 +528,7 @@ public class TaskListCommand : CommandHandlerBase
         bool isStory = optionalArguments_ReadOnly.Contains("--story");
         bool isCollection = optionalArguments_ReadOnly.Contains("--collection");
         bool isTask = optionalArguments_ReadOnly.Contains("--task");
+        bool isAll = optionalArguments_ReadOnly.Contains("--all");
 
         string categoryFilter;
         {
@@ -555,20 +560,23 @@ public class TaskListCommand : CommandHandlerBase
 
         foreach (var task in application.taskManager.Data.entries)
         {
-            if (task.status != status)
-                continue;
+            if (!isAll)
+            {
+                if (!task.status.ToLower().Contains(status.ToLower()))
+                    continue;
 
-            if (task.IsTask && !isTask)
-                continue;
+                if (task.IsTask && !isTask)
+                    continue;
 
-            if (task.IsStory && !isStory)
-                continue;
+                if (task.IsStory && !isStory)
+                    continue;
 
-            if (task.IsCollection && !isCollection)
-                continue;
+                if (task.IsCollection && !isCollection)
+                    continue;
 
-            if (categoryFilter != string.Empty && !task.categories.Contains(categoryFilter))
-                continue;
+                if (categoryFilter != string.Empty && !task.categories.Contains(categoryFilter))
+                    continue;
+            }
 
             foreach (var category in task.categories)
             {
@@ -583,7 +591,8 @@ public class TaskListCommand : CommandHandlerBase
         // output Heading 
         if (filteredTasks.Count() > 0)
         {
-            ConsoleWriter.Print("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
+            ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
+                application.DesignData.HighlightColorForText,
                 "ID", "DEPT", "TITLE", "STATUS", "TIME SPENT"
                 );
 
@@ -886,6 +895,65 @@ public class TaskRecordTimeLogCommand : CommandHandlerBase
         else
             ConsoleWriter.Print("Task not found with id : " + id);
 
+        return true;
+    }
+}
+
+public class TaskStatusCommand : CommandHandlerBase
+{
+    public TaskStatusCommand()
+    {
+    }
+
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("  >task status", "Shows count of tasks for each status");
+        SharedLogic.FlushHelpText();
+        return true;
+    }
+
+    protected override bool Run(Jarvis.JApplication application)
+    {
+        if (arguments_ReadOnly.Count != 0)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        Dictionary<string, int> countByStatus = new Dictionary<string, int>();
+        foreach (var task in application.taskManager.Data.entries)
+        {
+            if(!countByStatus.ContainsKey(task.status))
+                countByStatus[task.status] = 0;
+
+            countByStatus[task.status]++;
+        }
+
+
+        // output Heading 
+        if (countByStatus.Count() > 0)
+        {
+            ConsoleWriter.PrintInColor("{0, -30} {1, -15}",
+                application.DesignData.HighlightColorForText,
+                "STATUS", "TASK COUNT"
+                );
+
+            int lineCount = 0;
+            foreach (var status in countByStatus)
+            {
+                ConsoleWriter.Print("{0, -30} {1, -15}", status.Key, status.Value);
+
+                lineCount++;
+                if (lineCount % 5 == 0)
+                    ConsoleWriter.EmptyLine();
+            }
+        }
+        else
+            ConsoleWriter.Print("No tasks found!");
         return true;
     }
 }

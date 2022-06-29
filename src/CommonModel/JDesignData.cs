@@ -212,10 +212,24 @@ namespace Jarvis
             return false;
         }
 
-        public bool DoesStatusExist(string category)
+        public bool DoesStatusExist(string status)
         {
-            return cachedTaskStatuses.Contains(category);
+            return cachedTaskStatuses.Contains(status);
         }
+
+        public bool DoesStatusExistFuzzySearch(string status)
+        {
+                status = status.ToLower();
+                foreach (var st in cachedTaskStatuses)
+                {
+                    if (st.ToLower().Contains(status))
+                    {
+                        return true;
+                    }
+                }
+                return false;
+        }
+
 
         public bool DoesCategoryExist(string[] categories)
         {

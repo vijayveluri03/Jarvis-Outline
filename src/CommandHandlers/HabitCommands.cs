@@ -228,7 +228,8 @@ public class HabitListCommand : CommandHandlerBase
         // output Heading 
         if (habits.Count > 0)
         {
-            ConsoleWriter.Print("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -10} {5, -15}",
+            ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -10} {5, -15}",
+                application.DesignData.HighlightColorForText,
                 "ID", "DEPT", "TITLE", "LAST UPDATED", "STREAK", "SUCCESS"
                 );
 
