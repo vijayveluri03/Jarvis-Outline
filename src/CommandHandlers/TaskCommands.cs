@@ -1124,8 +1124,10 @@ public class TaskEditNoteCommand : CommandHandlerBase
         SharedLogic.PrintHelp("  >task note <taskID> --append:<Message>", "Append a message directly to a note");
         SharedLogic.PrintHelp("  >task note <taskID> --appendlog:<Message>", "Appends a message directly to a note, with a timestamp");
         SharedLogic.PrintHelp("  >task note <taskID> --appendtask:<taskID>", "Appends the title of a task directly to a note with a prefix task:");
+
         SharedLogic.PrintHelp("\nADVANCED");
         SharedLogic.PrintHelp("You can change the default editor in the Data/Design.json under 'defaultExternalEditor'");
+        SharedLogic.PrintHelp("you can use '--nowait' to have jarvis not wait for the notes to be closed.");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("  >task note 1", "Edit the notes for task : 1");
@@ -1146,6 +1148,8 @@ public class TaskEditNoteCommand : CommandHandlerBase
         }
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        bool waitForTheProgramToEnd = !optionalArguments_ReadOnly.Contains("--nowait");
+
         bool syntaxError = false;
         string externalProgram = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--ext", string.Empty, null, null, out syntaxError);
 
@@ -1219,7 +1223,7 @@ public class TaskEditNoteCommand : CommandHandlerBase
                 Utils.OpenAFileInEditor(
                     JConstants.PATH_TO_TASKS_NOTE + id,
                     externalProgram.IsEmpty() ? application.DesignData.defaultExternalEditor : externalProgram,
-                    true /* wait for the program to end*/);
+                    waitForTheProgramToEnd);
                 ConsoleWriter.Print("Closing Notes");
             }
         }
