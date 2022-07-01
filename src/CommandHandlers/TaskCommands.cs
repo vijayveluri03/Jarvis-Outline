@@ -20,8 +20,9 @@ public class TaskHandler : CommandHandlerBaseWithUtility
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("  >task add", "To add a task");
         SharedLogic.PrintHelp("  >task list", "to list all the tasks");
+        SharedLogic.PrintHelp("  >task complete", "to complete a task");
 
-        SharedLogic.PrintHelp("  >task status", "See count of tasks per status");
+        SharedLogic.PrintHelp("  >task status", "See number of tasks per status");
         SharedLogic.PrintHelp("  >task setstatus", "to set a task as open/complete");
 
         SharedLogic.PrintHelp("\nLOG TIME - to track your time per task");
@@ -68,6 +69,10 @@ public class TaskHandler : CommandHandlerBaseWithUtility
             case "delete":
             case "remove":
                 selectedHander = new TaskRemoveCommand();
+                break;
+            case "complete":
+            case "done":
+                selectedHander = new TaskCompleteCommand();
                 break;
             case "starttimelog":
                 selectedHander = new TaskStartCommand();
@@ -295,6 +300,52 @@ public class TaskCloneCommand : CommandHandlerBaseWithUtility
     }
 }
 
+public class TaskCompleteCommand : CommandHandlerBaseWithUtility
+{
+    public TaskCompleteCommand()
+    {
+
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp("USAGE");
+        SharedLogic.PrintHelp("  >task complete <taskID> ", "Task id is the ID of the task which is done");
+
+        SharedLogic.PrintHelp("\nEXAMPLES");
+        SharedLogic.PrintHelp("  >task complete 1", "If you want to complete a task with ID : 1");
+        SharedLogic.FlushHelpText();
+        return true;
+    }
+
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 1)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int[] ids = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
+
+        foreach (var id in ids)
+        {
+
+            if (application.taskManager.DoesTaskExist(id))
+            {
+                var task = application.taskManager.GetTask_Editable(id);
+                task.SetStatus(application.DesignData.CompletedStatus);
+                ConsoleWriter.Print("Task with id : {0} marked as {1}", id, task.StatusString);
+            }
+            else
+                ConsoleWriter.Print("Task not found with id : " + id);
+        }
+
+        return true;
+    }
+}
 
 public class TaskRemoveCommand : CommandHandlerBaseWithUtility
 {

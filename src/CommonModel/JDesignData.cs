@@ -144,6 +144,7 @@ namespace Jarvis
         {
             [JsonProperty] public string[] statusList;
             [JsonProperty] public string defaultStatus;
+            [JsonProperty] public string completeStatus;
         }
 
         public static JDesignData instance { get; private set; }
@@ -164,7 +165,7 @@ namespace Jarvis
         [JsonIgnore] private HashSet<string> cachedTaskStatuses = new HashSet<string>();
 
         [JsonIgnore] public string DefaultStatus { get { return tasks.defaultStatus; } }
-
+        [JsonIgnore] public string CompletedStatus { get { return tasks.completeStatus; } }
 
         public static JDesignData Load()
         {
@@ -198,6 +199,11 @@ namespace Jarvis
             if (!cachedTaskStatuses.Contains(tasks.defaultStatus))
             {
                 ConsoleWriter.Print("Error : Default status is invalid in Data/Design.Json. It should be one of the pre defined statuses.");
+                //@todo raise exception ?
+            }
+            if (!cachedTaskStatuses.Contains(tasks.completeStatus))
+            {
+                ConsoleWriter.Print("Error : Complete status is invalid in Data/Design.Json. It should be one of the pre defined statuses.");
                 //@todo raise exception ?
             }
         }
