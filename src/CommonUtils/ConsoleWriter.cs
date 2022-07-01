@@ -80,6 +80,10 @@ public static class ConsoleWriter
     {
         Print("");
     }
+    public static void Clear()
+    {
+        Console.Clear();
+    }
 
     private static Stack<ConsoleColor> foregroundTextColorStack = new Stack<ConsoleColor>();
 }

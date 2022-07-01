@@ -73,7 +73,7 @@ class Program
 #else
                         "Welcome! This is jarvis mode, where only jarvis commands would work. Try '--help' for more information." +
 #endif
-                        "\nTo exit, simply try 'exit' with out the quotes. Cheers!\n");
+                        "\nTo exit, simply try 'exit' with out the quotes. You can also try 'save' or 'clear'. Cheers!\n");
                         
                     firstTime = false;
                 }
@@ -88,6 +88,12 @@ class Program
                 if (customJarvisCommand.ToLower() == "save")
                 {
                     app.Save();
+                    continue;
+                }
+
+                if (customJarvisCommand.ToLower() == "cls" || customJarvisCommand.ToLower() == "clear")
+                {
+                    ConsoleWriter.Clear();
                     continue;
                 }
 
