@@ -1341,7 +1341,7 @@ public class TaskEditNoteCommand : TaskCommandHandlerBase
             }
             else
             {
-                
+                OpenNote(application, id, externalProgram, waitForTheProgramToEnd, true);
             }
         }
         else
