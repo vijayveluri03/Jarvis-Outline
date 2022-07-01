@@ -249,7 +249,7 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
                     habit.id,
                     (habit.categories != null && habit.categories.Length > 0 ? Utils.Conversions.ArrayToString(habit.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                     habit.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/)
-                        + (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + habit.id) ? "+(N)" : ""),
+                        + (notes.DoesNoteExist(habit.id) ? "+(N)" : ""),
                     habit.GetLastUpdatedOn().ShortForm(),
                     habit.GetStreak(),
                     habit.GetSuccessRate(),
@@ -571,7 +571,7 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        // Print Task details
+        // Print Habit details
         {
             // Heading
             ConsoleWriter.PrintInColor("{0, -4} {1,-15} {2}",
@@ -594,7 +594,7 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
                 "AVG IN LAST MONTH : {5,-15}",
                 hb.GetStreak(),
                 hb.StatusStr,
-                (Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + hb.id) ? "YES" : "NO"),
+                (notes.DoesNoteExist(hb.id) ? "YES" : "NO"),
                 hb.GetLastUpdatedOn().ShortFormWithDay(),
                 (hb.GetStreak() >= 7 && hb.GetEntryCount() >= 7 ? hb.GetEntryCount(7 - 1) / 7.0f : "Need more data to show this"),
                 (hb.GetStreak() >= 30 && hb.GetEntryCount() >= 30 ? hb.GetEntryCount(28 - 1) / 7.0f : "Need more data to show this")
@@ -685,12 +685,12 @@ public class HabitCatNotesCommand : CommandHandlerBaseWithUtility
         
         if (application.habitManager.DoesHabitExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + id) )
+            if (!notes.DoesNoteExist(id))
                 ConsoleWriter.Print("Notes not found for the habit with id : {0}", id);
-            else 
+            else
             {
                 ConsoleWriter.PrintInColor("NOTES :", application.DesignData.HighlightColorForText);
-                ConsoleWriter.PrintText(Utils.FileHandler.Read(JConstants.PATH_TO_HABITS_NOTE + id));
+                ConsoleWriter.PrintText(notes.GetNoteContent(id));
             }
         }
         else
@@ -718,6 +718,7 @@ public class HabitEditNoteCommand : CommandHandlerBaseWithUtility
 
         SharedLogic.PrintHelp("\nADVANCED");
         SharedLogic.PrintHelp("You can change the default editor (to open your notes in) in the Data/Design.json under 'defaultExternalEditor'");
+        SharedLogic.PrintHelp("you can use '--nowait' to have jarvis not wait for the notes to be closed.");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("  >habit note 1", "Edit the notes for habit : 1");
@@ -738,6 +739,8 @@ public class HabitEditNoteCommand : CommandHandlerBaseWithUtility
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
         bool syntaxError = false;
+        bool waitForTheProgramToEnd = !optionalArguments_ReadOnly.Contains("--nowait");
+
         string externalProgram = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--ext", string.Empty, null, null, out syntaxError );
 
         if ( syntaxError ) 
@@ -770,25 +773,16 @@ public class HabitEditNoteCommand : CommandHandlerBaseWithUtility
 
         if (application.habitManager.DoesHabitExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + id) )
-            {
-                Utils.FileHandler.Create(JConstants.PATH_TO_HABITS_NOTE + id);
-                ConsoleWriter.Print("New note created");
-            }
+            notes.CreateNoteIfUnavailable(id);
 
-            if ( !appendMessage.IsEmpty() )
+            if (!appendMessage.IsEmpty())
             {
                 ConsoleWriter.Print("Message appended to the notes");
-                Utils.AppendToFile(JConstants.PATH_TO_HABITS_NOTE+ id, appendMessage );
+                notes.AppendToNote(id, appendMessage);
             }
-            else 
+            else
             {
-                ConsoleWriter.Print("Opening Notes");
-                Utils.OpenAFileInEditor(
-                    JConstants.PATH_TO_HABITS_NOTE + id, 
-                    externalProgram.IsEmpty() ? application.DesignData.defaultExternalEditor : externalProgram,
-                    true /* wait for the program to end*/);
-                ConsoleWriter.Print("Closing Notes");
+                notes.OpenNote(application, id, externalProgram, waitForTheProgramToEnd, true);
             }
         }
         else
@@ -827,9 +821,9 @@ public class HabitDeleteNoteCommand : CommandHandlerBaseWithUtility
 
         if (application.habitManager.DoesHabitExist(id))
         {
-            if( Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + id) )
+            if (notes.DoesNoteExist(id))
             {
-                Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_HABITS_NOTE + id);
+                notes.RemoveNote(id);
                 ConsoleWriter.Print("Notes deleted");
             }
             else

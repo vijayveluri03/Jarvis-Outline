@@ -231,7 +231,7 @@ public class JournalShowCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        // Print Task details
+        // Print journal details
         {
             // Heading
             ConsoleWriter.PrintInColor("{0, -4} {1}",
@@ -335,12 +335,12 @@ public class JournalCatNotesCommand : CommandHandlerBaseWithUtility
         
         if (application.journalManager.DoesJournalExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_JOURNAL_NOTE + id) )
+            if( !notes.DoesNoteExist(id))
                 ConsoleWriter.Print("Notes not found for the journal with id : {0}", id);
             else 
             {
                 ConsoleWriter.PrintInColor("NOTES :", application.DesignData.HighlightColorForText);
-                ConsoleWriter.PrintText(Utils.FileHandler.Read(JConstants.PATH_TO_JOURNAL_NOTE + id));
+                ConsoleWriter.PrintText(notes.GetNoteContent(id));
             }
         }
         else
@@ -366,8 +366,9 @@ public class JournalEditNoteCommand : CommandHandlerBaseWithUtility
         SharedLogic.PrintHelp("  >journal note <journalID> --append:<Message>", "Append the message directly to the note");
         SharedLogic.PrintHelp("  >journal note <journalID> --appendlog:<Message>", "Append the message directly to the note, with a timestamp!");
 
-        SharedLogic.PrintHelp("\nMORE INFO :");
+        SharedLogic.PrintHelp("\nADVANCED :");
         SharedLogic.PrintHelp("You can change the default editor (to open the notes) in the Data/Design.json under 'defaultExternalEditor'");
+        SharedLogic.PrintHelp("you can use '--nowait' to have jarvis not wait for the notes to be closed.");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("  >journal note 1", "Edit the notes for journal : 1");
@@ -388,6 +389,9 @@ public class JournalEditNoteCommand : CommandHandlerBaseWithUtility
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
         bool syntaxError = false;
+        bool waitForTheProgramToEnd = !optionalArguments_ReadOnly.Contains("--nowait");
+
+
         string externalProgram = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--ext", string.Empty, null, null, out syntaxError );
 
         if ( syntaxError ) 
@@ -420,25 +424,16 @@ public class JournalEditNoteCommand : CommandHandlerBaseWithUtility
 
         if (application.journalManager.DoesJournalExist(id))
         {
-            if( !Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_JOURNAL_NOTE + id) )
-            {
-                Utils.FileHandler.Create(JConstants.PATH_TO_JOURNAL_NOTE + id);
-                ConsoleWriter.Print("New note created");
-            }
+            notes.CreateNoteIfUnavailable(id);
 
-            if ( !appendMessage.IsEmpty() )
+            if (!appendMessage.IsEmpty())
             {
                 ConsoleWriter.Print("Message appended to the notes");
-                Utils.AppendToFile(JConstants.PATH_TO_JOURNAL_NOTE + id, appendMessage );
+                notes.AppendToNote(id, appendMessage);
             }
-            else 
+            else
             {
-                ConsoleWriter.Print("Opening Notes");
-                Utils.OpenAFileInEditor(
-                    JConstants.PATH_TO_JOURNAL_NOTE + id, 
-                    externalProgram.IsEmpty() ? application.DesignData.defaultExternalEditor : externalProgram,
-                    true /* wait for the program to end*/);
-                ConsoleWriter.Print("Closing Notes");
+                notes.OpenNote(application, id, externalProgram, waitForTheProgramToEnd, true);
             }
         }
         else
