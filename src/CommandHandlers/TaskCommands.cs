@@ -24,14 +24,14 @@ public class TaskHandler : CommandHandlerBaseWithUtility
         SharedLogic.PrintHelp("  >task status", "See count of tasks per status");
         SharedLogic.PrintHelp("  >task setstatus", "to set a task as open/complete");
 
-        SharedLogic.PrintHelp("\nLOG TIME");
-        SharedLogic.PrintHelp("  >task start", "to start time log");
-        SharedLogic.PrintHelp("  >task stop", "to stop time log");
-        SharedLogic.PrintHelp("  >task active", "to show if any time record is in progress");
-        SharedLogic.PrintHelp("  >task recordtimelog", "to record an offline task");
+        SharedLogic.PrintHelp("\nLOG TIME - to track your time per task");
+        SharedLogic.PrintHelp("  >task starttimelog", "to start time logging");
+        SharedLogic.PrintHelp("  >task stoptimelog", "to stop time logging");
+        SharedLogic.PrintHelp("  >task active", "to show all the tasks with time logging on");
+        SharedLogic.PrintHelp("  >task addtimelog", "to directly add a timelog for a task (with out start and stop)");
 
         SharedLogic.PrintHelp("\nADVANCED");
-        SharedLogic.PrintHelp("  >task show", "to show more details of a task");
+        SharedLogic.PrintHelp("  >task moreinfo", "to show more details of a task");
         SharedLogic.PrintHelp("  >task report", "to show all the work done in the last day/week");
         SharedLogic.PrintHelp("  >task edittitle", "To edit the title of a task");
         SharedLogic.PrintHelp("  >task clone", "To clone a task!");
@@ -69,19 +69,19 @@ public class TaskHandler : CommandHandlerBaseWithUtility
             case "remove":
                 selectedHander = new TaskRemoveCommand();
                 break;
-            case "start":
+            case "starttimelog":
                 selectedHander = new TaskStartCommand();
                 break;
-            case "stop":
+            case "stoptimelog":
                 selectedHander = new TaskStopCommand();
                 break;
             case "active":
                 selectedHander = new TaskActiveCommand();
                 break;
-            case "show":
+            case "moreinfo":
                 selectedHander = new TaskShowCommand();
                 break;
-            case "recordtimelog":
+            case "addtimelog":
                 selectedHander = new TaskRecordTimeLogCommand();
                 break;
             case "status":
@@ -358,10 +358,10 @@ public class TaskStartCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE :");
-        SharedLogic.PrintHelp("  >task start <taskID>", "Start time tracking");
+        SharedLogic.PrintHelp("  >task starttimelog <taskID>", "Start time logging for a task");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task start 1", "Start recording time for task 1");
+        SharedLogic.PrintHelp("  >task starttimelog 1", "Start logging time for task 1");
         SharedLogic.FlushHelpText();
 
         return true;
@@ -387,7 +387,7 @@ public class TaskStartCommand : CommandHandlerBaseWithUtility
         if (application.taskManager.DoesTaskExist(id))
         {
             application.UserData.StartTask(id, DateTime.Now);
-            ConsoleWriter.Print("Started progress on Task with id : {0} -> {1}", id, application.taskManager.GetTask_ReadOnly(id).title);
+            ConsoleWriter.Print("Started logging time for Task with id : {0} -> {1}", id, application.taskManager.GetTask_ReadOnly(id).title);
         }
         else
             ConsoleWriter.Print("Task not found with id : " + id);
@@ -406,12 +406,12 @@ public class TaskStopCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task stop" , "Stops time tracking a task which is active. If no task is active, no action will be performed.");
-        SharedLogic.PrintHelp("  >task stop <comments>");
-        SharedLogic.PrintHelp("  >task stop --discard", "to ignore the recording alltogether");
+        SharedLogic.PrintHelp("  >task stoptimelog" , "Stops time tracking/logging for a task which is active. If no task is active, no action will be performed.");
+        SharedLogic.PrintHelp("  >task stoptimelog <comments>");
+        SharedLogic.PrintHelp("  >task stoptimelog --discard", "Stop tracking, but do not save the log. Discard it!");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task stop", "Stop recording time for a task which is active.");
+        SharedLogic.PrintHelp("  >task stoptimelog", "Stop logging time for a task which is active.");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -439,7 +439,7 @@ public class TaskStopCommand : CommandHandlerBaseWithUtility
 
         if (discard)
         {
-            ConsoleWriter.Print("Stopped and discarded progress on Task with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
+            ConsoleWriter.Print("Stopped and discarded progress for Task with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
             return true;
         }
 
@@ -455,7 +455,7 @@ public class TaskStopCommand : CommandHandlerBaseWithUtility
         }
 
         ConsoleWriter.Print("Stopped progress on Task with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
-        ConsoleWriter.Print("Total time recorded : {0}", Utils.Time.MinutesToHoursString(timeTakenInMinutes));
+        ConsoleWriter.Print("Total time logged : {0}", Utils.Time.MinutesToHoursString(timeTakenInMinutes));
 
         return true;
     }
@@ -541,7 +541,7 @@ public class TaskActiveCommand : CommandHandlerBaseWithUtility
         int timeTakenInMinutes = (int)(DateTime.Now - application.UserData.taskProgress.startTime).TotalMinutes;
 
         ConsoleWriter.Print("Task in progress, with id : {0} -> {1} ", id, application.taskManager.GetTask_ReadOnly(id).title);
-        ConsoleWriter.Print("Total time recorded : {0}", Utils.Time.MinutesToHoursString(timeTakenInMinutes));
+        ConsoleWriter.Print("Total time logged : {0}", Utils.Time.MinutesToHoursString(timeTakenInMinutes));
         return true;
     }
 }
@@ -699,14 +699,15 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
                     else
                         Utils.Assert(false);
 
-                    ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15}",
+                    ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -15} {5}",
                         textColor,
                         task.id,
                         (task.categories != null && task.categories.Length > 0 ? Utils.Conversions.ArrayToString(task.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                         task.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/)
                             + (notes.DoesNoteExist(task.id) ? "+(N)" : ""),
-                        (isInProgress ? "In Progress" : task.StatusString),
-                        (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) + " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentInMins(task.id)) + " )")
+                        task.StatusString,
+                        (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") + ("(" + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentInMins(task.id)) + "h)"),
+                        (isInProgress ? "LOGGING TIME" : "")
                         ); ;
 
                     lineCount++;
@@ -736,10 +737,10 @@ public class TaskShowCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task show <taskID>", "Show more details of a task");
+        SharedLogic.PrintHelp("  >task moreinfo <taskID>", "Show more details of a task");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task show 1", "Show more details for task : 1" );
+        SharedLogic.PrintHelp("  >task moreinfo 1", "Show more details for task : 1" );
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -776,13 +777,13 @@ public class TaskShowCommand : CommandHandlerBaseWithUtility
 
                 ConsoleWriter.Print();
 
-                ConsoleWriter.Print("STATUS : {0, -15}\nTYPE : {1}\nTIME SPENT : {2,-15}\nNOTES AVAILABLE: {3,-15}",
-                    (isInProgress ? "In Progress" : task.StatusString),
+                ConsoleWriter.Print("STATUS : {0, -15}\nTYPE : {1}\nTIME SPENT : {2,-15}\nNOTES AVAILABLE: {3,-15}\nLOGGING TIME : {4}",
+                    task.StatusString,
                     task.TypeString,
                     (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") +
-                    ("(" + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) +
-                    " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentInMins(task.id)) + ")"),
-                    (notes.DoesNoteExist(task.id) ? "YES" : "NO")
+                    ("(" + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentInMins(task.id)) + "h)"),
+                    (notes.DoesNoteExist(task.id) ? "YES" : "NO"),
+                    (isInProgress ? "YES" : "NO")
                     );
 
             }
@@ -836,7 +837,7 @@ public class TaskSetStatusCommand : CommandHandlerBaseWithUtility
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
         SharedLogic.PrintHelp("  >task setstatus <taskID> <status>", "This will set the status to open/complete/discard");
-        SharedLogic.PrintHelp("  >task setstatus <taskID> <status> --time:<time>", "If you want to also record the time taken");
+        SharedLogic.PrintHelp("  >task setstatus <taskID> <status> --time:<time>", "If you want to also log unlogged time spent on this task");
 
         SharedLogic.PrintHelp("\nWHAT'S STATUS");
         SharedLogic.PrintHelp("You can set the following status to a task/story/collection : ");
@@ -848,7 +849,7 @@ public class TaskSetStatusCommand : CommandHandlerBaseWithUtility
 
         SharedLogic.PrintHelp("\nEXAMPLES");
         SharedLogic.PrintHelp("  >task setstatus 1 complete", "Task with ID 1 is now completed");
-        SharedLogic.PrintHelp("  >task setstatus 1 complete --time:2", "Task with ID 1 is now completed. 2 hours is recorded to the task log");
+        SharedLogic.PrintHelp("  >task setstatus 1 complete --time:2", "Task with ID 1 is now completed. 2 hours is logged!");
         SharedLogic.PrintHelp("  >task setstatus 1 open", "Task with ID 1 is open");
         SharedLogic.PrintHelp("  >task setstatus 1 discard", "Task with ID 1 is discarded");
         SharedLogic.FlushHelpText();
@@ -928,11 +929,11 @@ public class TaskRecordTimeLogCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task recordtimelog <taskID> <time in hours> <comments>", "Force record a time log ( instead of start and stop )");
-        SharedLogic.PrintHelp("  >task recordtimelog <taskID> <time in hours> <comments> <--when:-1>  ", "How many days before ?. -1 this timelog is of yesterday. -2 for a day before that. by default, this is 0, as in the time log is created for today.");
+        SharedLogic.PrintHelp("  >task addtimelog <taskID> <time in hours> <comments>", "Force add a time log ( instead of start and stop )");
+        SharedLogic.PrintHelp("  >task addtimelog <taskID> <time in hours> <comments> <--when:-1>  ", "How many days before ?. -1 if this timelog is for yesterday. -2 for a day before that. by default, this is 0, as in the time log is created for today.");
 
         SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task recordtimelog 1 2", "A time of 2 hours is recorded for a Task with ID 1");
+        SharedLogic.PrintHelp("  >task addtimelog 1 2", "A time of 2 hours is logged for a Task with ID 1");
         SharedLogic.FlushHelpText();
 
         return true;
