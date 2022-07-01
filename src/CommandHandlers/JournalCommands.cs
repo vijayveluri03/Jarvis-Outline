@@ -124,7 +124,11 @@ public class JournalAddCommand : CommandHandlerBaseWithUtility
         var entry = SharedLogic.CreateNewJournalEntry(application.journalManager, title);
         application.journalManager.AddJournal(entry);
 
-        ConsoleWriter.Print("New Journal entry added with id : {0}. You can open/edit the notes using 'journal note'", entry.id);
+        ConsoleWriter.Print("New Journal entry added with id : {0}. You can also edit the notes using 'journal note'", entry.id);
+
+        notes.CreateNoteIfUnavailable(entry.id);
+        notes.OpenNote(application, entry.id, null, true, true);
+
         return true;
     }
 }
