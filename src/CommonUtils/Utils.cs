@@ -377,7 +377,6 @@ public static class Utils
 
             return false;
         }
-
         public static bool Create(string path, bool overwriteIfExists = false)
         {
             if (DoesFileExist(path) && !overwriteIfExists)
@@ -396,7 +395,6 @@ public static class Utils
 
             return true;
         }
-
         public static string Read(string path)
         {
             if (!DoesFileExist(path))
@@ -408,7 +406,6 @@ public static class Utils
 
             return File.ReadAllText(path);
         }
-
         public static void Append(string path, string txt)
         {
             Assert(DoesFileExist(path));
@@ -419,7 +416,6 @@ public static class Utils
 
             File.AppendAllText( path, txt);
         }
-
         public static void Clean (string path)
         {
             Assert(DoesFileExist(path));
@@ -430,7 +426,6 @@ public static class Utils
 
             File.WriteAllText(path, string.Empty);
         }
-
         public static void Remove (string path)
         {
             Assert(DoesFileExist(path));

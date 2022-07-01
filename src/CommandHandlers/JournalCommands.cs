@@ -6,7 +6,7 @@ using CommandLine;
 using Jarvis; //@todo 
 
 
-public class JournalHandler : CommandHandlerBase
+public class JournalHandler : CommandHandlerBaseWithUtility
 {
     public JournalHandler()
     {
@@ -73,6 +73,9 @@ public class JournalHandler : CommandHandlerBase
         {
             argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
             argumentsForSpecializedHandler.RemoveAt(0);
+
+            Utils.Assert(selectedHander is CommandHandlerBaseWithUtility);
+            (selectedHander as CommandHandlerBaseWithUtility).Init(application, notes);
         }
         else
             argumentsForSpecializedHandler = null;
@@ -80,7 +83,7 @@ public class JournalHandler : CommandHandlerBase
         return selectedHander;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         ConsoleWriter.Print("Invalid arguments! \n");
         ShowHelp();
@@ -88,7 +91,7 @@ public class JournalHandler : CommandHandlerBase
     }
 }
 
-public class JournalAddCommand : CommandHandlerBase
+public class JournalAddCommand : CommandHandlerBaseWithUtility
 {
     public JournalAddCommand()
     {
@@ -107,7 +110,7 @@ public class JournalAddCommand : CommandHandlerBase
 
         return true;
     }
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -126,7 +129,7 @@ public class JournalAddCommand : CommandHandlerBase
     }
 }
 
-public class JournalListCommand : CommandHandlerBase
+public class JournalListCommand : CommandHandlerBaseWithUtility
 {
     public JournalListCommand()
     {
@@ -145,7 +148,7 @@ public class JournalListCommand : CommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 0)
         {
@@ -192,7 +195,7 @@ public class JournalListCommand : CommandHandlerBase
 }
 
 
-public class JournalShowCommand : CommandHandlerBase
+public class JournalShowCommand : CommandHandlerBaseWithUtility
 {
     public JournalShowCommand()
     {
@@ -209,7 +212,7 @@ public class JournalShowCommand : CommandHandlerBase
         SharedLogic.FlushHelpText();
         return true;
     }
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -254,7 +257,7 @@ public class JournalShowCommand : CommandHandlerBase
     }
 }
 
-public class JournalEditTitleCommand : CommandHandlerBase
+public class JournalEditTitleCommand : CommandHandlerBaseWithUtility
 {
     public JournalEditTitleCommand()
     {
@@ -271,7 +274,7 @@ public class JournalEditTitleCommand : CommandHandlerBase
         SharedLogic.FlushHelpText();
         return true;
     }
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 2)
         {
@@ -298,7 +301,7 @@ public class JournalEditTitleCommand : CommandHandlerBase
     }
 }
 
-public class JournalCatNotesCommand : CommandHandlerBase
+public class JournalCatNotesCommand : CommandHandlerBaseWithUtility
 {
     public JournalCatNotesCommand()
     {
@@ -318,7 +321,7 @@ public class JournalCatNotesCommand : CommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -347,7 +350,7 @@ public class JournalCatNotesCommand : CommandHandlerBase
     }
 }
 
-public class JournalEditNoteCommand : CommandHandlerBase
+public class JournalEditNoteCommand : CommandHandlerBaseWithUtility
 {
     public JournalEditNoteCommand()
     {
@@ -374,7 +377,7 @@ public class JournalEditNoteCommand : CommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {

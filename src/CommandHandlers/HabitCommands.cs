@@ -6,7 +6,7 @@ using CommandLine;
 using Jarvis; //@todo 
 
 
-public class HabitHandler : CommandHandlerBase
+public class HabitHandler : CommandHandlerBaseWithUtility
 {
     public HabitHandler()
     {
@@ -102,6 +102,9 @@ public class HabitHandler : CommandHandlerBase
         {
             argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
             argumentsForSpecializedHandler.RemoveAt(0);
+
+            Utils.Assert(selectedHander is CommandHandlerBaseWithUtility);
+            (selectedHander as CommandHandlerBaseWithUtility).Init(application, notes);
         }
         else
             argumentsForSpecializedHandler = null;
@@ -109,7 +112,7 @@ public class HabitHandler : CommandHandlerBase
         return selectedHander;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         ConsoleWriter.Print("Invalid arguments! \n");
         ShowHelp();
@@ -117,7 +120,7 @@ public class HabitHandler : CommandHandlerBase
     }
 }
 
-public class HabitAddCommand : CommandHandlerBase
+public class HabitAddCommand : CommandHandlerBaseWithUtility
 {
     public HabitAddCommand()
     {
@@ -139,7 +142,7 @@ public class HabitAddCommand : CommandHandlerBase
         SharedLogic.FlushHelpText();
         return true;
     }
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 2)
         {
@@ -175,7 +178,7 @@ public class HabitAddCommand : CommandHandlerBase
     }
 }
 
-public class HabitListCommand : CommandHandlerBase
+public class HabitListCommand : CommandHandlerBaseWithUtility
 {
     public HabitListCommand()
     {
@@ -194,7 +197,7 @@ public class HabitListCommand : CommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 0)
         {
@@ -266,7 +269,7 @@ public class HabitListCommand : CommandHandlerBase
     }
 }
 
-public class HabitStreakUpCommand : CommandHandlerBase
+public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
 {
     public HabitStreakUpCommand()
     {
@@ -285,7 +288,7 @@ public class HabitStreakUpCommand : CommandHandlerBase
 
         return true;
     }
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -336,7 +339,7 @@ public class HabitStreakUpCommand : CommandHandlerBase
         return true;
     }
 }
-public class HabitDeleteCommand : CommandHandlerBase
+public class HabitDeleteCommand : CommandHandlerBaseWithUtility
 {
     public HabitDeleteCommand()
     {
@@ -353,7 +356,7 @@ public class HabitDeleteCommand : CommandHandlerBase
         SharedLogic.FlushHelpText();
         return true;
     }
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -380,7 +383,7 @@ public class HabitDeleteCommand : CommandHandlerBase
 }
 
 
-public class HabitDisableCommand : CommandHandlerBase
+public class HabitDisableCommand : CommandHandlerBaseWithUtility
 {
     public HabitDisableCommand()
     {
@@ -398,7 +401,7 @@ public class HabitDisableCommand : CommandHandlerBase
         SharedLogic.FlushHelpText();
         return true;
     }
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -430,7 +433,7 @@ public class HabitDisableCommand : CommandHandlerBase
     }
 }
 
-public class HabitReEnableCommand : CommandHandlerBase
+public class HabitReEnableCommand : CommandHandlerBaseWithUtility
 {
     public HabitReEnableCommand()
     {
@@ -449,7 +452,7 @@ public class HabitReEnableCommand : CommandHandlerBase
 
         return true;
     }
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -481,7 +484,7 @@ public class HabitReEnableCommand : CommandHandlerBase
     }
 }
 
-public class HabitResetCommand : CommandHandlerBase
+public class HabitResetCommand : CommandHandlerBaseWithUtility
 {
     public HabitResetCommand()
     {
@@ -499,7 +502,7 @@ public class HabitResetCommand : CommandHandlerBase
         SharedLogic.FlushHelpText();
         return true;
     }
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -531,7 +534,7 @@ public class HabitResetCommand : CommandHandlerBase
     }
 }
 
-public class HabitShowCommand : CommandHandlerBase
+public class HabitShowCommand : CommandHandlerBaseWithUtility
 {
     public HabitShowCommand()
     {
@@ -549,7 +552,7 @@ public class HabitShowCommand : CommandHandlerBase
         SharedLogic.FlushHelpText();
         return true;
     }
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -604,7 +607,7 @@ public class HabitShowCommand : CommandHandlerBase
     }
 }
 
-public class HabitEditTitleCommand : CommandHandlerBase
+public class HabitEditTitleCommand : CommandHandlerBaseWithUtility
 {
     public HabitEditTitleCommand()
     {
@@ -621,7 +624,7 @@ public class HabitEditTitleCommand : CommandHandlerBase
         SharedLogic.FlushHelpText();
         return true;
     }
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 2)
         {
@@ -648,7 +651,7 @@ public class HabitEditTitleCommand : CommandHandlerBase
     }
 }
 
-public class HabitCatNotesCommand : CommandHandlerBase
+public class HabitCatNotesCommand : CommandHandlerBaseWithUtility
 {
     public HabitCatNotesCommand()
     {
@@ -668,7 +671,7 @@ public class HabitCatNotesCommand : CommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -697,7 +700,7 @@ public class HabitCatNotesCommand : CommandHandlerBase
     }
 }
 
-public class HabitEditNoteCommand : CommandHandlerBase
+public class HabitEditNoteCommand : CommandHandlerBaseWithUtility
 {
     public HabitEditNoteCommand()
     {
@@ -724,7 +727,7 @@ public class HabitEditNoteCommand : CommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -795,7 +798,7 @@ public class HabitEditNoteCommand : CommandHandlerBase
 }
 
 
-public class HabitDeleteNoteCommand : CommandHandlerBase
+public class HabitDeleteNoteCommand : CommandHandlerBaseWithUtility
 {
     public HabitDeleteNoteCommand()
     {
@@ -811,7 +814,7 @@ public class HabitDeleteNoteCommand : CommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {

@@ -6,7 +6,7 @@ using CommandLine;
 using Jarvis; //@todo 
 
 
-public class GameHandler : CommandHandlerBase
+public class GameHandler : CommandHandlerBaseWithUtility
 {
     public GameHandler()
     {
@@ -42,6 +42,9 @@ public class GameHandler : CommandHandlerBase
         {
             argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
             argumentsForSpecializedHandler.RemoveAt(0);
+
+            Utils.Assert(selectedHander is CommandHandlerBaseWithUtility);
+            (selectedHander as CommandHandlerBaseWithUtility).Init(application, notes);
         }
         else 
             argumentsForSpecializedHandler = null;
@@ -49,7 +52,7 @@ public class GameHandler : CommandHandlerBase
         return selectedHander;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
 
         if (arguments_ReadOnly.Count < 1)
@@ -65,7 +68,7 @@ public class GameHandler : CommandHandlerBase
 }
 
 
-public class HungryEkansCommand : CommandHandlerBase
+public class HungryEkansCommand : CommandHandlerBaseWithUtility
 {
     public HungryEkansCommand()
     {
@@ -81,7 +84,7 @@ public class HungryEkansCommand : CommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         ConsoleWriter.Print("Launching Game!");
 

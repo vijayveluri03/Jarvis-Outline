@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using CommandLine;
+using Jarvis; //@todo 
+
 
 public abstract class CommandHandlerBase
 {
@@ -24,7 +26,7 @@ public abstract class CommandHandlerBase
         if (help)
             return ShowHelp();
         else
-            return Run(application);
+            return Run();
     }
 
     protected virtual CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler, bool printErrors )
@@ -37,8 +39,21 @@ public abstract class CommandHandlerBase
     protected abstract bool ShowHelp();
 
     // Returns true if a request is handled. else move on to the next element in the chain of responsibility
-    protected abstract bool Run(Jarvis.JApplication application);
+    protected abstract bool Run();
 
     protected List<string> arguments_ReadOnly;
     protected List<string> optionalArguments_ReadOnly;
+}
+
+public abstract class CommandHandlerBaseWithUtility : CommandHandlerBase
+{
+    public CommandHandlerBase Init ( JApplication application, NotesUtility notes )
+    {
+        this.application = application;
+        this.notes = notes;
+        return this;
+    }
+
+    protected NotesUtility notes;
+    protected JApplication application; // @todo, unnecessary interlinking
 }

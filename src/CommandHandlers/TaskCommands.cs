@@ -6,54 +6,8 @@ using CommandLine;
 using Jarvis; //@todo 
 
 
-public abstract class TaskCommandHandlerBase : CommandHandlerBase
-{
-    public static void CreateNoteIfUnavailable(int id, bool feedback = true)
-    {
-        if (!Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id))
-        {
-            Utils.FileHandler.Create(JConstants.PATH_TO_TASKS_NOTE + id);
-            if(feedback)
-                ConsoleWriter.Print("new note created");
-        }
-    }
 
-    public static bool DoesNoteExist(int id)
-    {
-        return Utils.FileHandler.DoesFileExist(JConstants.PATH_TO_TASKS_NOTE + id);
-    }
-
-    public static string GetNoteContent(int id)
-    {
-        return Utils.FileHandler.Read(JConstants.PATH_TO_TASKS_NOTE + id);
-    }
-
-    public static void AppendToNote(int id, string text)
-    {
-        Utils.AppendToFile(JConstants.PATH_TO_TASKS_NOTE + id, text);
-    }
-
-    public static void RemoveNote(int id)
-    {
-        Utils.FileHandler.Remove(JConstants.PATH_TO_TASKS_NOTE + id);
-    }
-
-    public static void OpenNote( JApplication application, int id, string externalProgram, bool waitForTheProgramToEnd, bool feedback = true)
-    {
-        if (feedback )
-            ConsoleWriter.Print("Opening Notes");
-        Utils.OpenAFileInEditor(
-            JConstants.PATH_TO_TASKS_NOTE + id,
-            externalProgram.IsEmpty() ? application.DesignData.defaultExternalEditor : externalProgram,
-            waitForTheProgramToEnd);
-
-        if (feedback)
-            ConsoleWriter.Print("Closing Notes");
-    }
-}
-
-
-public class TaskHandler : TaskCommandHandlerBase
+public class TaskHandler : CommandHandlerBaseWithUtility
 {
     public TaskHandler()
     {
@@ -168,6 +122,9 @@ public class TaskHandler : TaskCommandHandlerBase
         {
             argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
             argumentsForSpecializedHandler.RemoveAt(0);
+
+            Utils.Assert(selectedHander is CommandHandlerBaseWithUtility);
+            (selectedHander as CommandHandlerBaseWithUtility).Init(application, notes);
         }
         else
             argumentsForSpecializedHandler = null;
@@ -175,7 +132,7 @@ public class TaskHandler : TaskCommandHandlerBase
         return selectedHander;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
 
         ConsoleWriter.Print("Invalid arguments! \n");
@@ -185,7 +142,7 @@ public class TaskHandler : TaskCommandHandlerBase
 }
 
 
-public class TaskAddCommand : TaskCommandHandlerBase
+public class TaskAddCommand : CommandHandlerBaseWithUtility
 {
     public TaskAddCommand()
     {
@@ -215,7 +172,7 @@ public class TaskAddCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 2)
         {
@@ -269,7 +226,7 @@ public class TaskAddCommand : TaskCommandHandlerBase
     }
 }
 
-public class TaskCloneCommand : TaskCommandHandlerBase
+public class TaskCloneCommand : CommandHandlerBaseWithUtility
 {
     public TaskCloneCommand()
     {
@@ -286,7 +243,7 @@ public class TaskCloneCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -327,10 +284,10 @@ public class TaskCloneCommand : TaskCommandHandlerBase
 
         ConsoleWriter.Print("New task added with id : " + clonedTask.id);
 
-        if ( DoesNoteExist(originalTask.id))
+        if (notes.DoesNoteExist(originalTask.id))
         {
-            CreateNoteIfUnavailable(clonedTask.id);
-            AppendToNote(clonedTask.id, GetNoteContent(originalTask.id));
+            notes.CreateNoteIfUnavailable(clonedTask.id);
+            notes.AppendToNote(clonedTask.id, notes.GetNoteContent(originalTask.id));
             ConsoleWriter.Print("Notes is cloned!");
         }
 
@@ -339,7 +296,7 @@ public class TaskCloneCommand : TaskCommandHandlerBase
 }
 
 
-public class TaskRemoveCommand : TaskCommandHandlerBase
+public class TaskRemoveCommand : CommandHandlerBaseWithUtility
 {
     public TaskRemoveCommand()
     {
@@ -358,7 +315,7 @@ public class TaskRemoveCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -376,9 +333,9 @@ public class TaskRemoveCommand : TaskCommandHandlerBase
                 application.logManager.RemoveAllEntries(id);
                 ConsoleWriter.Print("Task removed with id : " + id);
 
-                if (DoesNoteExist(id))
+                if (notes.DoesNoteExist(id))
                 {
-                    RemoveNote(id);
+                    notes.RemoveNote(id);
                     ConsoleWriter.Print("Notes removed");
                 }
             }
@@ -390,7 +347,7 @@ public class TaskRemoveCommand : TaskCommandHandlerBase
     }
 }
 
-public class TaskStartCommand : TaskCommandHandlerBase
+public class TaskStartCommand : CommandHandlerBaseWithUtility
 {
     public TaskStartCommand()
     {
@@ -410,7 +367,7 @@ public class TaskStartCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -439,7 +396,7 @@ public class TaskStartCommand : TaskCommandHandlerBase
     }
 }
 
-public class TaskStopCommand : TaskCommandHandlerBase
+public class TaskStopCommand : CommandHandlerBaseWithUtility
 {
     public TaskStopCommand()
     {
@@ -459,7 +416,7 @@ public class TaskStopCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count > 1)
         {
@@ -504,7 +461,7 @@ public class TaskStopCommand : TaskCommandHandlerBase
     }
 }
 
-public class TaskEditTitleCommand : TaskCommandHandlerBase
+public class TaskEditTitleCommand : CommandHandlerBaseWithUtility
 {
     public TaskEditTitleCommand()
     {
@@ -523,7 +480,7 @@ public class TaskEditTitleCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 2)
         {
@@ -547,7 +504,7 @@ public class TaskEditTitleCommand : TaskCommandHandlerBase
     }
 }
 
-public class TaskActiveCommand : TaskCommandHandlerBase
+public class TaskActiveCommand : CommandHandlerBaseWithUtility
 {
     public TaskActiveCommand()
     {
@@ -565,7 +522,7 @@ public class TaskActiveCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count > 1)
         {
@@ -589,7 +546,7 @@ public class TaskActiveCommand : TaskCommandHandlerBase
     }
 }
 
-public class TaskListCommand : TaskCommandHandlerBase
+public class TaskListCommand : CommandHandlerBaseWithUtility
 {
     public TaskListCommand()
     {
@@ -618,7 +575,7 @@ public class TaskListCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 0)
         {
@@ -747,7 +704,7 @@ public class TaskListCommand : TaskCommandHandlerBase
                         task.id,
                         (task.categories != null && task.categories.Length > 0 ? Utils.Conversions.ArrayToString(task.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                         task.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/)
-                            + (DoesNoteExist(task.id) ? "+(N)" : ""),
+                            + (notes.DoesNoteExist(task.id) ? "+(N)" : ""),
                         (isInProgress ? "In Progress" : task.StatusString),
                         (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") + ("( " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) + " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentInMins(task.id)) + " )")
                         ); ;
@@ -768,7 +725,7 @@ public class TaskListCommand : TaskCommandHandlerBase
 }
 
 
-public class TaskShowCommand : TaskCommandHandlerBase
+public class TaskShowCommand : CommandHandlerBaseWithUtility
 {
     public TaskShowCommand()
     {
@@ -787,7 +744,7 @@ public class TaskShowCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -825,7 +782,7 @@ public class TaskShowCommand : TaskCommandHandlerBase
                     (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") +
                     ("(" + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentToday(task.id)) +
                     " , " + Utils.Time.MinutesToHoursString(application.logManager.GetTotalTimeSpentInMins(task.id)) + ")"),
-                    (DoesNoteExist(task.id) ? "YES" : "NO")
+                    (notes.DoesNoteExist(task.id) ? "YES" : "NO")
                     );
 
             }
@@ -868,7 +825,7 @@ public class TaskShowCommand : TaskCommandHandlerBase
     }
 }
 
-public class TaskSetStatusCommand : TaskCommandHandlerBase
+public class TaskSetStatusCommand : CommandHandlerBaseWithUtility
 {
     public TaskSetStatusCommand()
     {
@@ -899,7 +856,7 @@ public class TaskSetStatusCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 2)
         {
@@ -961,7 +918,7 @@ public class TaskSetStatusCommand : TaskCommandHandlerBase
 }
 
 
-public class TaskRecordTimeLogCommand : TaskCommandHandlerBase
+public class TaskRecordTimeLogCommand : CommandHandlerBaseWithUtility
 {
     public TaskRecordTimeLogCommand()
     {
@@ -981,7 +938,7 @@ public class TaskRecordTimeLogCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count < 2)
         {
@@ -1025,7 +982,7 @@ public class TaskRecordTimeLogCommand : TaskCommandHandlerBase
     }
 }
 
-public class TaskStatusCommand : TaskCommandHandlerBase
+public class TaskStatusCommand : CommandHandlerBaseWithUtility
 {
     public TaskStatusCommand()
     {
@@ -1041,7 +998,7 @@ public class TaskStatusCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 0)
         {
@@ -1084,7 +1041,7 @@ public class TaskStatusCommand : TaskCommandHandlerBase
     }
 }
 
-public class TaskReportCommand : TaskCommandHandlerBase
+public class TaskReportCommand : CommandHandlerBaseWithUtility
 {
     public TaskReportCommand()
     {
@@ -1126,7 +1083,7 @@ public class TaskReportCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 0)
         {
@@ -1185,7 +1142,7 @@ public class TaskReportCommand : TaskCommandHandlerBase
     }
 }
 
-public class TaskCatNotesCommand : TaskCommandHandlerBase
+public class TaskCatNotesCommand : CommandHandlerBaseWithUtility
 {
     public TaskCatNotesCommand()
     {
@@ -1205,7 +1162,7 @@ public class TaskCatNotesCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -1219,12 +1176,12 @@ public class TaskCatNotesCommand : TaskCommandHandlerBase
 
         if (application.taskManager.DoesTaskExist(id))
         {
-            if (!DoesNoteExist(id))
+            if (!notes.DoesNoteExist(id))
                 ConsoleWriter.Print("Notes not found for the task with id : {0}", id);
             else
             {
                 ConsoleWriter.PrintInColor("NOTES :", application.DesignData.HighlightColorForText);
-                ConsoleWriter.PrintText(GetNoteContent(id));
+                ConsoleWriter.PrintText(notes.GetNoteContent(id));
             }
         }
         else
@@ -1234,7 +1191,7 @@ public class TaskCatNotesCommand : TaskCommandHandlerBase
     }
 }
 
-public class TaskEditNoteCommand : TaskCommandHandlerBase
+public class TaskEditNoteCommand : CommandHandlerBaseWithUtility
 {
     public TaskEditNoteCommand()
     {
@@ -1264,7 +1221,7 @@ public class TaskEditNoteCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -1332,16 +1289,16 @@ public class TaskEditNoteCommand : TaskCommandHandlerBase
 
         if (application.taskManager.DoesTaskExist(id))
         {
-            CreateNoteIfUnavailable(id);
+            notes.CreateNoteIfUnavailable(id);
 
             if (!appendMessage.IsEmpty())
             {
                 ConsoleWriter.Print("Message appended to the notes");
-                AppendToNote(id, appendMessage);
+                notes.AppendToNote(id, appendMessage);
             }
             else
             {
-                OpenNote(application, id, externalProgram, waitForTheProgramToEnd, true);
+                notes.OpenNote(application, id, externalProgram, waitForTheProgramToEnd, true);
             }
         }
         else
@@ -1350,7 +1307,7 @@ public class TaskEditNoteCommand : TaskCommandHandlerBase
     }
 }
 
-public class TaskDeleteNoteCommand : TaskCommandHandlerBase
+public class TaskDeleteNoteCommand : CommandHandlerBaseWithUtility
 {
     public TaskDeleteNoteCommand()
     {
@@ -1366,7 +1323,7 @@ public class TaskDeleteNoteCommand : TaskCommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         if (arguments_ReadOnly.Count != 1)
         {
@@ -1379,9 +1336,9 @@ public class TaskDeleteNoteCommand : TaskCommandHandlerBase
 
         if (application.taskManager.DoesTaskExist(id))
         {
-            if (DoesNoteExist(id))
+            if (notes.DoesNoteExist(id))
             {
-                RemoveNote(id);
+                notes.RemoveNote(id);
                 ConsoleWriter.Print("Notes deleted");
             }
             else

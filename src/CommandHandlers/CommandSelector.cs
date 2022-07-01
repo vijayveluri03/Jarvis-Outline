@@ -7,7 +7,7 @@ using CommandLine;
 using Jarvis; //@todo 
 
 
-public class CommandSelector : CommandHandlerBase
+public class CommandSelector : CommandHandlerBaseWithUtility
 {
     public CommandSelector()
     {
@@ -18,13 +18,13 @@ public class CommandSelector : CommandHandlerBase
         switch (command)
         {
             case "task":
-                return new TaskHandler();
+                return new TaskHandler().Init(application, new NotesUtility(JConstants.PATH_TO_TASKS_NOTE));
             case "habit":
-                return new HabitHandler();
+                return new HabitHandler().Init(application, new NotesUtility(JConstants.PATH_TO_HABITS_NOTE));
             case "journal":
-                return new JournalHandler();
+                return new JournalHandler().Init(application, new NotesUtility(JConstants.PATH_TO_JOURNAL_NOTE));
             case "game":
-                return new GameHandler();
+                return new GameHandler().Init(application, null);
             default:
                 break;
         }
@@ -72,7 +72,7 @@ public class CommandSelector : CommandHandlerBase
         return true;
     }
 
-    protected override bool Run(Jarvis.JApplication application)
+    protected override bool Run()
     {
         ShowHelp();
         return false;

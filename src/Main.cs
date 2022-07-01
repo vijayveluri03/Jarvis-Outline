@@ -44,11 +44,14 @@ class Program
 #endif
 
         bool firstTime = true;
-        var commandSelector = new CommandSelector();
 
         ConsoleWriter.Initialize();
         Jarvis.JApplication app = new Jarvis.JApplication();
         app.Initialize();
+
+        var commandSelector = new CommandSelector();
+        commandSelector.Init(app, null);
+
 
         do
         {

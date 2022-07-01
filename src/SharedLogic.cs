@@ -106,4 +106,58 @@ namespace Jarvis
 
         #endregion // UTILS TO PRINT HELP TEXT
     }
+
+    public class NotesUtility
+    {
+        public NotesUtility(string path)
+        {
+            this.path = path;
+        }
+        public void CreateNoteIfUnavailable(int id, bool feedback = true)
+        {
+            if (!Utils.FileHandler.DoesFileExist(path + id))
+            {
+                Utils.FileHandler.Create(path + id);
+                if (feedback)
+                    ConsoleWriter.Print("new note created");
+            }
+        }
+
+        public bool DoesNoteExist(int id)
+        {
+            return Utils.FileHandler.DoesFileExist(path + id);
+        }
+
+        public string GetNoteContent(int id)
+        {
+            return Utils.FileHandler.Read(path + id);
+        }
+
+        public void AppendToNote(int id, string text)
+        {
+            Utils.AppendToFile(path + id, text);
+        }
+
+        public void RemoveNote(int id)
+        {
+            Utils.FileHandler.Remove(path + id);
+        }
+
+        public void OpenNote(JApplication application, int id, string externalProgram, bool waitForTheProgramToEnd, bool feedback = true)
+        {
+            if (feedback)
+                ConsoleWriter.Print("Opening Notes");
+            Utils.OpenAFileInEditor(
+                path + id,
+                externalProgram.IsEmpty() ? application.DesignData.defaultExternalEditor : externalProgram,
+                waitForTheProgramToEnd);
+
+            if (feedback)
+                ConsoleWriter.Print("Closing Notes");
+        }
+
+        private string path;
+    }
+
 }
+
