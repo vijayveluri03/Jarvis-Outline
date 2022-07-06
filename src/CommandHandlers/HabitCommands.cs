@@ -16,28 +16,28 @@ public class HabitHandler : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >habit add ", "To add a new habit");
-        SharedLogic.PrintHelp("  >habit streakup", "to increase the steak of a habit");
-        SharedLogic.PrintHelp("  >habit reset", "to reset a habit");
-        SharedLogic.PrintHelp("  >habit list", "to list all the habit");
-        SharedLogic.PrintHelp("  >habit show", "to show details of a habit");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit add ", "To add a new habit");
+        SharedLogic.PrintHelp_SubText(">habit streakup", "to increase the steak of a habit");
+        SharedLogic.PrintHelp_SubText(">habit reset", "to reset a habit");
+        SharedLogic.PrintHelp_SubText(">habit list", "to list all the habit");
+        SharedLogic.PrintHelp_SubText(">habit show", "to show details of a habit");
 
-        SharedLogic.PrintHelp("\nADVANCED");
-        SharedLogic.PrintHelp("  >habit delete", "to delete a habit");
-        SharedLogic.PrintHelp("  >habit disable", "to disable a habit");
-        SharedLogic.PrintHelp("  >habit re-enable", "to re-enable a disabled habit"); 
-        SharedLogic.PrintHelp("  >habit edittitle", "To edit the title of a habit");
+        SharedLogic.PrintHelp_Heading("ADVANCED");
+        SharedLogic.PrintHelp_SubText(">habit delete", "to delete a habit");
+        SharedLogic.PrintHelp_SubText(">habit disable", "to disable a habit");
+        SharedLogic.PrintHelp_SubText(">habit re-enable", "to re-enable a disabled habit"); 
+        SharedLogic.PrintHelp_SubText(">habit edittitle", "To edit the title of a habit");
 
-        SharedLogic.PrintHelp("\nNOTES"); 
-        SharedLogic.PrintHelp("  >habit note" , "open note for a habit");
-        SharedLogic.PrintHelp("  >habit printnote" , "print the notes. ( you can also use 'cat' instead of 'printnote')");
-        SharedLogic.PrintHelp("  >habit deletenote" , "delete note for a habit"); 
+        SharedLogic.PrintHelp_Heading("NOTES"); 
+        SharedLogic.PrintHelp_SubText(">habit note" , "open note for a habit");
+        SharedLogic.PrintHelp_SubText(">habit printnote" , "print the notes. ( you can also use 'cat' instead of 'printnote')");
+        SharedLogic.PrintHelp_SubText(">habit deletenote" , "delete note for a habit"); 
 
-        SharedLogic.PrintHelp("\nHELP");
-        SharedLogic.PrintHelp("All the commands have their own help section. Use the argument '--help'");
-        SharedLogic.PrintHelp("Example - 'habit add --help' for more examples on how to use it. Try it!");
-        SharedLogic.PrintHelp("This works for every single command! Cheers!");
+        SharedLogic.PrintHelp_Heading("HELP");
+        SharedLogic.PrintHelp_SubText("All the commands have their own help section. Use the argument '--help'");
+        SharedLogic.PrintHelp_SubText("Example - 'habit add --help' for more examples on how to use it. Try it!");
+        SharedLogic.PrintHelp_SubText("This works for every single command! Cheers!");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -130,15 +130,14 @@ public class HabitAddCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >habit add <category> <title>");
-        SharedLogic.PrintHelp("  >habit add <category> <title> --previousstreak:<count>", "This sets the starting streak for a habit. if you have already been doing this habit for a while, you can use this, to start from there ");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit add <category> <title>");
+        SharedLogic.PrintHelp_SubText(">habit add <category> <title> --previousstreak:<count>", "This sets the starting streak for a habit. if you have already been doing this habit for a while, you can use this, to start from there ");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >habit add health \"Wake up at 6AM everyday!\"");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit add health \"Wake up at 6AM everyday!\"");
 
-        SharedLogic.PrintHelp("\nMORE INFO");
-        SharedLogic.PrintHelp("Category can be 'office', 'learn', 'chores', 'health'. you can add more in the Data/Design.json as per your need.");
+        SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", application.DesignData.categories.listOfCategories, "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -156,8 +155,8 @@ public class HabitAddCommand : CommandHandlerBaseWithUtility
 
         if (!application.DesignData.DoesCategoryExist(categories))
         {
-            ConsoleWriter.Print("Invalid categories.\n" +
-                "Category can be office,learn,chores,health. you can add more in the design data as per your need.");
+            ConsoleWriter.Print("Invalid categories.");
+            SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", application.DesignData.categories.listOfCategories, "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
             return true;
         }
 
@@ -187,12 +186,12 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >habit list", "Lists all the habits");
-        SharedLogic.PrintHelp("  >habit list --cat:<category>", "Lists all the habits under this category");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit list", "Lists all the habits");
+        SharedLogic.PrintHelp_SubText(">habit list --cat:<category>", "Lists all the habits under this category");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >habit list");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit list");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -278,12 +277,12 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >habit streakup <id>", "Streaks up a habit");
-        SharedLogic.PrintHelp("  >habit streakup <id>  <--when:-1>", "If you forgot to streakup yesterday? -1 for yesterday. -2 for a day before that. by default, this is 0, as in today.");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit streakup <id>", "Streaks up a habit");
+        SharedLogic.PrintHelp_SubText(">habit streakup <id>  <--when:-1>", "If you forgot to streakup yesterday? -1 for yesterday. -2 for a day before that. by default, this is 0, as in today.");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >habit streakup 1", "Streakup a habit with id 1");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit streakup 1", "Streakup a habit with id 1");
         SharedLogic.FlushHelpText();
 
         return true;
@@ -348,11 +347,11 @@ public class HabitDeleteCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >habit delete <id>", "To delete a habit");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit delete <id>", "To delete a habit");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >habit deelte 1", "deletes a habit with id 1");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit deelte 1", "deletes a habit with id 1");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -392,11 +391,11 @@ public class HabitDisableCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >habit disable <id>", "To disable a habit");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit disable <id>", "To disable a habit");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >habit disable 1", "Disable a habit with id 1");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit disable 1", "Disable a habit with id 1");
 
         SharedLogic.FlushHelpText();
         return true;
@@ -442,11 +441,11 @@ public class HabitReEnableCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >habit re-enable <id>", "To re-enable a disabled habit");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit re-enable <id>", "To re-enable a disabled habit");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >habit re-enable 1", "Re-enable a habit with id 1");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit re-enable 1", "Re-enable a habit with id 1");
 
         SharedLogic.FlushHelpText();
 
@@ -493,11 +492,11 @@ public class HabitResetCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >habit reset <id>", "This will reset the streak of a habit! For a fresh start!");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit reset <id>", "This will reset the streak of a habit! For a fresh start!");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >habit reset 1", "Resets a habit with ID 1. This will reset all the streak!");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit reset 1", "Resets a habit with ID 1. This will reset all the streak!");
 
         SharedLogic.FlushHelpText();
         return true;
@@ -543,11 +542,11 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >habit show <id>", "This will show all the details of a habit!");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit show <id>", "This will show all the details of a habit!");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >habit show 1", "Show more details for habit with id 1");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit show 1", "Show more details for habit with id 1");
 
         SharedLogic.FlushHelpText();
         return true;
@@ -616,11 +615,11 @@ public class HabitEditTitleCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >habit edittitle <id> <new title>", "This is to rename the habit title!");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit edittitle <id> <new title>", "This is to rename the habit title!");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >habit edittitle 1 \"Wake up at 7 AM\"", "rename the title of habit : 1 to 'Wake up at 7 AM'");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit edittitle 1 \"Wake up at 7 AM\"", "rename the title of habit : 1 to 'Wake up at 7 AM'");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -661,12 +660,12 @@ public class HabitCatNotesCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >habit cat <habitID>", "Prints the notes of a habit. You can also use 'printnote' instead of cat");
-        SharedLogic.PrintHelp("  >habit printnote <habitID>", "Same as cat");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit cat <habitID>", "Prints the notes of a habit. You can also use 'printnote' instead of cat");
+        SharedLogic.PrintHelp_SubText(">habit printnote <habitID>", "Same as cat");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >habit cat 1", "Prints the notes for habit with id 1");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit cat 1", "Prints the notes for habit with id 1");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -710,20 +709,20 @@ public class HabitEditNoteCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >habit note <habitID>", "Opens notes for a habit");
-        SharedLogic.PrintHelp("  >habit note <habitID> --ext:<editorname>", "Provide external editor name of your choice, to open the notes in. Example : code or vim");
-        SharedLogic.PrintHelp("  >habit note <habitID> --append:<Message>", "Appends a message directly to the note");
-        SharedLogic.PrintHelp("  >habit note <habitID> --appendlog:<Message>", "Appends a message directly to a note, with a timestamp");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit note <habitID>", "Opens notes for a habit");
+        SharedLogic.PrintHelp_SubText(">habit note <habitID> --ext:<editorname>", "Provide external editor name of your choice, to open the notes in. Example : code or vim");
+        SharedLogic.PrintHelp_SubText(">habit note <habitID> --append:<Message>", "Appends a message directly to the note");
+        SharedLogic.PrintHelp_SubText(">habit note <habitID> --appendlog:<Message>", "Appends a message directly to a note, with a timestamp");
 
-        SharedLogic.PrintHelp("\nADVANCED");
-        SharedLogic.PrintHelp("You can change the default editor (to open your notes in) in the Data/Design.json under 'defaultExternalEditor'");
-        SharedLogic.PrintHelp("you can use '--nowait' to have jarvis not wait for the notes to be closed.");
+        SharedLogic.PrintHelp_Heading("ADVANCED");
+        SharedLogic.PrintHelp_SubText("You can change the default editor (to open your notes in) in the Data/Design.json under 'defaultExternalEditor'");
+        SharedLogic.PrintHelp_SubText("you can use '--nowait' to have jarvis not wait for the notes to be closed.");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >habit note 1", "Edit the notes for habit : 1");
-        SharedLogic.PrintHelp("  >habit note 1 --ext:code", "Edit the notes for habit : 1, within the visual studio code");
-        SharedLogic.PrintHelp("  >habit note 1 --append:\"Buy milk\"", "Add 'buy milk' to the notes!");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit note 1", "Edit the notes for habit : 1");
+        SharedLogic.PrintHelp_SubText(">habit note 1 --ext:code", "Edit the notes for habit : 1, within the visual studio code");
+        SharedLogic.PrintHelp_SubText(">habit note 1 --append:\"Buy milk\"", "Add 'buy milk' to the notes!");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -802,8 +801,8 @@ public class HabitDeleteNoteCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >habit deletenote <habitID>", "Deletes the notes");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit deletenote <habitID>", "Deletes the notes");
         SharedLogic.FlushHelpText();
         return true;
     }

@@ -17,35 +17,35 @@ public class TaskHandler : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task add", "To add a task");
-        SharedLogic.PrintHelp("  >task list", "to list all the tasks");
-        SharedLogic.PrintHelp("  >task complete", "to complete a task");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task add", "To add a task");
+        SharedLogic.PrintHelp_SubText(">task list", "to list all the tasks");
+        SharedLogic.PrintHelp_SubText(">task complete", "to complete a task");
 
-        SharedLogic.PrintHelp("  >task status", "See number of tasks per status");
-        SharedLogic.PrintHelp("  >task setstatus", "to set a task as open/complete");
+        SharedLogic.PrintHelp_SubText(">task status", "See number of tasks per status");
+        SharedLogic.PrintHelp_SubText(">task setstatus", "to set a task as open/complete");
 
         SharedLogic.PrintHelp("\nLOG TIME - to track your time per task");
-        SharedLogic.PrintHelp("  >task starttimelog", "to start time logging");
-        SharedLogic.PrintHelp("  >task stoptimelog", "to stop time logging");
-        SharedLogic.PrintHelp("  >task active", "to show all the tasks with time logging on");
-        SharedLogic.PrintHelp("  >task addtimelog", "to directly add a timelog for a task (with out start and stop)");
+        SharedLogic.PrintHelp_SubText(">task starttimelog", "to start time logging");
+        SharedLogic.PrintHelp_SubText(">task stoptimelog", "to stop time logging");
+        SharedLogic.PrintHelp_SubText(">task active", "to show all the tasks with time logging on");
+        SharedLogic.PrintHelp_SubText(">task addtimelog", "to directly add a timelog for a task (with out start and stop)");
 
-        SharedLogic.PrintHelp("\nADVANCED");
-        SharedLogic.PrintHelp("  >task moreinfo", "to show more details of a task");
-        SharedLogic.PrintHelp("  >task report", "to show all the work done in the last day/week");
-        SharedLogic.PrintHelp("  >task edittitle", "To edit the title of a task");
-        SharedLogic.PrintHelp("  >task clone", "To clone a task!");
+        SharedLogic.PrintHelp_Heading("ADVANCED");
+        SharedLogic.PrintHelp_SubText(">task moreinfo", "to show more details of a task");
+        SharedLogic.PrintHelp_SubText(">task report", "to show all the work done in the last day/week");
+        SharedLogic.PrintHelp_SubText(">task edittitle", "To edit the title of a task");
+        SharedLogic.PrintHelp_SubText(">task clone", "To clone a task!");
 
-        SharedLogic.PrintHelp("\nNOTES");
-        SharedLogic.PrintHelp("  >task note", "open note for a task");
-        SharedLogic.PrintHelp("  >task printnote", "print the notes. ( you can also use cat instead of printnote");
-        SharedLogic.PrintHelp("  >task deletenote", "delete note for a task");
+        SharedLogic.PrintHelp_Heading("NOTES");
+        SharedLogic.PrintHelp_SubText(">task note", "open note for a task");
+        SharedLogic.PrintHelp_SubText(">task printnote", "print the notes. ( you can also use cat instead of printnote");
+        SharedLogic.PrintHelp_SubText(">task deletenote", "delete note for a task");
 
-        SharedLogic.PrintHelp("\nHELP");
-        SharedLogic.PrintHelp("All the commands have their own help section. Use the argument '--help'");
-        SharedLogic.PrintHelp("Example - 'task add --help' for more examples on how to use it. Try it!");
-        SharedLogic.PrintHelp("This works for every single command! Cheers!");
+        SharedLogic.PrintHelp_Heading("HELP");
+        SharedLogic.PrintHelp_SubText("All the commands have their own help section. Use the argument '--help'");
+        SharedLogic.PrintHelp_SubText("Example - 'task add --help' for more examples on how to use it. Try it!");
+        SharedLogic.PrintHelp_SubText("This works for every single command! Cheers!");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -157,22 +157,23 @@ public class TaskAddCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task add <category> <title>");
-        SharedLogic.PrintHelp("  >task add <category> <title> --story", "A story is collection of tasks" );
-        SharedLogic.PrintHelp("  >task add <category> <title> --collection", "Creates a collection instead of a task). Collections are to club many simple tasks. Like Grocery list. Easy to keep them in one place");
-        SharedLogic.PrintHelp("  >task add <category> <title> --status:<status>", "To directly assign a status after creation. (shortform -s)");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task add <category> <title>");
+        SharedLogic.PrintHelp_SubText(">task add <category> <title> --story", "A story is collection of tasks" );
+        SharedLogic.PrintHelp_SubText(">task add <category> <title> --collection", "Creates a collection instead of a task). Collections are to club many simple tasks. Like Grocery list. Easy to keep them in one place");
+        SharedLogic.PrintHelp_SubText(">task add <category> <title> --status:<status>", "To directly assign a status after creation. (shortform -s)");
         
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task add chores \"Buy a T-Shirt\"");
-        SharedLogic.PrintHelp("  >task add chores \"Shopping list\" --collection", "Creates a collection");
-        SharedLogic.PrintHelp("  >task add chores \"Go to Goa!\" --story", "Creates a story");
-        SharedLogic.PrintHelp("  >task add chores \"Go to Goa!\" --story --status:complete", "Creates a story, and status is set as complete.");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">task add chores \"Buy a T-Shirt\"");
+        SharedLogic.PrintHelp_SubText(">task add chores \"Shopping list\" --collection", "Creates a collection");
+        SharedLogic.PrintHelp_SubText(">task add chores \"Go to Goa!\" --story", "Creates a story");
+        SharedLogic.PrintHelp_SubText(">task add chores \"Go to Goa!\" --story --status:complete", "Creates a story, and status is set as complete.");
 
-        SharedLogic.PrintHelp("\nMORE INFO");
-        SharedLogic.PrintHelp("Category can be office,learn,chores,health. you can add more in the Data/Design.json as per your need.");
-        SharedLogic.PrintHelp("use --story or -s to create a story (instead of a task)");
-        SharedLogic.PrintHelp("use --collection or -c to create a collection (instead of a task)");
+        SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", application.DesignData.categories.listOfCategories,  "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
+
+        SharedLogic.PrintHelp_Heading("MORE INFO");
+        SharedLogic.PrintHelp_SubText("use --story or -s to create a story (instead of a task)");
+        SharedLogic.PrintHelp_SubText("use --collection or -c to create a collection (instead of a task)");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -193,8 +194,8 @@ public class TaskAddCommand : CommandHandlerBaseWithUtility
 
         if (!application.DesignData.DoesCategoryExist(categories))
         {
-            ConsoleWriter.Print("Invalid categories.\n" +
-                "Category can be office,learn,chores,health. you can add more in the design data as per your need.");
+            ConsoleWriter.Print("Invalid categories.\n");
+            SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", application.DesignData.categories.listOfCategories, "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
             return true;
         }
 
@@ -213,7 +214,8 @@ public class TaskAddCommand : CommandHandlerBaseWithUtility
 
         if (!application.DesignData.DoesTaskStatusExist(status))
         {
-            ConsoleWriter.Print("Invalid status. It has to be one of the following -> " + application.DesignData.GetTaskStatusesAsCommaSeperatedString() + " or you can create new ones in Data/Design.json");
+            ConsoleWriter.Print("Invalid status");
+            SharedLogic.PrintHelp_WithHeadingAndSubText("Whats Status", application.DesignData.tasks.statusList, "Status can be one of these following. you can add more in the Data/Design.json as per your need.");
             return true;
         }
 
@@ -241,9 +243,9 @@ public class TaskCloneCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task clone id");
-        SharedLogic.PrintHelp("  >task clone id --status:<status>", "To directly assign a status after cloning. (shortform -s)");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task clone id");
+        SharedLogic.PrintHelp_SubText(">task clone id --status:<status>", "To directly assign a status after cloning. (shortform -s)");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -310,11 +312,11 @@ public class TaskCompleteCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task complete <taskID> ", "Task id is the ID of the task which is done");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task complete <taskID> ", "Task id is the ID of the task which is done");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task complete 1", "If you want to complete a task with ID : 1");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">task complete 1", "If you want to complete a task with ID : 1");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -357,11 +359,11 @@ public class TaskRemoveCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task remove <taskID> ", "Task id is the ID of the task you are trying to remove");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task remove <taskID> ", "Task id is the ID of the task you are trying to remove");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task remove 1", "If you want to remove a task with ID : 1");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">task remove 1", "If you want to remove a task with ID : 1");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -408,11 +410,11 @@ public class TaskStartCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE :");
-        SharedLogic.PrintHelp("  >task starttimelog <taskID>", "Start time logging for a task");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task starttimelog <taskID>", "Start time logging for a task");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task starttimelog 1", "Start logging time for task 1");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">task starttimelog 1", "Start logging time for task 1");
         SharedLogic.FlushHelpText();
 
         return true;
@@ -456,13 +458,13 @@ public class TaskStopCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task stoptimelog" , "Stops time tracking/logging for a task which is active. If no task is active, no action will be performed.");
-        SharedLogic.PrintHelp("  >task stoptimelog <comments>");
-        SharedLogic.PrintHelp("  >task stoptimelog --discard", "Stop tracking, but do not save the log. Discard it!");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task stoptimelog" , "Stops time tracking/logging for a task which is active. If no task is active, no action will be performed.");
+        SharedLogic.PrintHelp_SubText(">task stoptimelog <comments>");
+        SharedLogic.PrintHelp_SubText(">task stoptimelog --discard", "Stop tracking, but do not save the log. Discard it!");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task stoptimelog", "Stop logging time for a task which is active.");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">task stoptimelog", "Stop logging time for a task which is active.");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -522,11 +524,11 @@ public class TaskEditTitleCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task edittitle <taskID> <title>", "rename the title");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task edittitle <taskID> <title>", "rename the title");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task edittitle 1 \"Buy Blue T-shirt\"", "rename the title of task : 1 to 'Buy blue T-shirt'");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">task edittitle 1 \"Buy Blue T-shirt\"", "rename the title of task : 1 to 'Buy blue T-shirt'");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -564,11 +566,11 @@ public class TaskActiveCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task active", "Shows if time tracking is active for any task");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task active", "Shows if time tracking is active for any task");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task active");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">task active");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -606,22 +608,22 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task list", "lists all the tasks which are open");
-        SharedLogic.PrintHelp("  >task list --status:<status>", "Shows tasks with that status. See examples for how to use it. ( shortform -s)");
-        SharedLogic.PrintHelp("  >task list --story", "Shows only stories");
-        SharedLogic.PrintHelp("  >task list --collection", "Shows only collections");
-        SharedLogic.PrintHelp("  >task list --task", "Shows only tasks");
-        SharedLogic.PrintHelp("  >task list --cat:<category>", "Shows only those category");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task list", "lists all the tasks which are open");
+        SharedLogic.PrintHelp_SubText(">task list --status:<status>", "Shows tasks with that status. See examples for how to use it. ( shortform -s)");
+        SharedLogic.PrintHelp_SubText(">task list --story", "Shows only stories");
+        SharedLogic.PrintHelp_SubText(">task list --collection", "Shows only collections");
+        SharedLogic.PrintHelp_SubText(">task list --task", "Shows only tasks");
+        SharedLogic.PrintHelp_SubText(">task list --cat:<category>", "Shows only those category");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task list");
-        SharedLogic.PrintHelp("  >task list --story");
-        SharedLogic.PrintHelp("  >task list --status:archieve", "Shows all the tasks archieved");
-        SharedLogic.PrintHelp("  >task list --status:open", "Shows only the open tasks ( this is also the default setting )");
-        SharedLogic.PrintHelp("  >task list --status:complete", "Shows only the tasks completed");
-        SharedLogic.PrintHelp("  >task list --status:discard", "Shows only the tasks discard");
-        SharedLogic.PrintHelp("  >task list --cat:office", "filter by category");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">task list");
+        SharedLogic.PrintHelp_SubText(">task list --story");
+        SharedLogic.PrintHelp_SubText(">task list --status:archieve", "Shows all the tasks archieved");
+        SharedLogic.PrintHelp_SubText(">task list --status:open", "Shows only the open tasks ( this is also the default setting )");
+        SharedLogic.PrintHelp_SubText(">task list --status:complete", "Shows only the tasks completed");
+        SharedLogic.PrintHelp_SubText(">task list --status:discard", "Shows only the tasks discard");
+        SharedLogic.PrintHelp_SubText(">task list --cat:office", "filter by category");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -653,7 +655,8 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
 
             if ( !status.IsEmpty() && !application.DesignData.DoesTaskStatusExistFuzzySearch(status))
             {
-                ConsoleWriter.Print("Invalid status. It has to be one of the following -> " + application.DesignData.GetTaskStatusesAsCommaSeperatedString() + " or you can create new ones in Data/Design.json");
+                ConsoleWriter.Print("Invalid status");
+                SharedLogic.PrintHelp_WithHeadingAndSubText("Whats Status", application.DesignData.tasks.statusList, "Status can be one of these following. you can add more in the Data/Design.json as per your need.");
                 return true;
             }
         }
@@ -677,6 +680,7 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
             else if (categoryFilter != string.Empty && !application.DesignData.DoesCategoryExist(categoryFilter))
             {
                 ConsoleWriter.Print("Invalid category");
+                SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", application.DesignData.categories.listOfCategories, "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
                 categoryFilter = string.Empty;
                 return true;
             }
@@ -787,11 +791,11 @@ public class TaskShowCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task moreinfo <taskID>", "Show more details of a task");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task moreinfo <taskID>", "Show more details of a task");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task moreinfo 1", "Show more details for task : 1" );
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">task moreinfo 1", "Show more details for task : 1" );
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -886,23 +890,18 @@ public class TaskSetStatusCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task setstatus <taskID> <status>", "This will set the status to open/complete/discard");
-        SharedLogic.PrintHelp("  >task setstatus <taskID> <status> --time:<time>", "If you want to also log unlogged time spent on this task");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task setstatus <taskID> <status>", "This will set the status to open/complete/discard");
+        SharedLogic.PrintHelp_SubText(">task setstatus <taskID> <status> --time:<time>", "If you want to also log unlogged time spent on this task");
 
-        SharedLogic.PrintHelp("\nWHAT'S STATUS");
-        SharedLogic.PrintHelp("You can set the following status to a task/story/collection : ");
-        SharedLogic.PrintHelp("open");
-        SharedLogic.PrintHelp("complete");
-        SharedLogic.PrintHelp("archieve");
-        SharedLogic.PrintHelp("discard");
-        SharedLogic.PrintHelp("You can add new statuses or change any of the existing statuses in the data/Design.Json. Feel free to add more as you wish!");
+        SharedLogic.PrintHelp_WithHeadingAndSubText("WHAT'S STATUS", application.DesignData.tasks.statusList, "You can set these following statuses");
+        SharedLogic.PrintHelp_SubText("You can add new statuses or change any of the existing statuses in the data/Design.Json. Feel free to add more as you wish!");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task setstatus 1 complete", "Task with ID 1 is now completed");
-        SharedLogic.PrintHelp("  >task setstatus 1 complete --time:2", "Task with ID 1 is now completed. 2 hours is logged!");
-        SharedLogic.PrintHelp("  >task setstatus 1 open", "Task with ID 1 is open");
-        SharedLogic.PrintHelp("  >task setstatus 1 discard", "Task with ID 1 is discarded");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">task setstatus 1 complete", "Task with ID 1 is now completed");
+        SharedLogic.PrintHelp_SubText(">task setstatus 1 complete --time:2", "Task with ID 1 is now completed. 2 hours is logged!");
+        SharedLogic.PrintHelp_SubText(">task setstatus 1 open", "Task with ID 1 is open");
+        SharedLogic.PrintHelp_SubText(">task setstatus 1 discard", "Task with ID 1 is discarded");
         SharedLogic.FlushHelpText();
 
         return true;
@@ -931,7 +930,9 @@ public class TaskSetStatusCommand : CommandHandlerBaseWithUtility
 
         if ( !application.DesignData.DoesTaskStatusExist(status))
         {
-            ConsoleWriter.Print("Invalid status. It has to be one of the following -> " + application.DesignData.GetTaskStatusesAsCommaSeperatedString() + " or you can create new ones in Data/Design.json");
+            ConsoleWriter.Print("Invalid status");
+            SharedLogic.PrintHelp_WithHeadingAndSubText("Whats Status", application.DesignData.tasks.statusList, "Status can be one of these following. you can add more in the Data/Design.json as per your need.");
+
             return true;
         }
 
@@ -979,12 +980,12 @@ public class TaskRecordTimeLogCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task addtimelog <taskID> <time in hours> <comments>", "Force add a time log ( instead of start and stop )");
-        SharedLogic.PrintHelp("  >task addtimelog <taskID> <time in hours> <comments> <--when:-1>  ", "How many days before ?. -1 if this timelog is for yesterday. -2 for a day before that. by default, this is 0, as in the time log is created for today.");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task addtimelog <taskID> <time in hours> <comments>", "Force add a time log ( instead of start and stop )");
+        SharedLogic.PrintHelp_SubText(">task addtimelog <taskID> <time in hours> <comments> <--when:-1>  ", "How many days before ?. -1 if this timelog is for yesterday. -2 for a day before that. by default, this is 0, as in the time log is created for today.");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task addtimelog 1 2", "A time of 2 hours is logged for a Task with ID 1");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">task addtimelog 1 2", "A time of 2 hours is logged for a Task with ID 1");
         SharedLogic.FlushHelpText();
 
         return true;
@@ -1044,8 +1045,8 @@ public class TaskStatusCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task status", "Shows count of tasks for each status");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task status", "Shows count of tasks for each status");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -1129,8 +1130,8 @@ public class TaskReportCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task report", "Shows the report with all the work done in the last week");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task report", "Shows the report with all the work done in the last week");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -1204,12 +1205,12 @@ public class TaskCatNotesCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task cat <taskID>", "Prints the notes of a task. You can also use printnote instead of cat");
-        SharedLogic.PrintHelp("  >task printnote <taskID>", "Same as cat");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task cat <taskID>", "Prints the notes of a task. You can also use printnote instead of cat");
+        SharedLogic.PrintHelp_SubText(">task printnote <taskID>", "Same as cat");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task cat 1", "show the notes for task 1");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">task cat 1", "show the notes for task 1");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -1253,21 +1254,21 @@ public class TaskEditNoteCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task note <taskID>", "Opens notes for a task.");
-        SharedLogic.PrintHelp("  >task note <taskID> --ext:<editorname>", "provide external editor name of your choice, to open the notes in. Example : code or vim");
-        SharedLogic.PrintHelp("  >task note <taskID> --append:<Message>", "Append a message directly to a note");
-        SharedLogic.PrintHelp("  >task note <taskID> --appendlog:<Message>", "Appends a message directly to a note, with a timestamp");
-        SharedLogic.PrintHelp("  >task note <taskID> --appendtask:<taskID>", "Appends the title of a task directly to a note with a prefix task:");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task note <taskID>", "Opens notes for a task.");
+        SharedLogic.PrintHelp_SubText(">task note <taskID> --ext:<editorname>", "provide external editor name of your choice, to open the notes in. Example : code or vim");
+        SharedLogic.PrintHelp_SubText(">task note <taskID> --append:<Message>", "Append a message directly to a note");
+        SharedLogic.PrintHelp_SubText(">task note <taskID> --appendlog:<Message>", "Appends a message directly to a note, with a timestamp");
+        SharedLogic.PrintHelp_SubText(">task note <taskID> --appendtask:<taskID>", "Appends the title of a task directly to a note with a prefix task:");
 
-        SharedLogic.PrintHelp("\nADVANCED");
-        SharedLogic.PrintHelp("You can change the default editor in the Data/Design.json under 'defaultExternalEditor'");
-        SharedLogic.PrintHelp("you can use '--nowait' to have jarvis not wait for the notes to be closed.");
+        SharedLogic.PrintHelp_Heading("ADVANCED");
+        SharedLogic.PrintHelp_SubText("You can change the default editor in the Data/Design.json under 'defaultExternalEditor'");
+        SharedLogic.PrintHelp_SubText("you can use '--nowait' to have jarvis not wait for the notes to be closed.");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >task note 1", "Edit the notes for task : 1");
-        SharedLogic.PrintHelp("  >task note 1 --ext:code", "Edit the notes for task : 1, within the visual studio code");
-        SharedLogic.PrintHelp("  >task note 1 --append:\"Buy milk\"", "Add 'buy milk' to the notes!");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">task note 1", "Edit the notes for task : 1");
+        SharedLogic.PrintHelp_SubText(">task note 1 --ext:code", "Edit the notes for task : 1, within the visual studio code");
+        SharedLogic.PrintHelp_SubText(">task note 1 --append:\"Buy milk\"", "Add 'buy milk' to the notes!");
         SharedLogic.FlushHelpText();
 
         return true;
@@ -1369,8 +1370,8 @@ public class TaskDeleteNoteCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task deletenote <taskID>", "deletes the notes");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task deletenote <taskID>", "deletes the notes");
         SharedLogic.FlushHelpText();
         return true;
     }

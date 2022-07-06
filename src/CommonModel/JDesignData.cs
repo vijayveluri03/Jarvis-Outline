@@ -240,10 +240,6 @@ namespace Jarvis
             }
 
         }
-        public string GetTaskStatusesAsCommaSeperatedString()
-        {
-            return Utils.Conversions.ArrayToString(tasks.statusList, true);
-        }
 
         public bool DoesTaskStatusExist(string status)
         {
@@ -308,11 +304,6 @@ namespace Jarvis
                     return false;
             }
             return true;
-        }
-
-        public string GetJournalTagAsCommaSeperatedString()
-        {
-            return Utils.Conversions.ArrayToString(journal.listOfTags, true);
         }
 
         public bool DoesJournalTagExist(string tag)

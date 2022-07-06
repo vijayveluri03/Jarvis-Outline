@@ -16,23 +16,23 @@ public class JournalHandler : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >journal add ", "To add a new journal entry");
-        SharedLogic.PrintHelp("  >journal list", "To list all the journal entries");
-        SharedLogic.PrintHelp("  >journal show", "Show more details of an entry");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">journal add ", "To add a new journal entry");
+        SharedLogic.PrintHelp_SubText(">journal list", "To list all the journal entries");
+        SharedLogic.PrintHelp_SubText(">journal show", "Show more details of an entry");
 
-        SharedLogic.PrintHelp("\nADVANCED"); 
-        SharedLogic.PrintHelp("  >journal edittitle ", "To edit the title of an entry");
+        SharedLogic.PrintHelp_Heading("ADVANCED"); 
+        SharedLogic.PrintHelp_SubText(">journal edittitle ", "To edit the title of an entry");
 
-        SharedLogic.PrintHelp("\nNOTES"); 
-        SharedLogic.PrintHelp("  >journal note" , "Open journal entry");
-        SharedLogic.PrintHelp("  >journal printnote", "Print the journal entry");
-        SharedLogic.PrintHelp("  >journal cat", "Same as printnotes");
+        SharedLogic.PrintHelp_Heading("NOTES"); 
+        SharedLogic.PrintHelp_SubText(">journal note" , "Open journal entry");
+        SharedLogic.PrintHelp_SubText(">journal printnote", "Print the journal entry");
+        SharedLogic.PrintHelp_SubText(">journal cat", "Same as printnotes");
 
-        SharedLogic.PrintHelp("\nHELP");
-        SharedLogic.PrintHelp("All the commands have their own help section. Use the argument '--help'");
-        SharedLogic.PrintHelp("Example - 'journal add --help' for more examples on how to use it. Try it!");
-        SharedLogic.PrintHelp("This works for every single command! Cheers!");
+        SharedLogic.PrintHelp_Heading("HELP");
+        SharedLogic.PrintHelp_SubText("All the commands have their own help section. Use the argument '--help'");
+        SharedLogic.PrintHelp_SubText("Example - 'journal add --help' for more examples on how to use it. Try it!");
+        SharedLogic.PrintHelp_SubText("This works for every single command! Cheers!");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -101,23 +101,17 @@ public class JournalAddCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >journal add <title>", "This will create a new journal entry. ");
-        SharedLogic.PrintHelp("  >journal add <tags> <title>", "This will create a new journal entry. ");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">journal add <title>", "This will create a new journal entry. ");
+        SharedLogic.PrintHelp_SubText(">journal add <tags> <title>", "This will create a new journal entry. ");
 
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >journal add \"Stuff that i did today!\"", "This will create a journal entry." );
-        SharedLogic.PrintHelp("  >journal add \"dailylog\" \"Stuff that i did today!\"", "This will create a journal entry with a tag DailyLog. ");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">journal add \"Stuff that i did today!\"", "This will create a journal entry." );
+        SharedLogic.PrintHelp_SubText(">journal add \"dailylog\" \"Stuff that i did today!\"", "This will create a journal entry with a tag DailyLog. ");
 
-        SharedLogic.PrintHelp("\nTAGS - you can use these tags below, or create more in data/Design.json");
-        foreach( var tag in application.DesignData.journal.listOfTags)
-        {
-            SharedLogic.PrintHelp("  " + tag);
-        }
-        // todo - Move these to a common place
-
-
+        SharedLogic.PrintHelp_WithHeadingAndSubText("TAGS", application.DesignData.journal.listOfTags, "you can use these tags below, or create more in data/Design.json");
+      
         SharedLogic.FlushHelpText();
 
         return true;
@@ -148,14 +142,8 @@ public class JournalAddCommand : CommandHandlerBaseWithUtility
 
         if (!application.DesignData.DoesJournalTagExist(tags))
         {
-            ConsoleWriter.Print("Invalid Tag.\n" +
-                "Tags have to be one of the following. Or you can add more in data/Design.json");
-
-            foreach (var tag in application.DesignData.journal.listOfTags)
-            {
-                ConsoleWriter.Print("  " + tag);
-            }
-            // todo - Move these to a common place
+            ConsoleWriter.Print("Invalid Tag");
+            SharedLogic.PrintHelp_WithHeadingAndSubText("TAGS", application.DesignData.journal.listOfTags, "you can use these tags below, or create more in data/Design.json");
             return true;
         }
 
@@ -180,11 +168,11 @@ public class JournalListCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >journal list", "lists all the entries\n" );
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">journal list", "lists all the entries\n" );
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >journal list");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">journal list");
         SharedLogic.FlushHelpText();
 
         return true;
@@ -248,11 +236,11 @@ public class JournalShowCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >journal show <id>", "This will show all the details of a journal!");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">journal show <id>", "This will show all the details of a journal!");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >journal show 1", "Shows more details for journal with id 1");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">journal show 1", "Shows more details for journal with id 1");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -313,11 +301,11 @@ public class JournalEditTitleCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >journal edittitle <id> <new title>", "Renames the entry title");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">journal edittitle <id> <new title>", "Renames the entry title");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >journal edittitle 1 \"Wake up at 7 AM\"", "rename the title of journal : 1 to 'Wake up at 7 AM'");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">journal edittitle 1 \"Wake up at 7 AM\"", "rename the title of journal : 1 to 'Wake up at 7 AM'");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -358,12 +346,12 @@ public class JournalCatNotesCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >journal cat <journalID>", "Prints the notes of a journal entry. You can also use printnote instead of cat");
-        SharedLogic.PrintHelp("  >journal printnote <journalID>", "Same as cat");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">journal cat <journalID>", "Prints the notes of a journal entry. You can also use printnote instead of cat");
+        SharedLogic.PrintHelp_SubText(">journal printnote <journalID>", "Same as cat");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >journal cat 1", "Prints the notes for journal with id 1");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">journal cat 1", "Prints the notes for journal with id 1");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -407,20 +395,20 @@ public class JournalEditNoteCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >journal note <journalID>", "Opens notes for a journal");
-        SharedLogic.PrintHelp("  >journal note <journalID> --ext:<editorname>", "Provide external editor name of your choice. Example : code or vim");
-        SharedLogic.PrintHelp("  >journal note <journalID> --append:<Message>", "Append the message directly to the note");
-        SharedLogic.PrintHelp("  >journal note <journalID> --appendlog:<Message>", "Append the message directly to the note, with a timestamp!");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">journal note <journalID>", "Opens notes for a journal");
+        SharedLogic.PrintHelp_SubText(">journal note <journalID> --ext:<editorname>", "Provide external editor name of your choice. Example : code or vim");
+        SharedLogic.PrintHelp_SubText(">journal note <journalID> --append:<Message>", "Append the message directly to the note");
+        SharedLogic.PrintHelp_SubText(">journal note <journalID> --appendlog:<Message>", "Append the message directly to the note, with a timestamp!");
 
-        SharedLogic.PrintHelp("\nADVANCED :");
-        SharedLogic.PrintHelp("You can change the default editor (to open the notes) in the Data/Design.json under 'defaultExternalEditor'");
-        SharedLogic.PrintHelp("you can use '--nowait' to have jarvis not wait for the notes to be closed.");
+        SharedLogic.PrintHelp_Heading("ADVANCED");
+        SharedLogic.PrintHelp_SubText("You can change the default editor (to open the notes) in the Data/Design.json under 'defaultExternalEditor'");
+        SharedLogic.PrintHelp_SubText("you can use '--nowait' to have jarvis not wait for the notes to be closed.");
 
-        SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >journal note 1", "Edit the notes for journal : 1");
-        SharedLogic.PrintHelp("  >journal note 1 --ext:code", "Edit the notes for journal : 1, within the visual studio code");
-        SharedLogic.PrintHelp("  >journal note 1 --append:\"Buy milk\"", "Add 'buy milk' to the notes!");
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">journal note 1", "Edit the notes for journal : 1");
+        SharedLogic.PrintHelp_SubText(">journal note 1 --ext:code", "Edit the notes for journal : 1, within the visual studio code");
+        SharedLogic.PrintHelp_SubText(">journal note 1 --append:\"Buy milk\"", "Add 'buy milk' to the notes!");
         SharedLogic.FlushHelpText();
         return true;
     }

@@ -16,8 +16,8 @@ public class GameHandler : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-                SharedLogic.PrintHelp("  >game snake ", "To play a simple game\n");
+        SharedLogic.PrintHelp_Heading("USAGE");
+                SharedLogic.PrintHelp_SubText(">game snake ", "To play a simple game\n");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -78,8 +78,8 @@ public class HungryEkansCommand : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >game snake");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">game snake");
         SharedLogic.FlushHelpText();
         return true;
     }

@@ -73,6 +73,42 @@ namespace Jarvis
             isHelpTextCachingStarted = false;
         }
 
+        public static void PrintHelp_Heading(string statement, string comments = "", bool addToCache = true, int reservedSpaceForStatement = DEFAULT_RESERVED_SPACE_FOR_HELP, int fallbackReserveSpaceIfOverflowing = FALLBACK_RESERVED_SPACE_FOR_HELP)
+        {
+            PrintHelp(""); //new line
+            PrintHelp( statement.ToUpper(), comments, addToCache, reservedSpaceForStatement, fallbackReserveSpaceIfOverflowing);
+        }
+
+        public static void PrintHelp_SubText(string statement, string comments = "", bool addToCache = true, int reservedSpaceForStatement = DEFAULT_RESERVED_SPACE_FOR_HELP, int fallbackReserveSpaceIfOverflowing = FALLBACK_RESERVED_SPACE_FOR_HELP)
+        {
+            PrintHelp("   " /* tiny indentation */ + statement, comments, addToCache, reservedSpaceForStatement, fallbackReserveSpaceIfOverflowing);
+        }
+
+        /* 
+         * Param AutoCaching - Will start caching if its not enabled by default. If the caching had to be enable, then it will also flush and disable at the end.
+         */
+        public static void PrintHelp_WithHeadingAndSubText(string statement, string[] subtext, string comments = "",  bool addToCache = true, int reservedSpaceForStatement = DEFAULT_RESERVED_SPACE_FOR_HELP, int fallbackReserveSpaceIfOverflowing = FALLBACK_RESERVED_SPACE_FOR_HELP, bool autoCaching = true)
+        {
+            bool flushAtEnd = false;
+            if (autoCaching)
+            {
+                if (!isHelpTextCachingStarted)
+                {
+                    // If caching is enabled, it will also disable it by the end of this method. s
+                    StartCachingHelpText();
+                    flushAtEnd = true;
+                }
+            }
+            PrintHelp_Heading(statement, comments, addToCache, reservedSpaceForStatement, fallbackReserveSpaceIfOverflowing);
+            foreach( var sub in subtext )
+                PrintHelp_SubText(sub, "", addToCache, reservedSpaceForStatement, fallbackReserveSpaceIfOverflowing);
+        
+            if(flushAtEnd)
+            {
+                FlushHelpText();
+            }
+        }
+
         public static void PrintHelp( string statement, string comments = "", bool addToCache = true, int reservedSpaceForStatement = DEFAULT_RESERVED_SPACE_FOR_HELP, int fallbackReserveSpaceIfOverflowing = FALLBACK_RESERVED_SPACE_FOR_HELP ) 
         {
             if ( !comments.IsEmpty())

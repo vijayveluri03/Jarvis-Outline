@@ -56,16 +56,16 @@ public class CommandSelector : CommandHandlerBaseWithUtility
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >task <arguments>", "To manage your tasks. try 'task --help' for more information");
-        SharedLogic.PrintHelp("  >habit <arguments>", "To manage your habits. try 'habit --help' for more information");
-        SharedLogic.PrintHelp("  >journal <arguments>", "To manage your journal. 'journal --help' for more information");
-        SharedLogic.PrintHelp("  >game snake", "For a fun game :) ");
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task <arguments>", "To manage your tasks. try 'task --help' for more information");
+        SharedLogic.PrintHelp_SubText(">habit <arguments>", "To manage your habits. try 'habit --help' for more information");
+        SharedLogic.PrintHelp_SubText(">journal <arguments>", "To manage your journal. 'journal --help' for more information");
+        SharedLogic.PrintHelp_SubText(">game snake", "For a fun game :) ");
 
-        SharedLogic.PrintHelp("\nTIPS");
-        SharedLogic.PrintHelp("If you add Jarvis to your system path, you can access jarvis from anywhere in the command prompt ( or terminal )");
+        SharedLogic.PrintHelp_Heading("TIPS");
+        SharedLogic.PrintHelp_SubText("If you add Jarvis to your system path, you can access jarvis from anywhere in the command prompt ( or terminal )");
 
-        SharedLogic.PrintHelp("\nDesigned by Vijay Veluri!");
+        SharedLogic.PrintHelp_Heading("Designed by Vijay Veluri!");
 
         SharedLogic.FlushHelpText();
 
