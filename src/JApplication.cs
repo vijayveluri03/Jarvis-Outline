@@ -45,10 +45,10 @@ namespace Jarvis
             ConsoleWriter.PushColor(designData.DefaultColorForText);
 
             userData = JUserData.Load();
-            taskManager = new TaskManager(designData.DefaultStatus, designData.DoesStatusExist);
+            taskManager = new TaskManager(designData.TaskDefaultStatus, designData.DoesTaskStatusExist);
             habitManager = new HabitManager();
             logManager = new TaskTimeManagement();
-            journalManager = new JournalManager();
+            journalManager = new JournalManager(designData.JournalDefaultTag, designData.DoesJournalTagExist);
         }
 
         public void Save()

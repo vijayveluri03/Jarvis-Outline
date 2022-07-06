@@ -102,26 +102,64 @@ public class JournalAddCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp("USAGE");
-        SharedLogic.PrintHelp("  >journal add <title>", "This will create a new journal entry. use 'journal note' command to open and edit it!");
+        SharedLogic.PrintHelp("  >journal add <title>", "This will create a new journal entry. ");
+        SharedLogic.PrintHelp("  >journal add <tags> <title>", "This will create a new journal entry. ");
+
 
         SharedLogic.PrintHelp("\nEXAMPLES");
-        SharedLogic.PrintHelp("  >journal add \"Stuff that i did today!\"", "This will create a journal entry. Use jarvis journal note <id> to open and edit it" );
+        SharedLogic.PrintHelp("  >journal add \"Stuff that i did today!\"", "This will create a journal entry." );
+        SharedLogic.PrintHelp("  >journal add \"dailylog\" \"Stuff that i did today!\"", "This will create a journal entry with a tag DailyLog. ");
+
+        SharedLogic.PrintHelp("\nTAGS - you can use these tags below, or create more in data/Design.json");
+        foreach( var tag in application.DesignData.journal.listOfTags)
+        {
+            SharedLogic.PrintHelp("  " + tag);
+        }
+        // todo - Move these to a common place
+
+
         SharedLogic.FlushHelpText();
 
         return true;
     }
     protected override bool Run()
     {
-        if (arguments_ReadOnly.Count != 1)
+        if (arguments_ReadOnly.Count != 2 && arguments_ReadOnly.Count != 1 )
         {
             ConsoleWriter.Print("Invalid arguments! \n");
             ShowHelp();
             return true;
         }
 
-        string title = arguments_ReadOnly[0];
+        string title = null;
+        string[] tags = null;
+        if (arguments_ReadOnly.Count == 1)
+        {
+            title = arguments_ReadOnly[0];
+            tags = new string[] { application.DesignData.JournalDefaultTag };
+        }
+        else if (arguments_ReadOnly.Count == 2)
+        {
+            tags = arguments_ReadOnly[0].ToLower().Split(',');
+            title = arguments_ReadOnly[1];
+        }
+        else
+            Utils.Assert(false);
 
-        var entry = SharedLogic.CreateNewJournalEntry(application.journalManager, title);
+        if (!application.DesignData.DoesJournalTagExist(tags))
+        {
+            ConsoleWriter.Print("Invalid Tag.\n" +
+                "Tags have to be one of the following. Or you can add more in data/Design.json");
+
+            foreach (var tag in application.DesignData.journal.listOfTags)
+            {
+                ConsoleWriter.Print("  " + tag);
+            }
+            // todo - Move these to a common place
+            return true;
+        }
+
+        var entry = SharedLogic.CreateNewJournalEntry(application.journalManager, tags, title);
         application.journalManager.AddJournal(entry);
 
         ConsoleWriter.Print("New Journal entry added with id : {0}. You can also edit the notes using 'journal note'", entry.id);
@@ -164,22 +202,24 @@ public class JournalListCommand : CommandHandlerBaseWithUtility
         List<JournalEntry> journals = new List<JournalEntry>(application.journalManager.Data.entries);
 
         int lineCount = 0;
+        int categoryArea = 30;
         int titleArea = (optionalArguments_ReadOnly.Contains("-e") || optionalArguments_ReadOnly.Contains("--expand")) ? 120 : 40;
         const int newLineAfter = 5;
 
         // output Heading 
         if (journals.Count > 0)
         {
-            ConsoleWriter.PrintInColor("{0, -4} {1,-" + titleArea + "} {2, -15}",
+            ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15}",
                 application.DesignData.HighlightColorForText,
-                "ID", "TITLE", "LOGGED ON"
+                "ID", "TAGS", "TITLE", "LOGGED ON"
                 );
 
             foreach (var journal in journals)
             {
 
-                ConsoleWriter.Print("{0, -4} {1,-" + titleArea + "} {2, -15}",
+                ConsoleWriter.Print("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15}",
                     journal.id,
+                    (journal.tags != null && journal.tags.Length > 0 ? Utils.Conversions.ArrayToString(journal.tags, true).TruncateWithVisualFeedback(categoryArea - 3) : "ERROR"),
                     journal.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/) + "+(N)",// because Notes is available for all journals 
                     journal.loggedDate.ShortForm()
                     );
@@ -227,9 +267,11 @@ public class JournalShowCommand : CommandHandlerBaseWithUtility
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
-        JournalEntry hb = application.journalManager.GetJournal_ReadOnly(id);
+        int categoryArea = 45;
 
-        if (hb == null)
+        JournalEntry journal = application.journalManager.GetJournal_ReadOnly(id);
+
+        if (journal == null)
         {
             ConsoleWriter.Print("Journal with id : {0} not found!", id);
             return true;
@@ -238,20 +280,21 @@ public class JournalShowCommand : CommandHandlerBaseWithUtility
         // Print journal details
         {
             // Heading
-            ConsoleWriter.PrintInColor("{0, -4} {1}",
+            ConsoleWriter.PrintInColor("{0, -4} {1, -" + categoryArea + "} {2}",
                 application.DesignData.HighlightColorForText,
-                "ID", "TITLE"
+                "ID", "TAGS", "TITLE"
                 );
 
-            ConsoleWriter.Print("{0, -4} {1}",
-                hb.id,
-                hb.title);
+            ConsoleWriter.Print("{0, -4} {1, -" + categoryArea + "} {2}",
+                journal.id,
+                (journal.tags != null && journal.tags.Length > 0 ? Utils.Conversions.ArrayToString(journal.tags, true).TruncateWithVisualFeedback(categoryArea - 3) : "ERROR"),
+                journal.title);
 
             ConsoleWriter.Print();
 
             ConsoleWriter.Print(
-                "LOGGED ON : {1}\n", 
-                hb.loggedDate.ShortForm()
+                "LOGGED ON : {0}\n", 
+                journal.loggedDate.ShortForm()
                 );
         }
 

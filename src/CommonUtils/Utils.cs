@@ -485,7 +485,7 @@ public static class Utils
 
 // Date Utils
 
-public static class DateExt
+public static class DateTimeExt
 {
     public static string ShortForm(this DateTime date)
     {
@@ -519,6 +519,12 @@ public static class DateExt
     {
         return date == DateTime.MinValue;
     }
+    public static DateTime Yesterday { get { return DateTime.Now.AddDays(-1); } }
+    public static DateTime YesterdayMin { get { return DateTime.Now.AddDays(-1).ZeroTime(); } }
+    public static DateTime YesterdayMax { get { return DateTime.Now.AddDays(-1).MaxTime(); } }
+
+    public static DateTime TodayMin { get { return DateTime.Now.ZeroTime(); } } 
+    public static DateTime TodayMax { get { return DateTime.Now.MaxTime(); } }
 }
 
 // utilities

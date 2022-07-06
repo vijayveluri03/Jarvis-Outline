@@ -29,6 +29,16 @@
     "defaultStatus": "open",
     "completeStatus" :  "complete"  // the status for the completed tasks
   },
+  "journal": {
+    "listOfTags": [
+      "dailylog",
+      "important",
+      "achievement",
+      "rant",
+      "unknown"
+    ],
+    "defaultTag": "unknown" 
+   },
 
   "defaultExternalEditor": "notepad"
 }

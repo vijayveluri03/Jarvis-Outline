@@ -139,19 +139,11 @@ namespace Jarvis
         {
             [JsonProperty] public string[] listOfCategories;
         }
-        [Serializable]
-        public class Tasks
-        {
-            [JsonProperty] public string[] statusList;
-            [JsonProperty] public string defaultStatus;
-            [JsonProperty] public string completeStatus;
-        }
 
         public static JDesignData instance { get; private set; }
 
         [JsonProperty] public LookAndFeelProperties lookAndFeel;
         [JsonProperty] public Categories categories;
-        [JsonProperty] public Tasks tasks;
         [JsonProperty] public string defaultExternalEditor = "code";
 
         // Getters        
@@ -162,10 +154,7 @@ namespace Jarvis
         [JsonIgnore] public ConsoleColor HighlightColorForText_4 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_4); } } // unused
         [JsonIgnore] public ConsoleColor HighlightColorForText_5 { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_5); } } // unused
         [JsonIgnore] public ConsoleColor HighlightColorForText_Disabled { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText_disabled); } }    // used to represent disabled or inactive stuff
-        [JsonIgnore] private HashSet<string> cachedTaskStatuses = new HashSet<string>();
 
-        [JsonIgnore] public string DefaultStatus { get { return tasks.defaultStatus; } }
-        [JsonIgnore] public string CompletedStatus { get { return tasks.completeStatus; } }
 
         public static JDesignData Load()
         {
@@ -185,6 +174,49 @@ namespace Jarvis
         }
 
         private void PostLoad()
+        {
+            InitializeTasks();
+            InitializeJournal();
+        }
+
+        public bool DoesCategoryExist(string category)
+        {
+            foreach (var cat in categories.listOfCategories)
+            {
+                if (cat == category)
+                    return true;
+            }
+            return false;
+        }
+
+
+        public bool DoesCategoryExist(string[] categories)
+        {
+            Utils.Assert(categories.Length > 0);
+            foreach (var cat in categories)
+            {
+                if (!DoesCategoryExist(cat))
+                    return false;
+            }
+            return true;
+        }
+
+
+        #region TASK SPECIFIC
+
+        [Serializable]
+        public class Tasks
+        {
+            [JsonProperty] public string[] statusList;
+            [JsonProperty] public string defaultStatus;
+            [JsonProperty] public string completeStatus;
+        }
+        [JsonProperty] public Tasks tasks;
+        [JsonIgnore] private HashSet<string> cachedTaskStatuses = new HashSet<string>();
+        [JsonIgnore] public string TaskDefaultStatus { get { return tasks.defaultStatus; } }
+        [JsonIgnore] public string TaskCompletedStatus { get { return tasks.completeStatus; } }
+
+        void InitializeTasks()
         {
             foreach (var status in tasks.statusList)
             {
@@ -206,51 +238,104 @@ namespace Jarvis
                 ConsoleWriter.Print("Error : Complete status is invalid in Data/Design.Json. It should be one of the pre defined statuses.");
                 //@todo raise exception ?
             }
-        }
 
-        public bool DoesCategoryExist(string category)
+        }
+        public string GetTaskStatusesAsCommaSeperatedString()
         {
-            foreach (var cat in categories.listOfCategories)
-            {
-                if (cat == category)
-                    return true;
-            }
-            return false;
+            return Utils.Conversions.ArrayToString(tasks.statusList, true);
         }
 
-        public bool DoesStatusExist(string status)
+        public bool DoesTaskStatusExist(string status)
         {
             return cachedTaskStatuses.Contains(status);
         }
 
-        public bool DoesStatusExistFuzzySearch(string status)
+        public bool DoesTaskStatusExistFuzzySearch(string status)
         {
-                status = status.ToLower();
-                foreach (var st in cachedTaskStatuses)
+            status = status.ToLower();
+            foreach (var st in cachedTaskStatuses)
+            {
+                if (st.ToLower().Contains(status))
                 {
-                    if (st.ToLower().Contains(status))
-                    {
-                        return true;
-                    }
+                    return true;
                 }
-                return false;
+            }
+            return false;
         }
 
 
-        public bool DoesCategoryExist(string[] categories)
+
+        #endregion TASK SPECIFIC
+
+        #region JOURNAL SPECIFIC
+
+        [Serializable]
+        public class Journal
         {
-            Utils.Assert(categories.Length > 0);
-            foreach (var cat in categories)
+            [JsonProperty] public string[] listOfTags;
+            [JsonProperty] public string defaultTag;
+        }
+        [JsonProperty] public Journal journal;
+        [JsonIgnore] private HashSet<string> cachedJornalTags = new HashSet<string>();
+        [JsonIgnore] public string JournalDefaultTag { get { return journal.defaultTag; } }
+
+
+        void InitializeJournal()
+        {
+            foreach (var status in journal.listOfTags)
             {
-                if (!DoesCategoryExist(cat))
+                if (cachedJornalTags.Contains(status))
+                {
+                    ConsoleWriter.Print("Error : tags are repeated in Data/Design.Json");
+                    //@todo raise exception ?
+                    continue;
+                }
+                cachedJornalTags.Add(status);
+            }
+            if (!cachedJornalTags.Contains(journal.defaultTag))
+            {
+                ConsoleWriter.Print("Error : Default tag is invalid in Data/Design.Json. It should be one of the pre defined tags.");
+                //@todo raise exception ?
+            }
+        }
+
+        public bool DoesJournalTagExist(string[] tags)
+        {
+            Utils.Assert(tags.Length > 0);
+            foreach (var tag in tags)
+            {
+                if (!DoesJournalTagExist(tag))
                     return false;
             }
             return true;
         }
 
-        public string GetStatusesAsCommaSeperatedString()
+        public string GetJournalTagAsCommaSeperatedString()
         {
-            return Utils.Conversions.ArrayToString(tasks.statusList, true);
+            return Utils.Conversions.ArrayToString(journal.listOfTags, true);
         }
+
+        public bool DoesJournalTagExist(string tag)
+        {
+            return cachedJornalTags.Contains(tag);
+        }
+
+        public bool DoesJournalTagExistFuzzySearch(string tag)
+        {
+            tag = tag.ToLower();
+            foreach (var st in cachedJornalTags)
+            {
+                if (st.ToLower().Contains(tag))
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        #endregion JOURNAL SPECIFIC 
+
     }
+
+
 }

@@ -233,7 +233,7 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
         {
             ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -10} {5, -15}",
                 application.DesignData.HighlightColorForText,
-                "ID", "DEPT", "TITLE", "LAST UPDATED", "STREAK", "SUCCESS"
+                "ID", "DEPT", "TITLE", "LAST UPDATED", "STREAK", "SUCCESS %"
                 );
 
             // Sorts based on status to keep In-Progress onces above

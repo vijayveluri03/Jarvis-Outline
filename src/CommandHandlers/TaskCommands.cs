@@ -209,11 +209,11 @@ public class TaskAddCommand : CommandHandlerBaseWithUtility
         }
 
         if (status.IsEmpty())
-            status = application.DesignData.DefaultStatus;
+            status = application.DesignData.TaskDefaultStatus;
 
-        if (!application.DesignData.DoesStatusExist(status))
+        if (!application.DesignData.DoesTaskStatusExist(status))
         {
-            ConsoleWriter.Print("Invalid status. It has to be one of the following -> " + application.DesignData.GetStatusesAsCommaSeperatedString() + " or you can create new ones in Data/Design.json");
+            ConsoleWriter.Print("Invalid status. It has to be one of the following -> " + application.DesignData.GetTaskStatusesAsCommaSeperatedString() + " or you can create new ones in Data/Design.json");
             return true;
         }
 
@@ -336,7 +336,7 @@ public class TaskCompleteCommand : CommandHandlerBaseWithUtility
             if (application.taskManager.DoesTaskExist(id))
             {
                 var task = application.taskManager.GetTask_Editable(id);
-                task.SetStatus(application.DesignData.CompletedStatus);
+                task.SetStatus(application.DesignData.TaskCompletedStatus);
                 ConsoleWriter.Print("Task with id : {0} marked as {1}", id, task.StatusString);
             }
             else
@@ -651,9 +651,9 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
                 return true;
             }
 
-            if ( !status.IsEmpty() && !application.DesignData.DoesStatusExistFuzzySearch(status))
+            if ( !status.IsEmpty() && !application.DesignData.DoesTaskStatusExistFuzzySearch(status))
             {
-                ConsoleWriter.Print("Invalid status. It has to be one of the following -> " + application.DesignData.GetStatusesAsCommaSeperatedString() + " or you can create new ones in Data/Design.json");
+                ConsoleWriter.Print("Invalid status. It has to be one of the following -> " + application.DesignData.GetTaskStatusesAsCommaSeperatedString() + " or you can create new ones in Data/Design.json");
                 return true;
             }
         }
@@ -688,7 +688,7 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
 
         // by default only open ones are shown, unless specified in which case open ones are not shown. 
         if (status.IsEmpty())
-            status = application.DesignData.DefaultStatus;
+            status = application.DesignData.TaskDefaultStatus;
 
         Dictionary<string, List<Task>> filteredTasks = new Dictionary<string, List<Task>>();
 
@@ -929,9 +929,9 @@ public class TaskSetStatusCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        if ( !application.DesignData.DoesStatusExist(status))
+        if ( !application.DesignData.DoesTaskStatusExist(status))
         {
-            ConsoleWriter.Print("Invalid status. It has to be one of the following -> " + application.DesignData.GetStatusesAsCommaSeperatedString() + " or you can create new ones in Data/Design.json");
+            ConsoleWriter.Print("Invalid status. It has to be one of the following -> " + application.DesignData.GetTaskStatusesAsCommaSeperatedString() + " or you can create new ones in Data/Design.json");
             return true;
         }
 
