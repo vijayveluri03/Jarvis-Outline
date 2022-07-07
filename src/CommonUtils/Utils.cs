@@ -527,6 +527,27 @@ public static class DateTimeExt
     public static DateTime TodayMax { get { return DateTime.Now.MaxTime(); } }
 }
 
+public static class DateExt
+{
+    public static string ShortForm(this Date date)
+    {
+        return date.Month + "/" + date.Day;
+    }
+    public static string ShortFormWithDay(this Date date)
+    {
+        return date.Month + "/" + date.Day + " - " + date.DayOfWeek.ToString().Truncate(2);
+    }
+    public static bool IsToday(this Date date, int offset = 0)
+    {
+        return date == (Date.Today + offset);
+    }
+    public static bool IsThisMinDate(this Date date)
+    {
+        return date == Date.MinValue;
+    }
+    public static Date Yesterday { get { return Date.Today - 1; } }
+}
+
 // utilities
 
 public static class StringExt
@@ -638,4 +659,10 @@ public static class ListExtension
         }
         return false;
     }
+}
+
+public abstract class IDirtyable // Goosh, couldnt i think of a better name.
+{
+    [Newtonsoft.Json.JsonIgnore]
+    public bool IsDirty { get; set; } = false;
 }

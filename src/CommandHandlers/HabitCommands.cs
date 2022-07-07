@@ -169,7 +169,7 @@ public class HabitAddCommand : CommandHandlerBaseWithUtility
         }
 
 
-        var entry = SharedLogic.CreateNewHabit(application.habitManager, categories, title, previousStreak);
+        var entry = SharedLogic.CreateNewHabit(application.habitManager, categories, title);
         application.habitManager.AddHabit(entry);
 
         ConsoleWriter.Print("New Habit added with id : " + entry.id);
@@ -298,7 +298,7 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
 
         bool syntaxError = false;
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
-        int deltaTime = Utils.CLI.ExtractIntFromCLIParameter(optionalArguments_ReadOnly, "--when", 0, null, null, out syntaxError);
+        int offset = Utils.CLI.ExtractIntFromCLIParameter(optionalArguments_ReadOnly, "--when", 0, null, null, out syntaxError);
 
         Habit hb = application.habitManager.GetHabit_Editable(id);
 
@@ -314,7 +314,7 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        DateTime dateForEntry = DateTime.Now.ZeroTime().AddDays(deltaTime);
+        Date dateForEntry = Date.Today + offset;
         if (hb.IsEntryOn(dateForEntry))
         {
             ConsoleWriter.Print("Habit with id: {0} already streaked up on {1}. This can only be done once a day!", id, dateForEntry.ShortForm());
@@ -332,7 +332,7 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
         hb.AddNewEntry(dateForEntry);
 
         ConsoleWriter.Print("Habit with id : {0} Streaked up! Success rate {1} -> {2}", id, previousSuccess, hb.GetSuccessRate());
-        if( deltaTime != 0 )
+        if( offset != 0 )
             ConsoleWriter.Print("Entry added for date : {0}!", dateForEntry.ShortForm());
 
         return true;
@@ -595,8 +595,8 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
                 hb.StatusStr,
                 (notes.DoesNoteExist(hb.id) ? "YES" : "NO"),
                 hb.GetLastUpdatedOn().ShortFormWithDay(),
-                (hb.GetStreak() >= 7 && hb.GetEntryCount() >= 7 ? hb.GetEntryCount(7 - 1) / 7.0f : "Need more data to show this"),
-                (hb.GetStreak() >= 30 && hb.GetEntryCount() >= 30 ? hb.GetEntryCount(28 - 1) / 7.0f : "Need more data to show this")
+                (hb.GetStreak() >= 7 && hb.GetEntryCount() >= 7 ? hb.GetEntryCountForTheDuration(7 - 1) / 7.0f : "Need more data to show this"),
+                (hb.GetStreak() >= 30 && hb.GetEntryCount() >= 30 ? hb.GetEntryCountForTheDuration(28 - 1) / 7.0f : "Need more data to show this")
                 );
         }
 

@@ -27,14 +27,13 @@ namespace Jarvis
             return ed;
         }
 
-        public static Habit CreateNewHabit(HabitManager habitManager, string[] category, string title, int previousStreak)
+        public static Habit CreateNewHabit(HabitManager habitManager, string[] category, string title)
         {
             Habit ed = new Habit();
             ed.id = habitManager.GetAvailableID();
             ed.categories = category;
             ed.title = title;
-            ed.startDate = DateTime.Now.ZeroTime();
-            ed.previousStreak = previousStreak;
+            ed._startDateObscelete = DateTime.Now.ZeroTime();
             
             return ed;
         }

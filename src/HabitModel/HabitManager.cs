@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Jarvis
 {
-    public class Habit
+    public class Habit : IDirtyable
     {
         public enum Status
         {
@@ -19,33 +19,66 @@ namespace Jarvis
         // The name or the title for an entry 
         public string title;
 
-        public DateTime startDate;
+        [Obsolete("This will be removed in the next update")]
+        [JsonProperty(PropertyName = "startDate")]
+        public DateTime _startDateObscelete;
+
+        [JsonProperty(PropertyName = "startDateNew")]
+        public Date _startDate;
 
         // Unique ID
         public int id;
 
-        public List<DateTime> entries = new List<DateTime>();
+        [Obsolete("This will be removed in the next update")]
+        [JsonProperty(PropertyName = "entries")]
+        public List<DateTime> _entriesObscelete = new List<DateTime>();
 
-        public int previousStreak = 0;
+
+        //@todo - make this private but serializable
+        [JsonProperty(PropertyName = "entriesNew")]
+        public List<Date> _entries = new List<Date>();
 
         public Status status = Status.In_Progress;
 
+        [JsonIgnore]
         public bool IsEnabled { get { return status == Status.In_Progress; } }
+
+        [JsonIgnore]
         public bool IsDisabled { get { return status == Status.Disabled; } }
 
+        [JsonIgnore]
         public string StatusStr
         {
             get { return status == Status.In_Progress ? "In-Progress" : "Disabled"; }
         }
 
+        public void Init()
+        {
+            if (_entriesObscelete != null && _entriesObscelete.Count > 0)
+            {
+                _entries = new List<Date>();
+                foreach (var entry in _entriesObscelete)
+                    _entries.Add(new Date(entry));
+
+                IsDirty = true; 
+            }
+
+            if(!_startDateObscelete.IsThisMinDate())
+            {
+                _startDate = (Date)_startDateObscelete;
+                _startDateObscelete = DateTime.MinValue;
+                IsDirty = true;
+            }
+        }
+
         public int GetStreak()
         {
-            return entries.Count + previousStreak;
+            return -1;
         }
 
         public int GetEntryCount()
         {
-            return entries.Count;
+            return _entries.Count;
         }
 
         public void SetStatus(Status status)
@@ -53,13 +86,14 @@ namespace Jarvis
             this.status = status;
         }
 
-        public int GetEntryCount(int dayCount)
+        public int GetEntryCountForTheDuration(int dayCount)
         {
             int count = 0;
             Utils.Assert(dayCount >= 0);
-            foreach (var entry in entries)
+            Date startOfTheDuration = Date.Today - dayCount;
+            foreach (var entry in _entries)
             {
-                if (entry.ZeroTime() >= DateTime.Now.AddDays(-1 * dayCount).ZeroTime())
+                if (entry >= startOfTheDuration )
                     count++;
             }
             return count;
@@ -67,48 +101,48 @@ namespace Jarvis
 
         public int GetSuccessRate ()
         {
-             float totalDays = Math.Max( (float)(DateTime.Now.MaxTime() - startDate.ZeroTime()).TotalDays , 1 );
+            int totalDays = Date.Today - _startDate; // This will not include today
 
             #if RELEASE_LOG
-            foreach (var entry in entries)
+            foreach (var entry in _entries)
             {
-                Utils.Assert(entry >= startDate);
+                Utils.Assert(entry >= _startDate && entry <= Date.Today);
             }
             #endif
 
-            return (int)Math.Round( entries.Count * 100/ totalDays);
+            return (int)Math.Round( _entries.Count * 100.0f/ totalDays);
         }
 
-        public bool IsEntryOn(DateTime date)
+        public bool IsEntryOn(Date date)
         {
-            date = date.ZeroTime();
-            foreach (var entry in entries)
+            foreach (var entry in _entries)
             {
-                if (entry.ZeroTime() == date)
+                if (entry == date)
                     return true;
             }
             return false;
         }
 
-        public void AddNewEntry(DateTime newEntry)
+        public void AddNewEntry(Date newEntry)
         {
             Utils.Assert(!IsEntryOn(newEntry));
-            Utils.Assert(newEntry >= startDate);
-            entries.Add(newEntry);
+            Utils.Assert(newEntry >= _startDate);
+            Utils.Assert(newEntry <= Date.Today);
+
+            _entries.Add(newEntry);
         }
 
-        public DateTime GetLastUpdatedOn()
+        public Date GetLastUpdatedOn()
         {
-            if (entries.Count == 0)
-                return startDate;
-            return entries[entries.Count - 1];
+            if (_entries.Count == 0)
+                return _startDate;
+            return _entries[_entries.Count - 1];
         }
 
         public void Reset()
         {
-            entries.Clear();
-            previousStreak = 0;
-            startDate = DateTime.Now.ZeroTime();
+            _entries.Clear();
+            _startDate = Date.Today;
         }
     }
 
@@ -119,11 +153,10 @@ namespace Jarvis
     }
 
 
-    public class HabitManager
+    public class HabitManager : IDirtyable
     {
         public HabitCollection Data { get; private set; }
-        private bool dirty = false;
-
+        
         public HabitManager()
         {
             if (Utils.CreateFileIfNotExit(JConstants.HABITS_FILENAME, JConstants.HABITS_TEMPLATE_FILENAME))
@@ -137,13 +170,13 @@ namespace Jarvis
         public void AddHabit(Habit ed)
         {
             Data.entries.Add(ed);
-            dirty = true;
+            IsDirty = true;
         }
 
         public void RemoveHabit(Habit ed)
         {
             Data.entries.Remove(ed);
-            dirty = true;
+            IsDirty = true;
         }
 
         private void Load(string fileName)
@@ -159,16 +192,37 @@ namespace Jarvis
             {
                 if (ed.id >= availableID)
                     availableID = ed.id + 1;
+
+                ed.Init();
             }
         }
+
+        private bool IsDirtyRecursive()
+        {
+            foreach (Habit ed in Data.entries)
+            {
+                if (ed.IsDirty)
+                    return true;
+            }
+            return IsDirty;
+        }
+        private void UnSetDirtyRecursively()
+        {
+            foreach (Habit ed in Data.entries)
+            {
+                ed.IsDirty = false;
+            }
+            IsDirty = false;
+        }
+
         public void Save()
         {
-            if (!dirty)
+            if (!IsDirtyRecursive())
                 return;
 
             string serializedData = JsonConvert.SerializeObject(Data, Formatting.Indented);
             File.WriteAllText(JConstants.HABITS_FILENAME, serializedData);
-            dirty = false;
+            UnSetDirtyRecursively();
 
 #if RELEASE_LOG
             ConsoleWriter.Print("Habits saved");
@@ -200,7 +254,7 @@ namespace Jarvis
 
         public Habit GetHabit_Editable(int id)
         {
-            dirty = true;
+            IsDirty = true;
             return GetHabit_ReadOnly(id);
         }
 
