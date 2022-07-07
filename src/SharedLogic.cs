@@ -33,7 +33,8 @@ namespace Jarvis
             ed.id = habitManager.GetAvailableID();
             ed.categories = category;
             ed.title = title;
-            ed._startDateObscelete = DateTime.Now.ZeroTime();
+            ed._startDate = Date.Today; // @todo , using private member here
+            ed.IsDirty = true;
             
             return ed;
         }

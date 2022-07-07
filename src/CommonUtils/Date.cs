@@ -52,7 +52,7 @@ namespace System
 
 		private Date(SerializationInfo info, StreamingContext context)
 		{
-			this._dt = DateTime.FromFileTime(info.GetInt64("ticks"));
+			this._dt = (Date)info.GetDateTime("date");
 		}
 
 		public static int operator -(Date d1, Date d2)
@@ -248,7 +248,7 @@ namespace System
 
 		void ISerializable.GetObjectData(SerializationInfo info, StreamingContext context)
 		{
-			info.AddValue("ticks", this._dt.Ticks);
+			info.AddValue("date", this._dt.ToShortDateString());
 		}
 
 		public static bool IsLeapYear(int year)
@@ -335,6 +335,14 @@ namespace System
 		{
 			DateTime d;
 			bool success = DateTime.TryParse(s, out d);
+			result = new Date(d);
+			return success;
+		}
+
+		public static bool TryParse(string s, IFormatProvider provider, out Date result)
+		{
+			DateTime d;
+			bool success = DateTime.TryParse(s, provider, DateTimeStyles.None, out d);
 			result = new Date(d);
 			return success;
 		}

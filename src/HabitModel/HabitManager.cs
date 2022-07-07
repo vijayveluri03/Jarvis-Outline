@@ -60,6 +60,7 @@ namespace Jarvis
                 foreach (var entry in _entriesObscelete)
                     _entries.Add(new Date(entry));
 
+                _entriesObscelete.Clear();
                 IsDirty = true; 
             }
 
@@ -76,7 +77,7 @@ namespace Jarvis
             return -1;
         }
 
-        public int GetEntryCount()
+        public int GetAllEntryCount()
         {
             return _entries.Count;
         }
@@ -86,22 +87,22 @@ namespace Jarvis
             this.status = status;
         }
 
-        public int GetEntryCountForTheDuration(int dayCount)
+        public int GetEntryCountForTheDuration(Date start_Inclusive, Date end_Inclusive)
         {
             int count = 0;
-            Utils.Assert(dayCount >= 0);
-            Date startOfTheDuration = Date.Today - dayCount;
             foreach (var entry in _entries)
             {
-                if (entry >= startOfTheDuration )
+                if (entry >= start_Inclusive && entry <= end_Inclusive )
                     count++;
             }
             return count;
         }
 
+        // Gets success rate till yesterday. Doesnt include today!
         public int GetSuccessRate ()
         {
             int totalDays = Date.Today - _startDate; // This will not include today
+            int totalEntryCount = GetEntryCountForTheDuration(_startDate, Date.Today - 1);
 
             #if RELEASE_LOG
             foreach (var entry in _entries)
@@ -110,7 +111,7 @@ namespace Jarvis
             }
             #endif
 
-            return (int)Math.Round( _entries.Count * 100.0f/ totalDays);
+            return (int)Math.Round( totalEntryCount * 100.0f/ totalDays);
         }
 
         public bool IsEntryOn(Date date)
@@ -123,6 +124,11 @@ namespace Jarvis
             return false;
         }
 
+        public bool IsNewEntryValid(Date newEntry)
+        {
+            return !IsEntryOn(newEntry) && newEntry >= _startDate && newEntry <= Date.Today;
+        }
+
         public void AddNewEntry(Date newEntry)
         {
             Utils.Assert(!IsEntryOn(newEntry));
@@ -130,10 +136,14 @@ namespace Jarvis
             Utils.Assert(newEntry <= Date.Today);
 
             _entries.Add(newEntry);
+            _entries.Sort();
+
+            IsDirty = true;
         }
 
         public Date GetLastUpdatedOn()
         {
+            // as the entries are sorted, this should get us the latest update
             if (_entries.Count == 0)
                 return _startDate;
             return _entries[_entries.Count - 1];
@@ -143,6 +153,8 @@ namespace Jarvis
         {
             _entries.Clear();
             _startDate = Date.Today;
+
+            IsDirty = true;
         }
     }
 

@@ -18,12 +18,15 @@ public class HabitHandler : CommandHandlerBaseWithUtility
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
         SharedLogic.PrintHelp_SubText(">habit add ", "To add a new habit");
-        SharedLogic.PrintHelp_SubText(">habit streakup", "to increase the steak of a habit");
+        SharedLogic.PrintHelp_SubText(">habit ticktoday", "to tick today as completed");
+        SharedLogic.PrintHelp_SubText(">habit tickyesterday", "to tick yesterday as completed");
+        
         SharedLogic.PrintHelp_SubText(">habit reset", "to reset a habit");
         SharedLogic.PrintHelp_SubText(">habit list", "to list all the habit");
         SharedLogic.PrintHelp_SubText(">habit show", "to show details of a habit");
 
         SharedLogic.PrintHelp_Heading("ADVANCED");
+        SharedLogic.PrintHelp_SubText(">habit tick", "To mark a certain date as completed");
         SharedLogic.PrintHelp_SubText(">habit delete", "to delete a habit");
         SharedLogic.PrintHelp_SubText(">habit disable", "to disable a habit");
         SharedLogic.PrintHelp_SubText(">habit re-enable", "to re-enable a disabled habit"); 
@@ -52,7 +55,13 @@ public class HabitHandler : CommandHandlerBaseWithUtility
             case "add":
                 selectedHander = new HabitAddCommand();
                 break;
-            case "streakup":
+            case "ticktoday":
+                selectedHander = new HabitStreakUpTodayCommand();
+                break;
+            case "tickyesterday":
+                selectedHander = new HabitStreakUpYesterdayCommand();
+                break;
+            case "tick":
                 selectedHander = new HabitStreakUpCommand();
                 break;
             case "list":
@@ -232,7 +241,7 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
         {
             ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -10} {5, -15}",
                 application.DesignData.HighlightColorForText,
-                "ID", "DEPT", "TITLE", "LAST UPDATED", "STREAK", "SUCCESS %"
+                "ID", "DEPT", "TITLE", "LAST UPDATED", "COUNT", "SUCCESS %"
                 );
 
             // Sorts based on status to keep In-Progress onces above
@@ -250,7 +259,7 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
                     habit.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/)
                         + (notes.DoesNoteExist(habit.id) ? "+(N)" : ""),
                     habit.GetLastUpdatedOn().ShortForm(),
-                    habit.GetStreak(),
+                    habit.GetAllEntryCount(),
                     habit.GetSuccessRate(),
                     habit.IsDisabled ? "Disabled" : ""
                     );
@@ -268,9 +277,10 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
     }
 }
 
-public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
+
+public class HabitStreakUpTodayCommand : CommandHandlerBaseWithUtility
 {
-    public HabitStreakUpCommand()
+    public HabitStreakUpTodayCommand()
     {
     }
 
@@ -278,11 +288,10 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">habit streakup <id>", "Streaks up a habit");
-        SharedLogic.PrintHelp_SubText(">habit streakup <id>  <--when:-1>", "If you forgot to streakup yesterday? -1 for yesterday. -2 for a day before that. by default, this is 0, as in today.");
+        SharedLogic.PrintHelp_SubText(">habit ticktoday <id>", "tick a habit as done, for today");
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
-        SharedLogic.PrintHelp_SubText(">habit streakup 1", "Streakup a habit with id 1");
+        SharedLogic.PrintHelp_SubText(">habit ticktoday 1", "tick a habit with id 1 as done, for today");
         SharedLogic.FlushHelpText();
 
         return true;
@@ -296,9 +305,8 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        bool syntaxError = false;
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
-        int offset = Utils.CLI.ExtractIntFromCLIParameter(optionalArguments_ReadOnly, "--when", 0, null, null, out syntaxError);
+        Date date = Date.Today;
 
         Habit hb = application.habitManager.GetHabit_Editable(id);
 
@@ -308,16 +316,157 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        if( syntaxError)
-        {
-            ConsoleWriter.Print("syntax invalid for --when argument. please try again");
-            return true;
-        }
-
-        Date dateForEntry = Date.Today + offset;
+        Date dateForEntry = date;
         if (hb.IsEntryOn(dateForEntry))
         {
             ConsoleWriter.Print("Habit with id: {0} already streaked up on {1}. This can only be done once a day!", id, dateForEntry.ShortForm());
+            return true;
+        }
+
+        if (hb.IsDisabled)
+        {
+            ConsoleWriter.Print("Habit with id: {0} is disabled. You would want to re-enable it before it can be updated!", id);
+            return true;
+        }
+
+        if (!hb.IsNewEntryValid(dateForEntry))
+        {
+            Utils.Assert(false, "Why is the date valid??");
+            return true;
+        }
+
+        int previousSuccess = hb.GetSuccessRate();
+
+        hb.AddNewEntry(dateForEntry);
+
+        ConsoleWriter.Print("Habit with id : {0} Streaked up today! Success rate {1} -> {2}", id, previousSuccess, hb.GetSuccessRate());
+
+        return true;
+    }
+}
+
+// @todo - lot of code repeatition here. club all the three classes into one.
+public class HabitStreakUpYesterdayCommand : CommandHandlerBaseWithUtility
+{
+    public HabitStreakUpYesterdayCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit tickyesterday <id>", "tick a habit as done, for yesterday");
+
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit tickyesterday 1", "tick a habit with id 1 as done, for yesterday");
+        SharedLogic.FlushHelpText();
+
+        return true;
+    }
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 1)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        Date date = Date.Today - 1;
+
+        Habit hb = application.habitManager.GetHabit_Editable(id);
+
+        if (hb == null)
+        {
+            ConsoleWriter.Print("Habit with id : {0} not found!", id);
+            return true;
+        }
+
+        Date dateForEntry = date;
+        if (hb.IsEntryOn(dateForEntry))
+        {
+            ConsoleWriter.Print("Habit with id: {0} already streaked up on {1}. This can only be done once a day!", id, dateForEntry.ShortForm());
+            return true;
+        }
+
+        if (hb.IsDisabled)
+        {
+            ConsoleWriter.Print("Habit with id: {0} is disabled. You would want to re-enable it before it can be updated!", id);
+            return true;
+        }
+
+        if (!hb.IsNewEntryValid(dateForEntry))
+        {
+            Utils.Assert(false, "Why is the date valid??");
+            return true;
+        }
+
+        int previousSuccess = hb.GetSuccessRate();
+
+        hb.AddNewEntry(dateForEntry);
+
+        ConsoleWriter.Print("Habit with id : {0} Streaked up yesterday! Success rate {1} -> {2}", id, previousSuccess, hb.GetSuccessRate());
+
+        return true;
+    }
+}
+
+public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
+{
+    public HabitStreakUpCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit tick <id> dd/mm/yy", "tick a habit as done, on a specific date");
+
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit tick 1 01/01/2022", "tick a habit with id 1 on jan 1st 2022");
+        SharedLogic.FlushHelpText();
+
+        return true;
+    }
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 2)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        Date date = new Date();
+                
+        if ( !Date.TryParse(arguments_ReadOnly[1], new System.Globalization.CultureInfo("es-ES"), out date) )
+        {
+            ConsoleWriter.Print("Date mentioned is invalid. it has to be in the format dd/mm/yy");
+            return true;
+        }
+
+        Habit hb = application.habitManager.GetHabit_Editable(id);
+
+        if (hb == null)
+        {
+            ConsoleWriter.Print("Habit with id : {0} not found!", id);
+            return true;
+        }
+
+        Date dateForEntry = date;
+        if (hb.IsEntryOn(dateForEntry))
+        {
+            ConsoleWriter.Print("Habit with id: {0} already streaked up on {1}. This can only be done once a day!", id, dateForEntry.ShortForm());
+            return true;
+        }
+
+        if (!hb.IsNewEntryValid(dateForEntry))
+        {
+            ConsoleWriter.Print("Date mentioned is invalid. it has to be in the format dd/mm/yy");
             return true;
         }
 
@@ -332,8 +481,7 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
         hb.AddNewEntry(dateForEntry);
 
         ConsoleWriter.Print("Habit with id : {0} Streaked up! Success rate {1} -> {2}", id, previousSuccess, hb.GetSuccessRate());
-        if( offset != 0 )
-            ConsoleWriter.Print("Entry added for date : {0}!", dateForEntry.ShortForm());
+        ConsoleWriter.Print("Entry added for date : {0}!", dateForEntry.ShortForm());
 
         return true;
     }
@@ -586,21 +734,35 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
             ConsoleWriter.Print();
 
             ConsoleWriter.Print("STREAK : {0, -15}\n" +
-                "STATUS : {1}\n" + 
-                "NOTES : {2}\n" +
-                "LAST COMPLETED ON : {3}\n" +
-                "AVG IN LAST 7 DAYS : {4,15}\n" +
-                "AVG IN LAST MONTH : {5,-15}",
-                hb.GetStreak(),
+                "COUNT : {1}\n" + 
+                "STATUS : {2}\n" + 
+                "NOTES : {3}\n" +
+                "LAST COMPLETED ON : {4}\n" +
+                "AVG IN LAST 7 DAYS : {5,15}\n" +
+                "AVG IN LAST MONTH : {6,-15}",
+                "Error",
+                hb.GetAllEntryCount(),
                 hb.StatusStr,
                 (notes.DoesNoteExist(hb.id) ? "YES" : "NO"),
                 hb.GetLastUpdatedOn().ShortFormWithDay(),
-                (hb.GetStreak() >= 7 && hb.GetEntryCount() >= 7 ? hb.GetEntryCountForTheDuration(7 - 1) / 7.0f : "Need more data to show this"),
-                (hb.GetStreak() >= 30 && hb.GetEntryCount() >= 30 ? hb.GetEntryCountForTheDuration(28 - 1) / 7.0f : "Need more data to show this")
+                (hb.GetStreak() >= 7 && hb.GetAllEntryCount() >= 7 ? hb.GetEntryCountForTheDuration( Date.Today - 7, Date.Today - 1) / 7.0f : "Need more data to show this"),
+                (hb.GetStreak() >= 30 && hb.GetAllEntryCount() >= 30 ? hb.GetEntryCountForTheDuration( Date.Today - 28, Date.Today - 1) / 28.0f : "Need more data to show this")
                 );
         }
 
         ConsoleWriter.Print();
+
+        ConsoleWriter.Print("DATES WHEN ITS TICKED");
+        if (hb._entries == null || hb._entries.Count == 0)
+            ConsoleWriter.Print("No records found! Try to tick(complete) the habit first!");
+        else
+        {
+            foreach ( var date in hb._entries)
+            {
+                ConsoleWriter.Print("   " + date.ShortFormWithDay());
+            }
+        }
+
 
         return true;
     }
