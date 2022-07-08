@@ -342,6 +342,7 @@ public class HabitStreakUpTodayCommand : CommandHandlerBaseWithUtility
         hb.AddNewEntry(dateForEntry);
 
         ConsoleWriter.Print("Habit with id : {0} Streaked up today! Success rate {1} -> {2}", id, previousSuccess, hb.GetSuccessRate());
+        ConsoleWriter.Print("Try 'show' command for more details");
 
         return true;
     }
@@ -411,6 +412,7 @@ public class HabitStreakUpYesterdayCommand : CommandHandlerBaseWithUtility
         hb.AddNewEntry(dateForEntry);
 
         ConsoleWriter.Print("Habit with id : {0} Streaked up yesterday! Success rate {1} -> {2}", id, previousSuccess, hb.GetSuccessRate());
+        ConsoleWriter.Print("Try 'show' command for more details");
 
         return true;
     }
@@ -486,6 +488,7 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
 
         ConsoleWriter.Print("Habit with id : {0} Streaked up! Success rate {1} -> {2}", id, previousSuccess, hb.GetSuccessRate());
         ConsoleWriter.Print("Entry added for date : {0}!", dateForEntry.ShortForm());
+        ConsoleWriter.Print("Try 'show' command for more details");
 
         return true;
     }
@@ -737,24 +740,30 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
 
             ConsoleWriter.Print();
 
-            ConsoleWriter.Print("STREAK : {0, -15}\n" +
-                "TICK COUNT : {1}\n\n" + 
+            ConsoleWriter.Print(
+                "TICK COUNT : {0}\n\n" + 
 
-                "STATUS : {2}\n" + 
-                "NOTES : {3}\n\n" +
-
+                "SUCCESS RATE IN THE LAST 3 DAYS : {1}\n" +
+                "SUCCESS RATE IN THE LAST 7 DAYS : {2}\n" +
+                "SUCCESS RATE IN THE LAST MONTH : {3}\n\n" +
+                                                
                 "START DATE : {4}\n" +
-                "LAST COMPLETED ON : {5}\n\n" +
+                "LAST UPDATED ON : {5}\n\n" + 
 
-                "AVG IN LAST 7 DAYS : {6,15}\n" +
-                "AVG IN LAST MONTH : {7,-15}",
-                "Error",
+                "STATUS : {6}\n" +
+                "NOTES ? : {7}",
+
                 hb.GetAllEntryCount(true),
-                hb.StatusStr,
-                (notes.DoesNoteExist(hb.id) ? "YES" : "NO"),
+
+                (hb.GetNumberOfDaysFromTheStart() >= 3 ? Math.Round( hb.GetEntryCountForTheDuration(Date.Today - 3, Date.Today - 1) * 100.0f / 3.0f ) + " %" : "Need more data. Keep updating the habit daily!"),
+                (hb.GetNumberOfDaysFromTheStart() >= 7 ? Math.Round(hb.GetEntryCountForTheDuration(Date.Today - 7, Date.Today - 1) * 100.0f / 7.0f) + " %" : "Need more data. Keep updating the habit daily!"),
+                (hb.GetNumberOfDaysFromTheStart() >= 30 ? Math.Round(hb.GetEntryCountForTheDuration(Date.Today - 30, Date.Today - 1) * 100.0f / 30.0f) + " %" : "Need more data. Keep updating the habit daily!"),
+
+                hb._startDate.ShortFormWithDay(),
                 (hb.GetLastUpdatedOn().IsThisMinDate() ? "Never" : hb.GetLastUpdatedOn().ShortFormWithDay()),
-                (hb.GetAllEntryCount() >= 7 ? hb.GetEntryCountForTheDuration( Date.Today - 7, Date.Today - 1) / 7.0f : "Need more data to show this"),
-                (hb.GetAllEntryCount() >= 30 ? hb.GetEntryCountForTheDuration( Date.Today - 28, Date.Today - 1) / 28.0f : "Need more data to show this")
+
+                hb.StatusStr,
+                (notes.DoesNoteExist(hb.id) ? "YES" : "NO")
                 );
         }
 

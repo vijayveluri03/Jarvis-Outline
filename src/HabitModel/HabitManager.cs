@@ -88,6 +88,11 @@ namespace Jarvis
                 return _entries.Count;
         }
 
+        public int GetNumberOfDaysFromTheStart()
+        {
+            return Date.Today - _startDate;
+        }
+
         public void SetStatus(Status status)
         {
             this.status = status;
