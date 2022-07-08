@@ -141,10 +141,11 @@ public class HabitAddCommand : CommandHandlerBaseWithUtility
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
         SharedLogic.PrintHelp_SubText(">habit add <category> <title>");
-        SharedLogic.PrintHelp_SubText(">habit add <category> <title> --previousstreak:<count>", "This sets the starting streak for a habit. if you have already been doing this habit for a while, you can use this, to start from there ");
+        SharedLogic.PrintHelp_SubText(">habit add <category> <title> --previousstreak:<count>", "This sets the starting streak for a habit. if you have already been doing this habit for a while, you can use this, to start the tick count from there ");
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
         SharedLogic.PrintHelp_SubText(">habit add health \"Wake up at 6AM everyday!\"");
+        SharedLogic.PrintHelp_SubText(">habit add health \"Walk daily\" --previousstreak:20", "In this case, the tick count starts from 20!");
 
         SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", application.DesignData.categories.listOfCategories, "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
         SharedLogic.FlushHelpText();
@@ -178,7 +179,7 @@ public class HabitAddCommand : CommandHandlerBaseWithUtility
         }
 
 
-        var entry = SharedLogic.CreateNewHabit(application.habitManager, categories, title);
+        var entry = SharedLogic.CreateNewHabit(application.habitManager, categories, title, previousStreak);
         application.habitManager.AddHabit(entry);
 
         ConsoleWriter.Print("New Habit added with id : " + entry.id);
@@ -258,8 +259,8 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
                     (habit.categories != null && habit.categories.Length > 0 ? Utils.Conversions.ArrayToString(habit.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                     habit.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/)
                         + (notes.DoesNoteExist(habit.id) ? "+(N)" : ""),
-                    habit.GetLastUpdatedOn().ShortForm(),
-                    habit.GetAllEntryCount(),
+                    (habit.GetLastUpdatedOn().IsThisMinDate() ? "Never" : habit.GetLastUpdatedOn().ShortForm()),
+                    habit.GetAllEntryCount(true),
                     habit.GetSuccessRate(),
                     habit.IsDisabled ? "Disabled" : ""
                     );
@@ -737,19 +738,23 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
             ConsoleWriter.Print();
 
             ConsoleWriter.Print("STREAK : {0, -15}\n" +
-                "COUNT : {1}\n" + 
+                "TICK COUNT : {1}\n\n" + 
+
                 "STATUS : {2}\n" + 
-                "NOTES : {3}\n" +
-                "LAST COMPLETED ON : {4}\n" +
-                "AVG IN LAST 7 DAYS : {5,15}\n" +
-                "AVG IN LAST MONTH : {6,-15}",
+                "NOTES : {3}\n\n" +
+
+                "START DATE : {4}\n" +
+                "LAST COMPLETED ON : {5}\n\n" +
+
+                "AVG IN LAST 7 DAYS : {6,15}\n" +
+                "AVG IN LAST MONTH : {7,-15}",
                 "Error",
-                hb.GetAllEntryCount(),
+                hb.GetAllEntryCount(true),
                 hb.StatusStr,
                 (notes.DoesNoteExist(hb.id) ? "YES" : "NO"),
-                hb.GetLastUpdatedOn().ShortFormWithDay(),
-                (hb.GetStreak() >= 7 && hb.GetAllEntryCount() >= 7 ? hb.GetEntryCountForTheDuration( Date.Today - 7, Date.Today - 1) / 7.0f : "Need more data to show this"),
-                (hb.GetStreak() >= 30 && hb.GetAllEntryCount() >= 30 ? hb.GetEntryCountForTheDuration( Date.Today - 28, Date.Today - 1) / 28.0f : "Need more data to show this")
+                (hb.GetLastUpdatedOn().IsThisMinDate() ? "Never" : hb.GetLastUpdatedOn().ShortFormWithDay()),
+                (hb.GetAllEntryCount() >= 7 ? hb.GetEntryCountForTheDuration( Date.Today - 7, Date.Today - 1) / 7.0f : "Need more data to show this"),
+                (hb.GetAllEntryCount() >= 30 ? hb.GetEntryCountForTheDuration( Date.Today - 28, Date.Today - 1) / 28.0f : "Need more data to show this")
                 );
         }
 

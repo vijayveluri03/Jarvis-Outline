@@ -66,10 +66,9 @@ namespace Jarvis
     }
 
 
-    public class TaskManager
+    public class TaskManager : IDirtyable
     {
         public TaskCollection Data { get; private set; }
-        private bool dirty = false;
 
         public TaskManager( string defaultStatus, System.Func<string, bool> isStatusValid )
         {
@@ -84,16 +83,16 @@ namespace Jarvis
         public void AddTask(Task ed)
         {
             Data.entries.Add(ed);
-            dirty = true;
+            IsDirty = true;
         }
         public bool RemoveTask(Task ed)
         {
-            dirty = true;
+            IsDirty = true;
             return Data.entries.Remove(ed);
         }
         public bool RemoveTaskIfExists(int id)
         {
-            dirty = true;
+            IsDirty = true;
 
             Task ed = GetTask_ReadOnly(id);
             if (ed != null)
@@ -120,19 +119,19 @@ namespace Jarvis
                 if (ed.status.IsEmpty() || !isStatusValid( ed.status))
                 {
                     ed.SetStatus(defaultStatus);
-                    dirty = true;
+                    IsDirty = true;
                 }
             }
         }
 
         public void Save()
         {
-            if (!dirty)
+            if (!IsDirty)
                 return;
 
             string serializedData = JsonConvert.SerializeObject(Data, Formatting.Indented);
             File.WriteAllText(JConstants.TASKS_FILENAME, serializedData);
-            dirty = false;
+            IsDirty = false;
 
 #if RELEASE_LOG
             ConsoleWriter.Print("Tasks saved");
@@ -164,7 +163,7 @@ namespace Jarvis
 
         public Task GetTask_Editable(int id)
         {
-            dirty = true;
+            IsDirty = true;
             return GetTask_ReadOnly(id);
         }
 

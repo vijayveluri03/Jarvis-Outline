@@ -18,11 +18,10 @@ namespace Jarvis
         public List<LogEntry> entries = new List<LogEntry>();
     }
 
-    public class TaskTimeManagement
+    public class TaskTimeManagement : IDirtyable
     {
         public LogCollection logs { get; private set; }
-        private bool dirty = false;
-
+        
         public TaskTimeManagement()
         {
             if (Utils.CreateFileIfNotExit(JConstants.TASK_LOG_FILENAME, JConstants.TASK_LOG_TEMPLATE_FILENAME))
@@ -39,14 +38,14 @@ namespace Jarvis
         {
             logs.entries.Add(ed);
 
-            dirty = true;
+            IsDirty = true;
         }
 
         public void RemoveAllEntries(int taskID)
         {
             logs.entries.RemoveAll(e => { return e.id == taskID; } );
 
-            dirty = true;
+            IsDirty = true;
         }
 
         public int GetTotalTimeSpentToday(int id)
@@ -85,12 +84,12 @@ namespace Jarvis
         }
         public void Save()
         {
-            if(!dirty)
+            if(!IsDirty)
                 return;
 
             string serializedData = JsonConvert.SerializeObject(logs, Formatting.Indented);
             File.WriteAllText(JConstants.TASK_LOG_FILENAME, serializedData);
-            dirty = false;
+            IsDirty = false;
 
             #if RELEASE_LOG
             ConsoleWriter.Print("Logs saved");

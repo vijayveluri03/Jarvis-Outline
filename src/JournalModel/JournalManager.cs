@@ -25,11 +25,9 @@ namespace Jarvis
     }
 
 
-    public class JournalManager
+    public class JournalManager : IDirtyable
     {
         public JournalCollection Data { get; private set; }
-        private bool dirty = false;
-
         public JournalManager(string defaultTag, System.Func<string, bool> isTagValid)
         {
             if (Utils.CreateFileIfNotExit(JConstants.JOURNAL_FILENAME, JConstants.JOURNAL_TEMPLATE_FILENAME))
@@ -43,7 +41,7 @@ namespace Jarvis
         public void AddJournal(JournalEntry ed)
         {
             Data.entries.Add(ed);
-            dirty = true;
+            IsDirty = true;
         }
 
         private void Load(string fileName, string defaultTag, System.Func<string, bool> isTagValid)
@@ -77,7 +75,7 @@ namespace Jarvis
                 {
                     if (tag.IsEmpty() || !isTagValid(tag))
                     {
-                        dirty = true;
+                        IsDirty = true;
                     }
                     else
                         validTags.Add(tag);
@@ -85,7 +83,7 @@ namespace Jarvis
 
                 if (validTags == null || validTags.Count == 0)
                 {
-                    dirty = true;
+                    IsDirty = true;
                     validTags.Add(defaultTag);
                 }
 
@@ -96,12 +94,12 @@ namespace Jarvis
 
         public void Save()
         {
-            if (!dirty)
+            if (!IsDirty)
                 return;
 
             string serializedData = JsonConvert.SerializeObject(Data, Formatting.Indented);
             File.WriteAllText(JConstants.JOURNAL_FILENAME, serializedData);
-            dirty = false;
+            IsDirty = false;
 
 #if RELEASE_LOG
             ConsoleWriter.Print("Journals saved");
@@ -133,7 +131,7 @@ namespace Jarvis
 
         public JournalEntry GetJournal_Editable(int id)
         {
-            dirty = true;
+            IsDirty = true;
             return GetJournal_ReadOnly(id);
         }
 

@@ -38,7 +38,7 @@ namespace Jarvis
     // Load and Save custom data per user.
 
     [Serializable]
-    public class JUserData
+    public class JUserData : IDirtyable
     {
         [Serializable]
         public class TaskProgress
@@ -52,8 +52,6 @@ namespace Jarvis
         [JsonProperty] public DateTime lastLoginDate = DateTime.MinValue;
         [JsonProperty] public TaskProgress taskProgress = new TaskProgress();
         [JsonIgnore] public string lastCommandUsed = "";
-
-        [JsonIgnore] private bool dirty = false;
 
         public static JUserData Load()
         {
@@ -78,13 +76,13 @@ namespace Jarvis
             taskProgress.taskIDInProgress = id;
             taskProgress.startTime = time;
 
-            dirty = true;
+            IsDirty = true;
         }
         public void StopTask()
         {
             taskProgress.taskIDInProgress = -1;
 
-            dirty = true;
+            IsDirty = true;
         }
         public bool IsTaskInProgress()
         {
@@ -105,12 +103,12 @@ namespace Jarvis
 
         public void Save()
         {
-            if (!dirty)
+            if (!IsDirty)
                 return;
 
             string serializedUserData = JsonConvert.SerializeObject(this, Formatting.Indented);
             File.WriteAllText(JConstants.PLAYERPREFS_FILENAME, serializedUserData);
-            dirty = false;
+            IsDirty = false;
 
 #if RELEASE_LOG
             ConsoleWriter.Print("Userdata saved");

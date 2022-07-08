@@ -27,7 +27,7 @@ namespace Jarvis
             return ed;
         }
 
-        public static Habit CreateNewHabit(HabitManager habitManager, string[] category, string title)
+        public static Habit CreateNewHabit(HabitManager habitManager, string[] category, string title, int previousTickCount)
         {
             Habit ed = new Habit();
             ed.id = habitManager.GetAvailableID();
@@ -35,6 +35,7 @@ namespace Jarvis
             ed.title = title;
             ed._startDate = Date.Today; // @todo , using private member here
             ed.IsDirty = true;
+            ed._previousTickCount = previousTickCount; //@todo, using private member here
             
             return ed;
         }

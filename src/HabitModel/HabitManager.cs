@@ -40,6 +40,9 @@ namespace Jarvis
 
         public Status status = Status.In_Progress;
 
+        [JsonProperty(PropertyName = "PreviousTickCount")]
+        public int _previousTickCount;
+
         [JsonIgnore]
         public bool IsEnabled { get { return status == Status.In_Progress; } }
 
@@ -77,9 +80,12 @@ namespace Jarvis
             return -1;
         }
 
-        public int GetAllEntryCount()
+        public int GetAllEntryCount( bool includePreviousTickCount = false )
         {
-            return _entries.Count;
+            if (includePreviousTickCount)
+                return _entries.Count + _previousTickCount;
+            else
+                return _entries.Count;
         }
 
         public void SetStatus(Status status)
@@ -157,11 +163,12 @@ namespace Jarvis
             IsDirty = true;
         }
 
+        // Returns date when it was last updated. Returns min value if no update found!
         public Date GetLastUpdatedOn()
         {
             // as the entries are sorted, this should get us the latest update
             if (_entries.Count == 0)
-                return _startDate;
+                return Date.MinValue;
             return _entries[_entries.Count - 1];
         }
 
