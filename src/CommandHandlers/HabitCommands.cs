@@ -329,9 +329,10 @@ public class HabitStreakUpTodayCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        if (!hb.IsNewEntryValid(dateForEntry))
+        string error = "";
+        if (!hb.IsNewEntryValid(dateForEntry, out error))
         {
-            Utils.Assert(false, "Why is the date valid??");
+            ConsoleWriter.Print("Invalid date! -> " + error);
             return true;
         }
 
@@ -397,9 +398,10 @@ public class HabitStreakUpYesterdayCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        if (!hb.IsNewEntryValid(dateForEntry))
+        string error = "";
+        if (!hb.IsNewEntryValid(dateForEntry, out error))
         {
-            Utils.Assert(false, "Why is the date valid??");
+            ConsoleWriter.Print("Invalid date! -> " + error);
             return true;
         }
 
@@ -464,9 +466,10 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        if (!hb.IsNewEntryValid(dateForEntry))
+        string error = "";
+        if (!hb.IsNewEntryValid(dateForEntry, out error))
         {
-            ConsoleWriter.Print("Date mentioned is invalid. it has to be in the format dd/mm/yy");
+            ConsoleWriter.Print("Invalid date! -> " + error);
             return true;
         }
 

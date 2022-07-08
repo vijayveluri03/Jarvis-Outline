@@ -111,7 +111,7 @@ namespace Jarvis
             }
             #endif
 
-            return (int)Math.Round( totalEntryCount * 100.0f/ totalDays);
+            return totalDays > 0 ? (int)Math.Round( totalEntryCount * 100.0f/ totalDays) : 0;
         }
 
         public bool IsEntryOn(Date date)
@@ -124,9 +124,25 @@ namespace Jarvis
             return false;
         }
 
-        public bool IsNewEntryValid(Date newEntry)
+        public bool IsNewEntryValid(Date newEntry, out string error)
         {
-            return !IsEntryOn(newEntry) && newEntry >= _startDate && newEntry <= Date.Today;
+            if (IsEntryOn(newEntry) )
+            {
+                error = "Any entry for the date:" + newEntry.ShortForm() + " already exists!";
+                return false;
+            }
+            if (newEntry < _startDate)
+            {
+                error = "This habit started on " + newEntry.ShortForm() + ". So an entry before that is invalid.";
+                return false;
+            }
+            if (newEntry > Date.Today)
+            {
+                error = "Entry represents a future date";
+                return false;
+            }
+            error = string.Empty;
+            return  true;
         }
 
         public void AddNewEntry(Date newEntry)

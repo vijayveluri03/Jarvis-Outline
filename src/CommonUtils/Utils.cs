@@ -449,8 +449,10 @@ public static class Utils
     }
     public static void Assert(bool condition, string message = null)
     {
+        if (message == null) 
+            message = "";
         if (!condition)
-            ConsoleWriter.Print("==== ASSERT here =======");
+            ConsoleWriter.Print("ASSERTING >>> " + message);
         Debug.Assert(condition, message);
     }
     public static bool CreateFileIfNotExit(string path, string copyFrom)
