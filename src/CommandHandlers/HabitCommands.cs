@@ -769,19 +769,127 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
 
         ConsoleWriter.Print();
 
-        ConsoleWriter.Print("DATES WHEN ITS TICKED");
+        ConsoleWriter.Print("DATES WHEN ITS TICKED >>");
+        ConsoleWriter.PushIndent();
+
         if (hb._entries == null || hb._entries.Count == 0)
             ConsoleWriter.Print("No records found! Try to tick(complete) the habit first!");
         else
         {
+#if false
             foreach ( var date in hb._entries)
             {
                 ConsoleWriter.Print("   " + date.ShortFormWithDay());
             }
+#else
+
+            ConsoleWriter.EmptyLine();
+            for ( Date month = Date.Today; ShouldPrintMonth( month, hb._entries ); month = month.AddMonths(-1) )
+            {
+                PrintMonth(month, hb);
+                ConsoleWriter.EmptyLine();
+            }
+#endif
         }
 
+        ConsoleWriter.ClearIndent();
 
         return true;
+    }
+
+    private bool ShouldPrintMonth( Date month, List<Date> entries )
+    {
+        foreach( Date entry in entries )
+        {
+            if (month.Month.Equals(entry.Month) && month.Year.Equals(entry.Year))
+                return true;
+        }
+        return false;
+    }
+
+    private void PrintMonth(Date month, Habit hb )
+    {
+        ConsoleWriter.Print(string.Format("Calender for month : {0} {1}".ToUpper(), month.ToString("MMMM"), month.Year) );
+
+        ConsoleWriter.PushIndent();
+        ConsoleWriter.Print(string.Format("{0} {1} {2} {3} {4} {5} {6}", "M", "T", "W", "T", "F", "S", "S"));
+
+        Date currentDate = new Date(month.Year, month.Month, 1);
+        int emptyBlocksAtStart = GetNumberOfEmptySpacesAtTheStartOfTheMonth(month);
+        int totalDaysInMonth = DateTime.DaysInMonth(month.Year, month.Month);
+
+        ConsoleWriter.IndentWithOutLineBreak();
+        while ( emptyBlocksAtStart > 0 )
+        {
+            ConsoleWriter.PrintWithOutLineBreak("{0} ", "-");   // the space after {0} is intentional, to match the header of the calender 
+            emptyBlocksAtStart--;
+        }
+
+        for ( int day = 1; day <= totalDaysInMonth; day++ )
+        {
+            currentDate = new Date(month.Year, month.Month, day);
+            bool ticked = hb.IsEntryOn(currentDate);
+            ConsoleColor color = ConsoleColor.Green;
+            string text = "";
+            if ( currentDate >= Date.Today)
+            {
+                text = "-";
+                color = application.DesignData.DefaultColorForText;
+            }
+            else if (currentDate < hb._startDate )// @todo, using private member directly
+            {
+                text = "-";
+                color = application.DesignData.DefaultColorForText;
+            }
+            else if (ticked)
+            {
+                text = "Y";
+                color = ConsoleColor.Green; 
+            }
+            else
+            {
+                text = "X";
+                color = ConsoleColor.Red;
+            }
+
+            ConsoleWriter.PrintWithColorWithOutLineBreak( String.Format("{0} ", text), color);
+
+            if (currentDate.DayOfWeek == DayOfWeek.Sunday)
+            {
+                ConsoleWriter.EmptyLine();
+                ConsoleWriter.IndentWithOutLineBreak();
+            }
+        }
+
+        ConsoleWriter.EmptyLine();  // to flush the consolewriter with out line breaks
+
+        ConsoleWriter.PopIndent();
+    }
+
+    private int GetNumberOfEmptySpacesAtTheStartOfTheMonth( Date startDate )
+    {
+        DayOfWeek dayOfWeek = startDate.DayOfWeek;
+
+        // This order is based on my custom calender which has days in this order "M", "T", "W", "T", "F", "S", "S"
+        switch (dayOfWeek)
+        {
+            case DayOfWeek.Monday:
+                return 0;
+            case DayOfWeek.Tuesday:
+                return 1;
+            case DayOfWeek.Wednesday:
+                return 2;
+            case DayOfWeek.Thursday:
+                return 3;
+            case DayOfWeek.Friday:
+                return 4;
+            case DayOfWeek.Saturday:
+                return 5;
+            case DayOfWeek.Sunday:
+                return 6;
+        }
+        Utils.Assert(false);
+        return -1;
     }
 }
 
