@@ -54,30 +54,33 @@ public static class ConsoleWriter
     public static void PrintURL(string message)
     {
         Console.ForegroundColor = foregroundTextColorStack.Peek();
+
         message = GetIndentationPrefix() + message;
         Console.Write(message + "\n");
+        OnNewLine();
     }
     public static void Print(string message, params object[] parms)
     {
-        message = GetIndentationPrefix() + message;
         ConsoleColor foregroundColor;
         if (foregroundTextColorStack.TryPeek(out foregroundColor))
             Console.ForegroundColor = foregroundColor;
 
+        message = GetIndentationPrefix() + message;
         Console.Write(message + "\n", parms);
+        OnNewLine();
     }
     public static void PrintText(string message)
     {
-        message = GetIndentationPrefix() + message;
         ConsoleColor foregroundColor;
         if (foregroundTextColorStack.TryPeek(out foregroundColor))
             Console.ForegroundColor = foregroundColor;
 
+        message = GetIndentationPrefix() + message;
         Console.Write(message + "\n");
+        OnNewLine();
     }
     public static void PrintInColor(string message, ConsoleColor foregroundColor, params object[] parms)
     {
-        message = GetIndentationPrefix() + message;
         PushColor(foregroundColor);
         Print(message, parms);
         PopColor();
@@ -86,18 +89,26 @@ public static class ConsoleWriter
     public static void IndentWithOutLineBreak()
     {
         Console.Write(GetIndentationPrefix());
+        OnAvoidingNewLine();
     }
     public static void PrintWithOutLineBreak(string message, params object[] parms)
     {
         Console.ForegroundColor = foregroundTextColorStack.Peek();
-
         Console.Write(message, parms);
+        OnAvoidingNewLine();
     }
     public static void PrintWithColorWithOutLineBreak(string message, ConsoleColor color, params object[] parms)
     {
         PushColor(color);
         Console.Write(message, parms);
         PopColor();
+        OnAvoidingNewLine();
+    }
+
+    public static void InsertNewLineIfAvoidingLineBreaks()
+    {
+        if (AreLineBreaksAvoided())
+            EmptyLine();
     }
 
     public static void Print()
@@ -127,7 +138,22 @@ public static class ConsoleWriter
             indentationPrefix += "  ";
         }
     }
+
+    private static void OnNewLine()
+    {
+        isAvoidingLineBreaks = false;
+    }
+    private static void OnAvoidingNewLine()
+    {
+        isAvoidingLineBreaks = true;
+    }
+    private static bool AreLineBreaksAvoided()
+    {
+        return isAvoidingLineBreaks;
+    }
+
     private static Stack<ConsoleColor> foregroundTextColorStack = new Stack<ConsoleColor>();
     private static int indentTabCount = 0;
     private static string indentationPrefix = "";
+    private static bool isAvoidingLineBreaks = false;
 }

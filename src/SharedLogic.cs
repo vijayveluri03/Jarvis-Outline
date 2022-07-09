@@ -50,6 +50,98 @@ namespace Jarvis
             return ed;
         }
 
+        #region HABITS AND CALENDAR SUPPORT 
+
+        public static void PrintMonth( JApplication application, Date month, Habit hb)
+        {
+            ConsoleWriter.PrintInColor(string.Format("Calendar for month : {0} {1}".ToUpper(), month.ToString("MMMM"), month.Year), application.DesignData.HighlightColorForText);
+
+            ConsoleWriter.PushIndent();
+            ConsoleWriter.PrintInColor(string.Format("{0} {1} {2} {3} {4} {5} {6}", "M", "T", "W", "T", "F", "S", "S"), application.DesignData.HighlightColorForText_2);
+
+            Date currentDate = new Date(month.Year, month.Month, 1);
+            int emptyBlocksAtStart = GetNumberOfEmptySpacesAtTheStartOfTheMonth(currentDate);
+            int totalDaysInMonth = DateTime.DaysInMonth(month.Year, month.Month);
+
+            ConsoleWriter.IndentWithOutLineBreak();
+            while (emptyBlocksAtStart > 0)
+            {
+                ConsoleWriter.PrintWithOutLineBreak("{0} ", "-");   // the space after {0} is intentional, to match the header of the calendar 
+                emptyBlocksAtStart--;
+            }
+
+            for (int day = 1; day <= totalDaysInMonth; day++)
+            {
+                currentDate = new Date(month.Year, month.Month, day);
+                bool ticked = hb.IsEntryOn(currentDate);
+                ConsoleColor color = ConsoleColor.Green;
+                string text = "";
+                if (currentDate >= Date.Today)
+                {
+                    text = "-";
+                    color = application.DesignData.DefaultColorForText;
+                }
+                else if (currentDate < hb._startDate)// @todo, using private member directly
+                {
+                    text = "-";
+                    color = application.DesignData.DefaultColorForText;
+                }
+                else if (ticked)
+                {
+                    text = "Y";
+                    color = ConsoleColor.Green;
+                }
+                else
+                {
+                    text = "X";
+                    color = ConsoleColor.Red;
+                }
+
+                ConsoleWriter.PrintWithColorWithOutLineBreak(String.Format("{0} ", text), color);
+
+                if (currentDate.DayOfWeek == DayOfWeek.Sunday)
+                {
+                    if (day < totalDaysInMonth) // dont worry about indentation if this is last day anyway.
+                    {
+                        ConsoleWriter.EmptyLine();
+                        ConsoleWriter.IndentWithOutLineBreak();
+                    }
+                }
+            }
+
+            ConsoleWriter.InsertNewLineIfAvoidingLineBreaks();  // to flush the consolewriter with out line breaks
+
+            ConsoleWriter.PopIndent();
+        }
+
+        private static int GetNumberOfEmptySpacesAtTheStartOfTheMonth(Date startDate)
+        {
+            DayOfWeek dayOfWeek = startDate.DayOfWeek;
+
+            // This order is based on my custom calendar which has days in this order "M", "T", "W", "T", "F", "S", "S"
+            switch (dayOfWeek)
+            {
+                case DayOfWeek.Monday:
+                    return 0;
+                case DayOfWeek.Tuesday:
+                    return 1;
+                case DayOfWeek.Wednesday:
+                    return 2;
+                case DayOfWeek.Thursday:
+                    return 3;
+                case DayOfWeek.Friday:
+                    return 4;
+                case DayOfWeek.Saturday:
+                    return 5;
+                case DayOfWeek.Sunday:
+                    return 6;
+            }
+            Utils.Assert(false);
+            return -1;
+        }
+
+        #endregion
+
         #region UTILS TO PRINT HELP TEXT
 
         public static void StartCachingHelpText()
