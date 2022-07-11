@@ -5,6 +5,48 @@ using System.Collections.Generic;
 
 namespace Jarvis
 {
+    public enum HabitStatus
+    {
+        Completed = 0,
+        Ignored,
+        Missed
+    }
+    public class HabitEntry : IEquatable<HabitEntry> , IComparable<HabitEntry>
+    {
+        public HabitEntry() { }
+        public HabitEntry(Date date, HabitStatus status) {  this.date = date; this.status = status; }
+        public Date date;
+        public HabitStatus status;
+
+        public bool IsCompleted {  get {  return this.status == HabitStatus.Completed; } }
+        public bool IsIgnored { get { return this.status == HabitStatus.Ignored; } }
+        public bool IsMissed {  get { return this.status == HabitStatus.Missed; } }
+
+        public int CompareTo(HabitEntry other)
+        {
+            if (other == null)
+                return 1;
+            else
+                return this.date.CompareTo(other.date);
+        }
+
+        public bool Equals(object other)
+        {
+            if (other == null) 
+                return false;
+            HabitEntry otherHE = other as HabitEntry;
+            if (otherHE == null) 
+                return false;
+            else 
+                return Equals(otherHE);
+        }
+        public bool Equals(HabitEntry other)
+        {
+            if (other == null) 
+                return false;
+            return (this.date.Equals(other.date) && this.status.Equals(other.status));
+        }
+    }
     public class Habit : IDirtyable
     {
         public enum Status
@@ -19,24 +61,15 @@ namespace Jarvis
         // The name or the title for an entry 
         public string title;
 
-        [Obsolete("This will be removed in the next update")]
-        [JsonProperty(PropertyName = "startDate")]
-        public DateTime _startDateObscelete;
-
         [JsonProperty(PropertyName = "startDateNew")]
         public Date _startDate;
 
         // Unique ID
         public int id;
 
-        [Obsolete("This will be removed in the next update")]
         [JsonProperty(PropertyName = "entries")]
-        public List<DateTime> _entriesObscelete = new List<DateTime>();
+        public List<HabitEntry> _entries = new List<HabitEntry>();
 
-
-        //@todo - make this private but serializable
-        [JsonProperty(PropertyName = "entriesNew")]
-        public List<Date> _entries = new List<Date>();
 
         public Status status = Status.In_Progress;
 
@@ -57,22 +90,6 @@ namespace Jarvis
 
         public void Init()
         {
-            if (_entriesObscelete != null && _entriesObscelete.Count > 0)
-            {
-                _entries = new List<Date>();
-                foreach (var entry in _entriesObscelete)
-                    _entries.Add(new Date(entry));
-
-                _entriesObscelete.Clear();
-                IsDirty = true; 
-            }
-
-            if(!_startDateObscelete.IsThisMinDate())
-            {
-                _startDate = (Date)_startDateObscelete;
-                _startDateObscelete = DateTime.MinValue;
-                IsDirty = true;
-            }
         }
 
         public int GetStreak()
@@ -80,12 +97,19 @@ namespace Jarvis
             return -1;
         }
 
-        public int GetAllEntryCount( bool includePreviousTickCount = false )
+        public int GetAllEntryCount( HabitStatus status, bool includePreviousTickCount = false )
         {
+            int count = 0;
+            foreach( HabitEntry entry in _entries )
+            {
+                if (entry.status == status)
+                    count++;
+            }
+
             if (includePreviousTickCount)
-                return _entries.Count + _previousTickCount;
+                return count + _previousTickCount;
             else
-                return _entries.Count;
+                return count;
         }
 
         public int GetNumberOfDaysFromTheStart()
@@ -98,12 +122,12 @@ namespace Jarvis
             this.status = status;
         }
 
-        public int GetEntryCountForTheDuration(Date start_Inclusive, Date end_Inclusive)
+        public int GetEntryCountForTheDuration( HabitStatus status, Date start_Inclusive, Date end_Inclusive)
         {
             int count = 0;
             foreach (var entry in _entries)
             {
-                if (entry >= start_Inclusive && entry <= end_Inclusive )
+                if ( entry.status == status && entry.date >= start_Inclusive && entry.date <= end_Inclusive )
                     count++;
             }
             return count;
@@ -113,31 +137,71 @@ namespace Jarvis
         public int GetSuccessRate ()
         {
             int totalDays = Date.Today - _startDate; // This will not include today
-            int totalEntryCount = GetEntryCountForTheDuration(_startDate, Date.Today - 1);
+            int totalEntryCount = GetEntryCountForTheDuration( HabitStatus.Completed, _startDate, Date.Today - 1);
+            int totalIgnoreDays = GetEntryCountForTheDuration(HabitStatus.Ignored, _startDate, Date.Today - 1);
 
-            #if RELEASE_LOG
+            totalDays -= totalIgnoreDays; // removing the ignorable days 
+#if RELEASE_LOG
             foreach (var entry in _entries)
             {
-                Utils.Assert(entry >= _startDate && entry <= Date.Today);
+                Utils.Assert(entry.date >= _startDate && entry.date <= Date.Today);
             }
-            #endif
+#endif
 
             return totalDays > 0 ? (int)Math.Round( totalEntryCount * 100.0f/ totalDays) : 0;
         }
 
-        public bool IsEntryOn(Date date)
+        public int GetSuccessRateForDuration(Date start_Inclusive, Date end_Inclusive)
+        {
+            int totalDays = Date.Today - _startDate; // This will not include today
+            int totalEntryCount = GetEntryCountForTheDuration(HabitStatus.Completed, start_Inclusive, end_Inclusive);
+            int totalIgnoreDays = GetEntryCountForTheDuration(HabitStatus.Ignored, start_Inclusive, end_Inclusive);
+
+            totalDays -= totalIgnoreDays; // removing the ignorable days 
+#if RELEASE_LOG
+            foreach (var entry in _entries)
+            {
+                Utils.Assert(entry.date >= _startDate && entry.date <= Date.Today);
+            }
+#endif
+
+            return totalDays > 0 ? (int)Math.Round(totalEntryCount * 100.0f / totalDays) : 0;
+        }
+
+        public bool IsTickedOn(Date date)
         {
             foreach (var entry in _entries)
             {
-                if (entry == date)
+                if (entry.date == date && entry.IsCompleted)
+                    return true;
+            }
+            return false;
+        }
+        public bool IsIgnoredOn(Date date)
+        {
+            foreach (var entry in _entries)
+            {
+                if (entry.date == date && entry.IsIgnored)
                     return true;
             }
             return false;
         }
 
+
+        public bool IsEntryOn(Date date)
+        {
+            foreach (var entry in _entries)
+            {
+                if (entry.date == date)
+                    return true;
+            }
+            return false;
+        }
+
+
         public bool IsNewEntryValid(Date newEntry, out string error)
         {
-            if (IsEntryOn(newEntry) )
+            if (IsTickedOn(newEntry) )
             {
                 error = "Any entry for the date:" + newEntry.ShortForm() + " already exists!";
                 return false;
@@ -156,13 +220,13 @@ namespace Jarvis
             return  true;
         }
 
-        public void AddNewEntry(Date newEntry)
+        public void AddNewEntry(Date date, HabitStatus status)
         {
-            Utils.Assert(!IsEntryOn(newEntry));
-            Utils.Assert(newEntry >= _startDate);
-            Utils.Assert(newEntry <= Date.Today);
+            Utils.Assert(!IsEntryOn(date));
+            Utils.Assert(date >= _startDate);
+            Utils.Assert(date <= Date.Today);
 
-            _entries.Add(newEntry);
+            _entries.Add( new HabitEntry(date, status));
             _entries.Sort();
 
             IsDirty = true;
@@ -174,7 +238,7 @@ namespace Jarvis
             // as the entries are sorted, this should get us the latest update
             if (_entries.Count == 0)
                 return Date.MinValue;
-            return _entries[_entries.Count - 1];
+            return _entries[_entries.Count - 1].date;
         }
 
         public void Reset()

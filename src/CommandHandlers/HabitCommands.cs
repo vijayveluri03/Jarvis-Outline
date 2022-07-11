@@ -20,7 +20,9 @@ public class HabitHandler : CommandHandlerBaseWithUtility
         SharedLogic.PrintHelp_SubText(">habit add ", "To add a new habit");
         SharedLogic.PrintHelp_SubText(">habit ticktoday", "to tick today as completed");
         SharedLogic.PrintHelp_SubText(">habit tickyesterday", "to tick yesterday as completed");
-        
+        SharedLogic.PrintHelp_SubText(">habit ignoretoday", "to ignore today. This will not be considred as failed!");
+        SharedLogic.PrintHelp_SubText(">habit ignoreyesterday", "to tick ignore yesterday. This will not be considred as failed!");
+
         SharedLogic.PrintHelp_SubText(">habit reset", "to reset a habit");
         SharedLogic.PrintHelp_SubText(">habit list", "to list all the habit");
         SharedLogic.PrintHelp_SubText(">habit show", "to show details of a habit");
@@ -60,6 +62,12 @@ public class HabitHandler : CommandHandlerBaseWithUtility
                 break;
             case "tickyesterday":
                 selectedHander = new HabitStreakUpYesterdayCommand();
+                break;
+            case "ignoretoday":
+                selectedHander = new HabitIgnoreTodayCommand();
+                break;
+            case "ignoreyesterday":
+                selectedHander = new HabitIgnoreYesterdayCommand();
                 break;
             case "tick":
                 selectedHander = new HabitStreakUpCommand();
@@ -260,7 +268,7 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
                     habit.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/)
                         + (notes.DoesNoteExist(habit.id) ? "+(N)" : ""),
                     (habit.GetLastUpdatedOn().IsThisMinDate() ? "Never" : habit.GetLastUpdatedOn().ShortForm()),
-                    habit.GetAllEntryCount(true),
+                    habit.GetAllEntryCount( HabitStatus.Completed, true),
                     habit.GetSuccessRate(),
                     habit.IsDisabled ? "Disabled" : ""
                     );
@@ -309,48 +317,7 @@ public class HabitStreakUpTodayCommand : CommandHandlerBaseWithUtility
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
         Date date = Date.Today;
 
-        Habit hb = application.habitManager.GetHabit_Editable(id);
-
-        if (hb == null)
-        {
-            ConsoleWriter.Print("Habit with id : {0} not found!", id);
-            return true;
-        }
-
-        Date dateForEntry = date;
-        if (hb.IsEntryOn(dateForEntry))
-        {
-            ConsoleWriter.Print("Habit with id: {0} already streaked up on {1}. This can only be done once a day!", id, dateForEntry.ShortForm());
-            return true;
-        }
-
-        if (hb.IsDisabled)
-        {
-            ConsoleWriter.Print("Habit with id: {0} is disabled. You would want to re-enable it before it can be updated!", id);
-            return true;
-        }
-
-        string error = "";
-        if (!hb.IsNewEntryValid(dateForEntry, out error))
-        {
-            ConsoleWriter.Print("Invalid date! -> " + error);
-            return true;
-        }
-
-        int previousSuccess = hb.GetSuccessRate();
-
-        hb.AddNewEntry(dateForEntry);
-
-        ConsoleWriter.Print("Habit with id : {0} Streaked up today! Success rate {1} -> {2}", id, previousSuccess, hb.GetSuccessRate());
-
-        {
-            ConsoleWriter.EmptyLine();
-            SharedLogic.PrintMonth(application, dateForEntry, hb);
-            ConsoleWriter.EmptyLine();
-        }
-
-
-        ConsoleWriter.Print("Try 'show' command for more details");
+        SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Completed);
 
         return true;
     }
@@ -387,48 +354,80 @@ public class HabitStreakUpYesterdayCommand : CommandHandlerBaseWithUtility
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
         Date date = Date.Today - 1;
 
-        Habit hb = application.habitManager.GetHabit_Editable(id);
+        SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Completed);
 
-        if (hb == null)
+        return true;
+    }
+}
+
+public class HabitIgnoreTodayCommand : CommandHandlerBaseWithUtility
+{
+    public HabitIgnoreTodayCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit ignoretoday <id>", "Mark this habit as ignore for today. Not be considered as failed!");
+
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit ignoretoday 1", "ignores habit with id 1, for today");
+        SharedLogic.FlushHelpText();
+
+        return true;
+    }
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 1)
         {
-            ConsoleWriter.Print("Habit with id : {0} not found!", id);
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
             return true;
         }
 
-        Date dateForEntry = date;
-        if (hb.IsEntryOn(dateForEntry))
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        Date date = Date.Today;
+
+        SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Ignored);
+
+        return true;
+    }
+}
+
+// @todo - lot of code repeatition here. club all the three classes into one.
+public class HabitIgnoreYesterdayCommand : CommandHandlerBaseWithUtility
+{
+    public HabitIgnoreYesterdayCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit ignoreyesterday <id>", "Mark this habit as ignore for yesterday. Not be considered as failed!");
+
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit ignoreyesterday 1", "ignores habit with id 1, yesterday");
+        SharedLogic.FlushHelpText();
+
+        return true;
+    }
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 1)
         {
-            ConsoleWriter.Print("Habit with id: {0} already streaked up on {1}. This can only be done once a day!", id, dateForEntry.ShortForm());
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
             return true;
         }
 
-        if (hb.IsDisabled)
-        {
-            ConsoleWriter.Print("Habit with id: {0} is disabled. You would want to re-enable it before it can be updated!", id);
-            return true;
-        }
+        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        Date date = Date.Today - 1;
 
-        string error = "";
-        if (!hb.IsNewEntryValid(dateForEntry, out error))
-        {
-            ConsoleWriter.Print("Invalid date! -> " + error);
-            return true;
-        }
-
-        int previousSuccess = hb.GetSuccessRate();
-
-        hb.AddNewEntry(dateForEntry);
-
-        ConsoleWriter.Print("Habit with id : {0} Streaked up yesterday! Success rate {1} -> {2}", id, previousSuccess, hb.GetSuccessRate());
-
-        {
-            ConsoleWriter.EmptyLine();
-            SharedLogic.PrintMonth(application, dateForEntry, hb);
-            ConsoleWriter.EmptyLine();
-        }
-
-
-        ConsoleWriter.Print("Try 'show' command for more details");
+        SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Ignored);
 
         return true;
     }
@@ -470,49 +469,7 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        Habit hb = application.habitManager.GetHabit_Editable(id);
-
-        if (hb == null)
-        {
-            ConsoleWriter.Print("Habit with id : {0} not found!", id);
-            return true;
-        }
-
-        Date dateForEntry = date;
-        if (hb.IsEntryOn(dateForEntry))
-        {
-            ConsoleWriter.Print("Habit with id: {0} already streaked up on {1}. This can only be done once a day!", id, dateForEntry.ShortForm());
-            return true;
-        }
-
-        string error = "";
-        if (!hb.IsNewEntryValid(dateForEntry, out error))
-        {
-            ConsoleWriter.Print("Invalid date! -> " + error);
-            return true;
-        }
-
-        if (hb.IsDisabled)
-        {
-            ConsoleWriter.Print("Habit with id: {0} is disabled. You would want to re-enable it before it can be updated!", id);
-            return true;
-        }
-
-        int previousSuccess = hb.GetSuccessRate();
-
-        hb.AddNewEntry(dateForEntry);
-
-        ConsoleWriter.Print("Habit with id : {0} Streaked up! Success rate {1} -> {2}", id, previousSuccess, hb.GetSuccessRate());
-        ConsoleWriter.Print("Entry added for date : {0}!", dateForEntry.ShortForm());
-
-        {
-            ConsoleWriter.EmptyLine();
-            SharedLogic.PrintMonth(application, dateForEntry, hb);
-            ConsoleWriter.EmptyLine();
-        }
-
-
-        ConsoleWriter.Print("Try 'show' command for more details");
+        SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Completed);
 
         return true;
     }
@@ -777,11 +734,11 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
                 "STATUS : {6}\n" +
                 "NOTES ? : {7}",
 
-                hb.GetAllEntryCount(true),
+                hb.GetAllEntryCount(HabitStatus.Completed, true),
 
-                (hb.GetNumberOfDaysFromTheStart() >= 3 ? Math.Round( hb.GetEntryCountForTheDuration(Date.Today - 3, Date.Today - 1) * 100.0f / 3.0f ) + " %" : "Need more data. Keep updating the habit daily!"),
-                (hb.GetNumberOfDaysFromTheStart() >= 7 ? Math.Round(hb.GetEntryCountForTheDuration(Date.Today - 7, Date.Today - 1) * 100.0f / 7.0f) + " %" : "Need more data. Keep updating the habit daily!"),
-                (hb.GetNumberOfDaysFromTheStart() >= 30 ? Math.Round(hb.GetEntryCountForTheDuration(Date.Today - 30, Date.Today - 1) * 100.0f / 30.0f) + " %" : "Need more data. Keep updating the habit daily!"),
+                (hb.GetNumberOfDaysFromTheStart() >= 3 ? hb.GetSuccessRateForDuration(Date.Today - 3, Date.Today - 1) + " %" : "Need more data. Keep updating the habit daily!"),
+                (hb.GetNumberOfDaysFromTheStart() >= 7 ? hb.GetSuccessRateForDuration(Date.Today - 7, Date.Today - 1) + " %" : "Need more data. Keep updating the habit daily!"),
+                (hb.GetNumberOfDaysFromTheStart() >= 30 ? hb.GetSuccessRateForDuration(Date.Today - 30, Date.Today - 1) + " %" : "Need more data. Keep updating the habit daily!"),
 
                 hb._startDate.ShortFormWithDay(),
                 (hb.GetLastUpdatedOn().IsThisMinDate() ? "Never" : hb.GetLastUpdatedOn().ShortFormWithDay()),
@@ -800,19 +757,12 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
             ConsoleWriter.Print("No records found! Try to tick(complete) the habit first!");
         else
         {
-#if false
-            foreach ( var date in hb._entries)
-            {
-                ConsoleWriter.Print("   " + date.ShortFormWithDay());
-            }
-#else
             ConsoleWriter.EmptyLine();
             for ( Date month = Date.Today; ShouldPrintMonth( month, hb._entries ); month = month.AddMonths(-1) )
             {
                 SharedLogic.PrintMonth(application, month, hb);
                 ConsoleWriter.EmptyLine();
             }
-#endif
         }
 
         ConsoleWriter.ClearIndent();
@@ -820,11 +770,11 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
         return true;
     }
 
-    private bool ShouldPrintMonth( Date month, List<Date> entries )
+    private bool ShouldPrintMonth( Date month, List<HabitEntry> entries )
     {
-        foreach( Date entry in entries )
+        foreach( var entry in entries )
         {
-            if (month.Month.Equals(entry.Month) && month.Year.Equals(entry.Year))
+            if (month.Month.Equals(entry.date.Month) && month.Year.Equals(entry.date.Year))
                 return true;
         }
         return false;

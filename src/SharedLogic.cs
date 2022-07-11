@@ -50,6 +50,56 @@ namespace Jarvis
             return ed;
         }
 
+        public static void TryAddHabitEntry(JApplication application, int id, Date date, HabitStatus status)
+        {
+            Habit hb = application.habitManager.GetHabit_Editable(id);
+
+            if (hb == null)
+            {
+                ConsoleWriter.Print("Habit with id : {0} not found!", id);
+                return;
+            }
+
+            Date dateForEntry = date;
+            if (hb.IsEntryOn(dateForEntry))
+            {
+                ConsoleWriter.Print("Habit with id: {0} already updated for {1}. This can only be done once a day!", id, dateForEntry.ShortForm());
+                return;
+            }
+
+            if (hb.IsDisabled)
+            {
+                ConsoleWriter.Print("Habit with id: {0} is disabled. You would want to re-enable it before it can be updated!", id);
+                return;
+            }
+
+            string error = "";
+            if (!hb.IsNewEntryValid(dateForEntry, out error))
+            {
+                ConsoleWriter.Print("Invalid date! -> " + error);
+                return;
+            }
+
+            int previousSuccess = hb.GetSuccessRate();
+
+            hb.AddNewEntry(dateForEntry, status);
+
+            if (status == HabitStatus.Completed)
+                ConsoleWriter.Print("Habit with id : {0} ticked on {1}! Success rate {2} -> {3}", id, date.ShortForm(), previousSuccess, hb.GetSuccessRate());
+            else if (status == HabitStatus.Ignored)
+                ConsoleWriter.Print("Habit with id : {0} ticked on {1}! Success rate {2} -> {3}", id, date.ShortForm(), previousSuccess, hb.GetSuccessRate());
+            else
+                Utils.Assert(false, "This condition is not programmed");
+
+            {
+                ConsoleWriter.EmptyLine();
+                SharedLogic.PrintMonth(application, dateForEntry, hb);
+                ConsoleWriter.EmptyLine();
+            }
+
+            ConsoleWriter.Print("You can also try 'show' command for more details. Cheers!");
+        }
+
         #region HABITS AND CALENDAR SUPPORT 
 
         public static void PrintMonth( JApplication application, Date month, Habit hb)
@@ -73,7 +123,8 @@ namespace Jarvis
             for (int day = 1; day <= totalDaysInMonth; day++)
             {
                 currentDate = new Date(month.Year, month.Month, day);
-                bool ticked = hb.IsEntryOn(currentDate);
+                bool ticked = hb.IsTickedOn(currentDate);
+                bool isIgnored = hb.IsIgnoredOn(currentDate);
                 ConsoleColor color = ConsoleColor.Green;
                 string text = "";
                 if (currentDate >= Date.Today)
@@ -90,6 +141,11 @@ namespace Jarvis
                 {
                     text = "Y";
                     color = ConsoleColor.Green;
+                }
+                else if(isIgnored)
+                {
+                    text = "I";
+                    color = application.DesignData.DefaultColorForText;
                 }
                 else
                 {
