@@ -137,7 +137,11 @@ public static class Utils
             syntaxError = false;
             foreach (var startingSubstring in startingSubStrings)
             {
-                string listItem = arguments.FindItemWithSubstring(startingSubstring);
+                string subString = startingSubstring;
+                if (!subString.EndsWith(":"))
+                    subString += ":";
+
+                string listItem = arguments.FindItemWithSubstring(subString);
                 if (listItem == null || listItem == string.Empty)
                 {
                     continue;

@@ -610,20 +610,24 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
         SharedLogic.PrintHelp_SubText(">task list", "lists all the tasks which are open");
-        SharedLogic.PrintHelp_SubText(">task list --status:<status>", "Shows tasks with that status. See examples for how to use it. ( shortform -s)");
-        SharedLogic.PrintHelp_SubText(">task list --story", "Shows only stories");
-        SharedLogic.PrintHelp_SubText(">task list --collection", "Shows only collections");
-        SharedLogic.PrintHelp_SubText(">task list --task", "Shows only tasks");
-        SharedLogic.PrintHelp_SubText(">task list --cat:<category>", "Shows only those category");
+        SharedLogic.PrintHelp_SubText(">task list --all", "Shows everything across all statuses!");
+        SharedLogic.PrintHelp_SubText(">task list --status:<status>", "Shows tasks within a specific status.See examples for how to use it.(Shortform:-s)");
+        SharedLogic.PrintHelp_SubText(">task list --story", "Shows only stories. Can be used with --all");
+        SharedLogic.PrintHelp_SubText(">task list --collection", "Shows only collections. Can be used with --all");
+        SharedLogic.PrintHelp_SubText(">task list --task", "Shows only tasks. Can be used with --all");
+        SharedLogic.PrintHelp_SubText(">task list --cat:<category>", "Shows only those category. Can be used with --all");
+        SharedLogic.PrintHelp_SubText(">task list --search:<text>", "Searches for stuff with the current filter. Use it with --all for overall search");
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
         SharedLogic.PrintHelp_SubText(">task list");
+        SharedLogic.PrintHelp_SubText(">task list --all", "Shows all the tasks");
         SharedLogic.PrintHelp_SubText(">task list --story");
         SharedLogic.PrintHelp_SubText(">task list --status:archieve", "Shows all the tasks archieved");
         SharedLogic.PrintHelp_SubText(">task list --status:open", "Shows only the open tasks ( this is also the default setting )");
         SharedLogic.PrintHelp_SubText(">task list --status:complete", "Shows only the tasks completed");
         SharedLogic.PrintHelp_SubText(">task list --status:discard", "Shows only the tasks discard");
         SharedLogic.PrintHelp_SubText(">task list --cat:office", "filter by category");
+        SharedLogic.PrintHelp_SubText(">task list --search:\"Buy shoes\" --all", "Search in all the statuses");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -642,6 +646,7 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
         int categoryArea = 15;
         int newLineAfter = 5;
 
+        #region STATUS
         string status;
         {
             bool syntaxError = false;
@@ -653,20 +658,23 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
                 return true;
             }
 
-            if ( !status.IsEmpty() && !application.DesignData.DoesTaskStatusExistFuzzySearch(status))
+            if ( !status.IsEmpty() && !application.DesignData.DoesTaskStatusExist(status))
             {
                 ConsoleWriter.Print("Invalid status");
                 SharedLogic.PrintHelp_WithHeadingAndSubText("Whats Status", application.DesignData.tasks.statusList, "Status can be one of these following. you can add more in the Data/Design.json as per your need.");
                 return true;
             }
         }
+        #endregion
 
 
-        bool isStory = optionalArguments_ReadOnly.Contains("--story");
-        bool isCollection = optionalArguments_ReadOnly.Contains("--collection");
-        bool isTask = optionalArguments_ReadOnly.Contains("--task");
+        bool isStoryOnly = optionalArguments_ReadOnly.Contains("--story");
+        bool isCollectionOnly = optionalArguments_ReadOnly.Contains("--collection");
+        bool isTaskOnly = optionalArguments_ReadOnly.Contains("--task");
+
         bool isAll = optionalArguments_ReadOnly.Contains("--all");
 
+        #region CATEGORY
         string categoryFilter;
         {
             bool syntaxErrorInCategoryFilter = false;
@@ -685,10 +693,19 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
                 return true;
             }
         }
-
-        // By default all are shown
-        if (!isStory && !isTask && !isCollection)
-            isStory = isTask = isCollection = true;
+        #endregion
+        string searchFilter = "";
+        {
+            bool syntaxError = false;
+            searchFilter = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--search", string.Empty, null, null, out syntaxError);
+            if (syntaxError)
+            {
+                ConsoleWriter.Print("Invalid syntax for --search argument.");
+                searchFilter = string.Empty;
+                return true;
+            }
+            searchFilter = searchFilter.ToLower();
+        }
 
         // by default only open ones are shown, unless specified in which case open ones are not shown. 
         if (status.IsEmpty())
@@ -698,23 +715,30 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
 
         foreach (var task in application.taskManager.Data.entries)
         {
-            if (!isAll)
+            if (isAll)
             {
-                if (!task.status.ToLower().Contains(status.ToLower()))
-                    continue;
-
-                if (task.IsTask && !isTask)
-                    continue;
-
-                if (task.IsStory && !isStory)
-                    continue;
-
-                if (task.IsCollection && !isCollection)
-                    continue;
-
-                if (categoryFilter != string.Empty && !task.categories.Contains(categoryFilter))
+                // no filterning
+            }
+            else
+            {
+                if (task.status.ToLower() != (status.ToLower()))
                     continue;
             }
+
+            if (isTaskOnly && !task.IsTask)
+                continue;
+
+            if (isStoryOnly && !task.IsStory)
+                continue;
+
+            if (isCollectionOnly && !task.IsCollection)
+                continue;
+
+            if (!categoryFilter.IsEmpty() && !task.categories.Contains(categoryFilter))
+                continue;
+
+            if( !searchFilter.IsEmpty() && !task.title.ToLower().Contains(searchFilter))
+                    continue;
 
             foreach (var category in task.categories)
             {
