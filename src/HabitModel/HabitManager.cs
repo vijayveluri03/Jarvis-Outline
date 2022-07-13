@@ -153,7 +153,7 @@ namespace Jarvis
 
         public int GetSuccessRateForDuration(Date start_Inclusive, Date end_Inclusive)
         {
-            int totalDays = Date.Today - _startDate; // This will not include today
+            int totalDays = Date.Today - start_Inclusive; // This will not include today
             int totalEntryCount = GetEntryCountForTheDuration(HabitStatus.Completed, start_Inclusive, end_Inclusive);
             int totalIgnoreDays = GetEntryCountForTheDuration(HabitStatus.Ignored, start_Inclusive, end_Inclusive);
 

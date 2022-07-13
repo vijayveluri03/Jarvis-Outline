@@ -50,6 +50,11 @@ namespace Jarvis
             return ed;
         }
 
+        public static void TryAddHabitEntry(JApplication application, int[] ids, Date date, HabitStatus status)
+        {
+            foreach( var id in ids )
+                TryAddHabitEntry(application, id, date, status);
+        }
         public static void TryAddHabitEntry(JApplication application, int id, Date date, HabitStatus status)
         {
             Habit hb = application.habitManager.GetHabit_Editable(id);

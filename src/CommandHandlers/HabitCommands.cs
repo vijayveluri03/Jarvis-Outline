@@ -314,7 +314,7 @@ public class HabitStreakUpTodayCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        int[] id = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
         Date date = Date.Today;
 
         SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Completed);
@@ -351,7 +351,7 @@ public class HabitStreakUpYesterdayCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        int[] id = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
         Date date = Date.Today - 1;
 
         SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Completed);
@@ -387,7 +387,7 @@ public class HabitIgnoreTodayCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        int[] id = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
         Date date = Date.Today;
 
         SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Ignored);
@@ -424,7 +424,7 @@ public class HabitIgnoreYesterdayCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        int[] id = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
         Date date = Date.Today - 1;
 
         SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Ignored);
@@ -460,7 +460,7 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
+        int[] id = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
         Date date = new Date();
                 
         if ( !Date.TryParse(arguments_ReadOnly[1], new System.Globalization.CultureInfo("es-ES"), out date) )
