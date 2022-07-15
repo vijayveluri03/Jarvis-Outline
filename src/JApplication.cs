@@ -17,7 +17,7 @@ namespace Jarvis
         public JUserData UserData { get { return userData; } }
         public TaskManager taskManager { get; private set; }
         public HabitManager habitManager { get; private set; }
-        public JournalManager journalManager { get; private set; }
+        public NotebookManager notebookManager { get; private set; }
         public TaskTimeManagement logManager { get; private set; }
 
         public void Initialize()
@@ -48,7 +48,7 @@ namespace Jarvis
             taskManager = new TaskManager(designData.TaskDefaultStatus, designData.DoesTaskStatusExist);
             habitManager = new HabitManager();
             logManager = new TaskTimeManagement();
-            journalManager = new JournalManager(designData.JournalDefaultTag, designData.DoesJournalTagExist);
+            notebookManager = new NotebookManager(designData.NotebookDefaultTag, designData.DoesNotebookTagExist);
         }
 
         public void Save()
@@ -57,7 +57,7 @@ namespace Jarvis
             taskManager.Save();
             logManager.Save();
             habitManager.Save();
-            journalManager.Save();
+            notebookManager.Save();
         }
 
         // private

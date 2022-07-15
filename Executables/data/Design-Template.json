@@ -29,7 +29,7 @@
     "defaultStatus": "open",
     "completeStatus" :  "complete"  // the status for the completed tasks
   },
-  "journal": {
+  "notebook": {
     "listOfTags": [
       "dailylog",
       "important",

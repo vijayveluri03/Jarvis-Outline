@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Jarvis
 {
-    public class JournalEntry
+    public class NotebookEntry
     {
         // The name or the title for an entry 
         public string title;
@@ -19,26 +19,26 @@ namespace Jarvis
     }
 
     // List of all the Entries
-    public class JournalCollection
+    public class NotebookCollection
     {
-        public List<JournalEntry> entries = new List<JournalEntry>();
+        public List<NotebookEntry> entries = new List<NotebookEntry>();
     }
 
 
-    public class JournalManager : IDirtyable
+    public class NotebookManager : IDirtyable
     {
-        public JournalCollection Data { get; private set; }
-        public JournalManager(string defaultTag, System.Func<string, bool> isTagValid)
+        public NotebookCollection Data { get; private set; }
+        public NotebookManager(string defaultTag, System.Func<string, bool> isTagValid)
         {
             if (Utils.CreateFileIfNotExit(JConstants.JOURNAL_FILENAME, JConstants.JOURNAL_TEMPLATE_FILENAME))
             {
-                ConsoleWriter.Print("Journals data copied from Template. This happens on the first launch.");
+                ConsoleWriter.Print("Notebooks data copied from Template. This happens on the first launch.");
             }
 
             Load(JConstants.JOURNAL_FILENAME, defaultTag, isTagValid);
         }
 
-        public void AddJournal(JournalEntry ed)
+        public void AddNotebook(NotebookEntry ed)
         {
             Data.entries.Add(ed);
             IsDirty = true;
@@ -49,11 +49,11 @@ namespace Jarvis
             using (StreamReader r = new StreamReader(fileName))
             {
                 string json = r.ReadToEnd();
-                JournalCollection data = JsonConvert.DeserializeObject<JournalCollection>(json);
+                NotebookCollection data = JsonConvert.DeserializeObject<NotebookCollection>(json);
                 Data = data;
             }
 
-            foreach (JournalEntry ed in Data.entries)
+            foreach (NotebookEntry ed in Data.entries)
             {
                 if (ed.id >= availableID)
                     availableID = ed.id + 1;
@@ -102,15 +102,15 @@ namespace Jarvis
             IsDirty = false;
 
 #if RELEASE_LOG
-            ConsoleWriter.Print("Journals saved");
+            ConsoleWriter.Print("Notebooks saved");
 #endif
         }
 
         // Getters
 
-        public bool DoesJournalExist(int id)
+        public bool DoesNotebookExist(int id)
         {
-            foreach (JournalEntry ed in Data.entries)
+            foreach (NotebookEntry ed in Data.entries)
             {
                 if (ed.id == id)
                     return true;
@@ -119,9 +119,9 @@ namespace Jarvis
         }
 
         // Because C# doesnt in const (-|-)
-        public JournalEntry GetJournal_ReadOnly(int id)
+        public NotebookEntry GetNotebook_ReadOnly(int id)
         {
-            foreach (JournalEntry ed in Data.entries)
+            foreach (NotebookEntry ed in Data.entries)
             {
                 if (ed.id == id)
                     return ed;
@@ -129,10 +129,10 @@ namespace Jarvis
             return null;
         }
 
-        public JournalEntry GetJournal_Editable(int id)
+        public NotebookEntry GetNotebook_Editable(int id)
         {
             IsDirty = true;
-            return GetJournal_ReadOnly(id);
+            return GetNotebook_ReadOnly(id);
         }
 
         public int GetAvailableID()

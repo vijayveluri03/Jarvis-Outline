@@ -21,8 +21,8 @@ public class CommandSelector : CommandHandlerBaseWithUtility
                 return new TaskHandler().Init(application, new NotesUtility(JConstants.PATH_TO_TASKS_NOTE));
             case "habit":
                 return new HabitHandler().Init(application, new NotesUtility(JConstants.PATH_TO_HABITS_NOTE));
-            case "journal":
-                return new JournalHandler().Init(application, new NotesUtility(JConstants.PATH_TO_JOURNAL_NOTE));
+            case "notebook":
+                return new NotebookHandler().Init(application, new NotesUtility(JConstants.PATH_TO_JOURNAL_NOTE));
             case "game":
                 return new GameHandler().Init(application, null);
             default:
@@ -59,7 +59,7 @@ public class CommandSelector : CommandHandlerBaseWithUtility
         SharedLogic.PrintHelp_Heading("USAGE");
         SharedLogic.PrintHelp_SubText(">task <arguments>", "To manage your tasks. try 'task --help' for more information");
         SharedLogic.PrintHelp_SubText(">habit <arguments>", "To manage your habits. try 'habit --help' for more information");
-        SharedLogic.PrintHelp_SubText(">journal <arguments>", "To manage your journal. 'journal --help' for more information");
+        SharedLogic.PrintHelp_SubText(">notebook <arguments>", "To manage your notebook. 'notebook --help' for more information");
         SharedLogic.PrintHelp_SubText(">game snake", "For a fun game :) ");
 
         SharedLogic.PrintHelp_Heading("TIPS");

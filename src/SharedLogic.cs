@@ -40,10 +40,10 @@ namespace Jarvis
             return ed;
         }
 
-        public static JournalEntry CreateNewJournalEntry(JournalManager journalManager, string[] tags, string title)
+        public static NotebookEntry CreateNewNotebookEntry(NotebookManager notebookManager, string[] tags, string title)
         {
-            JournalEntry ed = new JournalEntry();
-            ed.id = journalManager.GetAvailableID();
+            NotebookEntry ed = new NotebookEntry();
+            ed.id = notebookManager.GetAvailableID();
             ed.title = title;
             ed.tags = tags;
             ed.loggedDate = DateTime.Now.ZeroTime();

@@ -19,20 +19,20 @@ namespace Jarvis
         public static string DESIGNDATA_FILENAME { get { return JConstants.PATH_TO_DATA + ("Design.json"); } }
         public static string PLAYERPREFS_FILENAME { get { return JConstants.PATH_TO_DATA + ("PlayerPrefs.json"); } }
         public static string TASKS_FILENAME { get { return JConstants.PATH_TO_DATA + ("Tasks.json"); } }
-        public static string JOURNAL_FILENAME { get { return JConstants.PATH_TO_DATA + ("Journal.json"); } }
+        public static string JOURNAL_FILENAME { get { return JConstants.PATH_TO_DATA + ("Notebook.json"); } }
         public static string HABITS_FILENAME { get { return JConstants.PATH_TO_DATA + ("Habits.json"); } }
         public static string TASK_LOG_FILENAME { get { return JConstants.PATH_TO_DATA + ("TaskLog.json"); } }
 
         public static string PATH_TO_TASKS_NOTE { get { return JConstants.PATH_TO_DATA + ("Tasks/"); } }
         public static string PATH_TO_HABITS_NOTE { get { return JConstants.PATH_TO_DATA + ("Habits/"); } }
         public static string PATH_TO_TASK_LOG_NOTES { get { return JConstants.PATH_TO_DATA + ("TaskLog/"); } }
-        public static string PATH_TO_JOURNAL_NOTE { get { return JConstants.PATH_TO_DATA + ("Journal/"); } }
+        public static string PATH_TO_JOURNAL_NOTE { get { return JConstants.PATH_TO_DATA + ("Notebook/"); } }
 
         public static string DESIGNDATA_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Design-Template.json"); } }
         public static string TASKS_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Tasks-Template.json"); } }
         public static string HABITS_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Habits-Template.json"); } }
         public static string TASK_LOG_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("TaskLog-Template.json"); } }
-        public static string JOURNAL_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Journal-Template.json"); } }
+        public static string JOURNAL_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Notebook-Template.json"); } }
     }
 
     // Load and Save custom data per user.
@@ -176,7 +176,7 @@ namespace Jarvis
         private void PostLoad()
         {
             InitializeTasks();
-            InitializeJournal();
+            InitializeNotebook();
         }
 
         public bool DoesCategoryExist(string category)
@@ -266,19 +266,19 @@ namespace Jarvis
         #region JOURNAL SPECIFIC
 
         [Serializable]
-        public class Journal
+        public class Notebook
         {
             [JsonProperty] public string[] listOfTags;
             [JsonProperty] public string defaultTag;
         }
-        [JsonProperty] public Journal journal;
+        [JsonProperty] public Notebook notebook;
         [JsonIgnore] private HashSet<string> cachedJornalTags = new HashSet<string>();
-        [JsonIgnore] public string JournalDefaultTag { get { return journal.defaultTag; } }
+        [JsonIgnore] public string NotebookDefaultTag { get { return notebook.defaultTag; } }
 
 
-        void InitializeJournal()
+        void InitializeNotebook()
         {
-            foreach (var status in journal.listOfTags)
+            foreach (var status in notebook.listOfTags)
             {
                 if (cachedJornalTags.Contains(status))
                 {
@@ -288,30 +288,30 @@ namespace Jarvis
                 }
                 cachedJornalTags.Add(status);
             }
-            if (!cachedJornalTags.Contains(journal.defaultTag))
+            if (!cachedJornalTags.Contains(notebook.defaultTag))
             {
                 ConsoleWriter.Print("Error : Default tag is invalid in Data/Design.Json. It should be one of the pre defined tags.");
                 //@todo raise exception ?
             }
         }
 
-        public bool DoesJournalTagExist(string[] tags)
+        public bool DoesNotebookTagExist(string[] tags)
         {
             Utils.Assert(tags.Length > 0);
             foreach (var tag in tags)
             {
-                if (!DoesJournalTagExist(tag))
+                if (!DoesNotebookTagExist(tag))
                     return false;
             }
             return true;
         }
 
-        public bool DoesJournalTagExist(string tag)
+        public bool DoesNotebookTagExist(string tag)
         {
             return cachedJornalTags.Contains(tag);
         }
 
-        public bool DoesJournalTagExistFuzzySearch(string tag)
+        public bool DoesNotebookTagExistFuzzySearch(string tag)
         {
             tag = tag.ToLower();
             foreach (var st in cachedJornalTags)

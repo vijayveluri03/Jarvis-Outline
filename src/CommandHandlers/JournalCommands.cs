@@ -6,9 +6,9 @@ using CommandLine;
 using Jarvis; //@todo 
 
 
-public class JournalHandler : CommandHandlerBaseWithUtility
+public class NotebookHandler : CommandHandlerBaseWithUtility
 {
-    public JournalHandler()
+    public NotebookHandler()
     {
 
     }
@@ -17,21 +17,21 @@ public class JournalHandler : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">journal add ", "To add a new journal entry");
-        SharedLogic.PrintHelp_SubText(">journal list", "To list all the journal entries");
-        SharedLogic.PrintHelp_SubText(">journal show", "Show more details of an entry");
+        SharedLogic.PrintHelp_SubText(">notebook add ", "To add a new notebook entry");
+        SharedLogic.PrintHelp_SubText(">notebook list", "To list all the notebook entries");
+        SharedLogic.PrintHelp_SubText(">notebook show", "Show more details of an entry");
 
         SharedLogic.PrintHelp_Heading("ADVANCED"); 
-        SharedLogic.PrintHelp_SubText(">journal edittitle ", "To edit the title of an entry");
+        SharedLogic.PrintHelp_SubText(">notebook edittitle ", "To edit the title of an entry");
 
         SharedLogic.PrintHelp_Heading("NOTES"); 
-        SharedLogic.PrintHelp_SubText(">journal note" , "Open journal entry");
-        SharedLogic.PrintHelp_SubText(">journal printnote", "Print the journal entry");
-        SharedLogic.PrintHelp_SubText(">journal cat", "Same as printnotes");
+        SharedLogic.PrintHelp_SubText(">notebook note" , "Open notebook entry");
+        SharedLogic.PrintHelp_SubText(">notebook printnote", "Print the notebook entry");
+        SharedLogic.PrintHelp_SubText(">notebook cat", "Same as printnotes");
 
         SharedLogic.PrintHelp_Heading("HELP");
         SharedLogic.PrintHelp_SubText("All the commands have their own help section. Use the argument '--help'");
-        SharedLogic.PrintHelp_SubText("Example - 'journal add --help' for more examples on how to use it. Try it!");
+        SharedLogic.PrintHelp_SubText("Example - 'notebook add --help' for more examples on how to use it. Try it!");
         SharedLogic.PrintHelp_SubText("This works for every single command! Cheers!");
         SharedLogic.FlushHelpText();
         return true;
@@ -45,27 +45,27 @@ public class JournalHandler : CommandHandlerBaseWithUtility
         switch (action)
         {
             case "add":
-                selectedHander = new JournalAddCommand();
+                selectedHander = new NotebookAddCommand();
                 break;
             case "list":
-                selectedHander = new JournalListCommand();
+                selectedHander = new NotebookListCommand();
                 break;
             case "show":
-                selectedHander = new JournalShowCommand();
+                selectedHander = new NotebookShowCommand();
                 break;
             case "cat":
             case "printnote":
-                selectedHander = new JournalCatNotesCommand();
+                selectedHander = new NotebookCatNotesCommand();
                 break;
             case "note":
-                selectedHander = new JournalEditNoteCommand();
+                selectedHander = new NotebookEditNoteCommand();
                 break;
             case "edittitle":
-                selectedHander = new JournalEditTitleCommand();
+                selectedHander = new NotebookEditTitleCommand();
                 break;
             default:
                 if(printErrors)
-                    ConsoleWriter.Print("Invalid command. Try 'journal --help' for more information");
+                    ConsoleWriter.Print("Invalid command. Try 'notebook --help' for more information");
                 break;
         }
 
@@ -91,9 +91,9 @@ public class JournalHandler : CommandHandlerBaseWithUtility
     }
 }
 
-public class JournalAddCommand : CommandHandlerBaseWithUtility
+public class NotebookAddCommand : CommandHandlerBaseWithUtility
 {
-    public JournalAddCommand()
+    public NotebookAddCommand()
     {
 
     }
@@ -102,15 +102,15 @@ public class JournalAddCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">journal add <title>", "This will create a new journal entry. ");
-        SharedLogic.PrintHelp_SubText(">journal add <tags> <title>", "This will create a new journal entry. ");
+        SharedLogic.PrintHelp_SubText(">notebook add <title>", "This will create a new notebook entry. ");
+        SharedLogic.PrintHelp_SubText(">notebook add <tags> <title>", "This will create a new notebook entry. ");
 
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
-        SharedLogic.PrintHelp_SubText(">journal add \"Stuff that i did today!\"", "This will create a journal entry." );
-        SharedLogic.PrintHelp_SubText(">journal add \"dailylog\" \"Stuff that i did today!\"", "This will create a journal entry with a tag DailyLog. ");
+        SharedLogic.PrintHelp_SubText(">notebook add \"Stuff that i did today!\"", "This will create a notebook entry." );
+        SharedLogic.PrintHelp_SubText(">notebook add \"dailylog\" \"Stuff that i did today!\"", "This will create a notebook entry with a tag DailyLog. ");
 
-        SharedLogic.PrintHelp_WithHeadingAndSubText("TAGS", application.DesignData.journal.listOfTags, "you can use these tags below, or create more in data/Design.json");
+        SharedLogic.PrintHelp_WithHeadingAndSubText("TAGS", application.DesignData.notebook.listOfTags, "you can use these tags below, or create more in data/Design.json");
       
         SharedLogic.FlushHelpText();
 
@@ -130,7 +130,7 @@ public class JournalAddCommand : CommandHandlerBaseWithUtility
         if (arguments_ReadOnly.Count == 1)
         {
             title = arguments_ReadOnly[0];
-            tags = new string[] { application.DesignData.JournalDefaultTag };
+            tags = new string[] { application.DesignData.NotebookDefaultTag };
         }
         else if (arguments_ReadOnly.Count == 2)
         {
@@ -140,17 +140,17 @@ public class JournalAddCommand : CommandHandlerBaseWithUtility
         else
             Utils.Assert(false);
 
-        if (!application.DesignData.DoesJournalTagExist(tags))
+        if (!application.DesignData.DoesNotebookTagExist(tags))
         {
             ConsoleWriter.Print("Invalid Tag");
-            SharedLogic.PrintHelp_WithHeadingAndSubText("TAGS", application.DesignData.journal.listOfTags, "you can use these tags below, or create more in data/Design.json");
+            SharedLogic.PrintHelp_WithHeadingAndSubText("TAGS", application.DesignData.notebook.listOfTags, "you can use these tags below, or create more in data/Design.json");
             return true;
         }
 
-        var entry = SharedLogic.CreateNewJournalEntry(application.journalManager, tags, title);
-        application.journalManager.AddJournal(entry);
+        var entry = SharedLogic.CreateNewNotebookEntry(application.notebookManager, tags, title);
+        application.notebookManager.AddNotebook(entry);
 
-        ConsoleWriter.Print("New Journal entry added with id : {0}. You can also edit the notes using 'journal note'", entry.id);
+        ConsoleWriter.Print("New Notebook entry added with id : {0}. You can also edit the notes using 'notebook note'", entry.id);
 
         notes.CreateNoteIfUnavailable(entry.id);
         notes.OpenNote(application, entry.id, null, true, true);
@@ -159,9 +159,9 @@ public class JournalAddCommand : CommandHandlerBaseWithUtility
     }
 }
 
-public class JournalListCommand : CommandHandlerBaseWithUtility
+public class NotebookListCommand : CommandHandlerBaseWithUtility
 {
-    public JournalListCommand()
+    public NotebookListCommand()
     {
 
     }
@@ -169,10 +169,10 @@ public class JournalListCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">journal list", "lists all the entries\n" );
+        SharedLogic.PrintHelp_SubText(">notebook list", "lists all the entries\n" );
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
-        SharedLogic.PrintHelp_SubText(">journal list");
+        SharedLogic.PrintHelp_SubText(">notebook list");
         SharedLogic.FlushHelpText();
 
         return true;
@@ -187,7 +187,7 @@ public class JournalListCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        List<JournalEntry> journals = new List<JournalEntry>(application.journalManager.Data.entries);
+        List<NotebookEntry> notebooks = new List<NotebookEntry>(application.notebookManager.Data.entries);
 
         int lineCount = 0;
         int categoryArea = 30;
@@ -195,21 +195,21 @@ public class JournalListCommand : CommandHandlerBaseWithUtility
         const int newLineAfter = 5;
 
         // output Heading 
-        if (journals.Count > 0)
+        if (notebooks.Count > 0)
         {
             ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15}",
                 application.DesignData.HighlightColorForText,
                 "ID", "TAGS", "TITLE", "LOGGED ON"
                 );
 
-            foreach (var journal in journals)
+            foreach (var notebook in notebooks)
             {
 
                 ConsoleWriter.Print("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15}",
-                    journal.id,
-                    (journal.tags != null && journal.tags.Length > 0 ? Utils.Conversions.ArrayToString(journal.tags, true).TruncateWithVisualFeedback(categoryArea - 3) : "ERROR"),
-                    journal.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/) + "+(N)",// because Notes is available for all journals 
-                    journal.loggedDate.ShortForm()
+                    notebook.id,
+                    (notebook.tags != null && notebook.tags.Length > 0 ? Utils.Conversions.ArrayToString(notebook.tags, true).TruncateWithVisualFeedback(categoryArea - 3) : "ERROR"),
+                    notebook.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/) + "+(N)",// because Notes is available for all notebooks 
+                    notebook.loggedDate.ShortForm()
                     );
 
                 lineCount++;
@@ -220,16 +220,16 @@ public class JournalListCommand : CommandHandlerBaseWithUtility
             }
         }
         else
-            ConsoleWriter.Print("No journals found! Try adding a few using \"journal add\"");
+            ConsoleWriter.Print("No notebooks found! Try adding a few using \"notebook add\"");
 
         return true;
     }
 }
 
 
-public class JournalShowCommand : CommandHandlerBaseWithUtility
+public class NotebookShowCommand : CommandHandlerBaseWithUtility
 {
-    public JournalShowCommand()
+    public NotebookShowCommand()
     {
     }
 
@@ -237,10 +237,10 @@ public class JournalShowCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">journal show <id>", "This will show all the details of a journal!");
+        SharedLogic.PrintHelp_SubText(">notebook show <id>", "This will show all the details of a notebook!");
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
-        SharedLogic.PrintHelp_SubText(">journal show 1", "Shows more details for journal with id 1");
+        SharedLogic.PrintHelp_SubText(">notebook show 1", "Shows more details for notebook with id 1");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -257,15 +257,15 @@ public class JournalShowCommand : CommandHandlerBaseWithUtility
 
         int categoryArea = 45;
 
-        JournalEntry journal = application.journalManager.GetJournal_ReadOnly(id);
+        NotebookEntry notebook = application.notebookManager.GetNotebook_ReadOnly(id);
 
-        if (journal == null)
+        if (notebook == null)
         {
-            ConsoleWriter.Print("Journal with id : {0} not found!", id);
+            ConsoleWriter.Print("Notebook with id : {0} not found!", id);
             return true;
         }
 
-        // Print journal details
+        // Print notebook details
         {
             // Heading
             ConsoleWriter.PrintInColor("{0, -4} {1, -" + categoryArea + "} {2}",
@@ -274,15 +274,15 @@ public class JournalShowCommand : CommandHandlerBaseWithUtility
                 );
 
             ConsoleWriter.Print("{0, -4} {1, -" + categoryArea + "} {2}",
-                journal.id,
-                (journal.tags != null && journal.tags.Length > 0 ? Utils.Conversions.ArrayToString(journal.tags, true).TruncateWithVisualFeedback(categoryArea - 3) : "ERROR"),
-                journal.title);
+                notebook.id,
+                (notebook.tags != null && notebook.tags.Length > 0 ? Utils.Conversions.ArrayToString(notebook.tags, true).TruncateWithVisualFeedback(categoryArea - 3) : "ERROR"),
+                notebook.title);
 
             ConsoleWriter.Print();
 
             ConsoleWriter.Print(
                 "LOGGED ON : {0}\n", 
-                journal.loggedDate.ShortForm()
+                notebook.loggedDate.ShortForm()
                 );
         }
 
@@ -292,9 +292,9 @@ public class JournalShowCommand : CommandHandlerBaseWithUtility
     }
 }
 
-public class JournalEditTitleCommand : CommandHandlerBaseWithUtility
+public class NotebookEditTitleCommand : CommandHandlerBaseWithUtility
 {
-    public JournalEditTitleCommand()
+    public NotebookEditTitleCommand()
     {
     }
 
@@ -302,10 +302,10 @@ public class JournalEditTitleCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">journal edittitle <id> <new title>", "Renames the entry title");
+        SharedLogic.PrintHelp_SubText(">notebook edittitle <id> <new title>", "Renames the entry title");
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
-        SharedLogic.PrintHelp_SubText(">journal edittitle 1 \"Wake up at 7 AM\"", "rename the title of journal : 1 to 'Wake up at 7 AM'");
+        SharedLogic.PrintHelp_SubText(">notebook edittitle 1 \"Wake up at 7 AM\"", "rename the title of notebook : 1 to 'Wake up at 7 AM'");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -321,24 +321,24 @@ public class JournalEditTitleCommand : CommandHandlerBaseWithUtility
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
         string title = arguments_ReadOnly[1];
 
-        JournalEntry hb = application.journalManager.GetJournal_ReadOnly(id);
+        NotebookEntry hb = application.notebookManager.GetNotebook_ReadOnly(id);
 
         if (hb == null)
         {
-            ConsoleWriter.Print("Journal with id : {0} not found!", id);
+            ConsoleWriter.Print("Notebook with id : {0} not found!", id);
             return true;
         }
 
-        application.journalManager.GetJournal_Editable(id).title = title;
-        ConsoleWriter.Print("Journal with id : {0} renamed to - {1}", id, title);
+        application.notebookManager.GetNotebook_Editable(id).title = title;
+        ConsoleWriter.Print("Notebook with id : {0} renamed to - {1}", id, title);
 
         return true;
     }
 }
 
-public class JournalCatNotesCommand : CommandHandlerBaseWithUtility
+public class NotebookCatNotesCommand : CommandHandlerBaseWithUtility
 {
-    public JournalCatNotesCommand()
+    public NotebookCatNotesCommand()
     {
 
     }
@@ -347,11 +347,11 @@ public class JournalCatNotesCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">journal cat <journalID>", "Prints the notes of a journal entry. You can also use printnote instead of cat");
-        SharedLogic.PrintHelp_SubText(">journal printnote <journalID>", "Same as cat");
+        SharedLogic.PrintHelp_SubText(">notebook cat <notebookID>", "Prints the notes of a notebook entry. You can also use printnote instead of cat");
+        SharedLogic.PrintHelp_SubText(">notebook printnote <notebookID>", "Same as cat");
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
-        SharedLogic.PrintHelp_SubText(">journal cat 1", "Prints the notes for journal with id 1");
+        SharedLogic.PrintHelp_SubText(">notebook cat 1", "Prints the notes for notebook with id 1");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -368,10 +368,10 @@ public class JournalCatNotesCommand : CommandHandlerBaseWithUtility
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
         
-        if (application.journalManager.DoesJournalExist(id))
+        if (application.notebookManager.DoesNotebookExist(id))
         {
             if( !notes.DoesNoteExist(id))
-                ConsoleWriter.Print("Notes not found for the journal with id : {0}", id);
+                ConsoleWriter.Print("Notes not found for the notebook with id : {0}", id);
             else 
             {
                 ConsoleWriter.PrintInColor("NOTES :", application.DesignData.HighlightColorForText);
@@ -379,15 +379,15 @@ public class JournalCatNotesCommand : CommandHandlerBaseWithUtility
             }
         }
         else
-            ConsoleWriter.Print("journal not found with id : " + id);
+            ConsoleWriter.Print("notebook not found with id : " + id);
 
         return true;
     }
 }
 
-public class JournalEditNoteCommand : CommandHandlerBaseWithUtility
+public class NotebookEditNoteCommand : CommandHandlerBaseWithUtility
 {
-    public JournalEditNoteCommand()
+    public NotebookEditNoteCommand()
     {
 
     }
@@ -396,19 +396,19 @@ public class JournalEditNoteCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">journal note <journalID>", "Opens notes for a journal");
-        SharedLogic.PrintHelp_SubText(">journal note <journalID> --ext:<editorname>", "Provide external editor name of your choice. Example : code or vim");
-        SharedLogic.PrintHelp_SubText(">journal note <journalID> --append:<Message>", "Append the message directly to the note");
-        SharedLogic.PrintHelp_SubText(">journal note <journalID> --appendlog:<Message>", "Append the message directly to the note, with a timestamp!");
+        SharedLogic.PrintHelp_SubText(">notebook note <notebookID>", "Opens notes for a notebook");
+        SharedLogic.PrintHelp_SubText(">notebook note <notebookID> --ext:<editorname>", "Provide external editor name of your choice. Example : code or vim");
+        SharedLogic.PrintHelp_SubText(">notebook note <notebookID> --append:<Message>", "Append the message directly to the note");
+        SharedLogic.PrintHelp_SubText(">notebook note <notebookID> --appendlog:<Message>", "Append the message directly to the note, with a timestamp!");
 
         SharedLogic.PrintHelp_Heading("ADVANCED");
         SharedLogic.PrintHelp_SubText("You can change the default editor (to open the notes) in the Data/Design.json under 'defaultExternalEditor'");
         SharedLogic.PrintHelp_SubText("you can use '--nowait' to have jarvis not wait for the notes to be closed.");
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
-        SharedLogic.PrintHelp_SubText(">journal note 1", "Edit the notes for journal : 1");
-        SharedLogic.PrintHelp_SubText(">journal note 1 --ext:code", "Edit the notes for journal : 1, within the visual studio code");
-        SharedLogic.PrintHelp_SubText(">journal note 1 --append:\"Buy milk\"", "Add 'buy milk' to the notes!");
+        SharedLogic.PrintHelp_SubText(">notebook note 1", "Edit the notes for notebook : 1");
+        SharedLogic.PrintHelp_SubText(">notebook note 1 --ext:code", "Edit the notes for notebook : 1, within the visual studio code");
+        SharedLogic.PrintHelp_SubText(">notebook note 1 --append:\"Buy milk\"", "Add 'buy milk' to the notes!");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -457,7 +457,7 @@ public class JournalEditNoteCommand : CommandHandlerBaseWithUtility
             appendMessage = "Log on " +  DateTime.Now.ToShortDateString() + " " + appendLogMessage;
         }
 
-        if (application.journalManager.DoesJournalExist(id))
+        if (application.notebookManager.DoesNotebookExist(id))
         {
             notes.CreateNoteIfUnavailable(id);
 
@@ -472,7 +472,7 @@ public class JournalEditNoteCommand : CommandHandlerBaseWithUtility
             }
         }
         else
-            ConsoleWriter.Print("journal not found with id : " + id);
+            ConsoleWriter.Print("notebook not found with id : " + id);
         return true;
     }
 }
