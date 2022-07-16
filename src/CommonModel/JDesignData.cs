@@ -146,6 +146,8 @@ namespace Jarvis
         [JsonProperty] public Categories categories;
         [JsonProperty] public string defaultExternalEditor = "code";
 
+        [JsonProperty] public Dictionary<string, string> properties = new Dictionary<string, string>();    
+
         // Getters        
         [JsonIgnore] public ConsoleColor DefaultColorForText { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.defaultColorForText); } } // used for all default text
         [JsonIgnore] public ConsoleColor HighlightColorForText { get { return Utils.ParseEnum<ConsoleColor>(lookAndFeel.highlightColorForText); } } //used for headings 
@@ -178,6 +180,41 @@ namespace Jarvis
             InitializeTasks();
             InitializeNotebook();
         }
+
+        #region PROPERTIES 
+
+        public bool TryGetProperty(string key, out string value)
+        {
+            if(properties.ContainsKey(key))
+            {
+                value = properties[key];
+                return true;
+            }
+            value = null;
+            return false;
+        }
+        public bool TryGetIntegerProperty(string key, out int value)
+        {
+            if (properties.ContainsKey(key))
+            {
+                value = Utils.Conversions.Atoi( properties[key]);
+                return true;
+            }
+            value = 0;
+            return false;
+        }
+
+        public string GetProperty( string key )
+        {
+            return properties[key];
+        }
+        public int GetIntegerProperty(string key)
+        {
+            return Utils.Conversions.Atoi(GetProperty(key));
+        }
+
+        #endregion // PROPERTIES
+
 
         public bool DoesCategoryExist(string category)
         {

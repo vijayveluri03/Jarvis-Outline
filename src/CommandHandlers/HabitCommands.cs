@@ -226,7 +226,9 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
         List<Habit> habits = new List<Habit>(application.habitManager.Data.entries);
 
         int lineCount = 0;
-        int titleArea = (optionalArguments_ReadOnly.Contains("-e") || optionalArguments_ReadOnly.Contains("--expand")) ? 120 : 40;
+        int titleArea = (optionalArguments_ReadOnly.Contains("-e") || optionalArguments_ReadOnly.Contains("--expand")) ? 
+            application.DesignData.GetIntegerProperty("view.habit.titleWidthExtended") : 
+            application.DesignData.GetIntegerProperty("view.habit.titleWidthDefault");
         int categoryArea = 15;
         int newLineAfter = 5;
 

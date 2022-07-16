@@ -10,6 +10,10 @@
     "HighlightColorForText_Disabled": "Gray"
 
   },
+  "properties": {
+    "view.habit.titleWidthDefault": 40,
+    "view.habit.titleWidthExtended": 120
+  },
   "categories": {
     "listOfCategories": [
       "health",
