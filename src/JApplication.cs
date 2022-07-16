@@ -51,41 +51,36 @@ public class JApplication
                 if (firstTime)
                 {
                     ConsoleWriter.Print(
-#if !FORCE_JARVIS_CLI
-                        "Entering JARVIS mode. You can enter any jarvis command with out the prefix 'jarvis' here." +
-                        "\nExample - JARVIS>task list (or) JARVIS>habit list" +
-#else
-                        "Welcome! This is jarvis mode, where only jarvis commands would work. Try '--help' for more information." +
-#endif
+                        "Welcome! Try '--help' for more information." +
                         "\nTo exit, simply try 'exit' with out the quotes. You can also try 'save' or 'clear'. Cheers!\n");
 
                     firstTime = false;
                 }
-                string cursorText = GetPreCursorText();
-                string customJarvisCommand = Utils.CLI.GetUserInputString(cursorText, app.DesignData.HighlightColorForText);
+                string cursorText = GetCursorText();
+                string userCommand = Utils.CLI.GetUserInputString(cursorText, app.DesignData.HighlightColorForText);
 
-                if (customJarvisCommand.IsEmpty())
+                if (userCommand.IsEmpty())
                 {
                     continue;
                 }
 
                 //@todo - Move these somewhere else
-                if (customJarvisCommand.ToLower() == "exit")
+                if (userCommand.ToLower() == "exit")
                     break;
 
-                if (customJarvisCommand.ToLower() == "save")
+                if (userCommand.ToLower() == "save")
                 {
                     app.Save();
                     continue;
                 }
 
-                if (customJarvisCommand.ToLower() == "cls" || customJarvisCommand.ToLower() == "clear")
+                if (userCommand.ToLower() == "cls" || userCommand.ToLower() == "clear")
                 {
                     ConsoleWriter.Clear();
                     continue;
                 }
 
-                args = Utils.CLI.SplitCommandLine(customJarvisCommand);
+                args = Utils.CLI.SplitCommandLine(userCommand);
             }
 
             // split big command ( which could be a combination of multiple commands seperated to '+' into small ones
@@ -109,7 +104,7 @@ public class JApplication
 
                 ConsoleWriter.EmptyLine();
 
-                commandSelector.TryHandle(arguments[0] /*Manditory arguments*/, arguments[1] /*Optional*/, app);
+                commandSelector.TryHandle(arguments[0] /*Manditory arguments*/, arguments[1] /*Optional ones*/, app);
             }
         } while (true);
     }
@@ -144,7 +139,7 @@ public class JApplication
         pomodoroObserver.Join();
     }
 
-    private string GetPreCursorText()
+    private string GetCursorText()
     {
         string lastCommand = app.UserData.GetLastCommand();
         string statusStr = GetStatusStr();

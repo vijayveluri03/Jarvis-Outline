@@ -35,9 +35,9 @@ namespace Jarvis
 
         public static JUserData Load()
         {
-            if (File.Exists(JConstants.PLAYERPREFS_FILENAME))
+            if (File.Exists(JConstants.USERDATA_FILENAME))
             {
-                using (StreamReader r = new StreamReader(JConstants.PLAYERPREFS_FILENAME))
+                using (StreamReader r = new StreamReader(JConstants.USERDATA_FILENAME))
                 {
                     string json = r.ReadToEnd();
                     JUserData userData = JsonConvert.DeserializeObject<JUserData>(json);
@@ -130,7 +130,7 @@ namespace Jarvis
                 return;
 
             string serializedUserData = JsonConvert.SerializeObject(this, Formatting.Indented);
-            File.WriteAllText(JConstants.PLAYERPREFS_FILENAME, serializedUserData);
+            File.WriteAllText(JConstants.USERDATA_FILENAME, serializedUserData);
             IsDirty = false;
 
 #if RELEASE_LOG

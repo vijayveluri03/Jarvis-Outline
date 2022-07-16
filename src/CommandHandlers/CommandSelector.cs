@@ -63,6 +63,7 @@ public class CommandSelector : CommandHandlerBaseWithUtility
         SharedLogic.PrintHelp_SubText(">task <arguments>", "To manage your tasks. try 'task --help' for more information");
         SharedLogic.PrintHelp_SubText(">habit <arguments>", "To manage your habits. try 'habit --help' for more information");
         SharedLogic.PrintHelp_SubText(">notebook <arguments>", "To manage your notebook. 'notebook --help' for more information");
+        SharedLogic.PrintHelp_SubText(">pomo <arguments>", "To manage your pomodoro timers. 'pomo --help' for more information");
         SharedLogic.PrintHelp_SubText(">game snake", "For a fun game :) ");
 
         SharedLogic.PrintHelp_Heading("TIPS");

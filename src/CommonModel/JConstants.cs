@@ -17,7 +17,7 @@ namespace Jarvis
         public static string PATH_TO_NOTES { get { return WORKING_DIRECTORY + "data/Notes/"; } }
 
         public static string DESIGNDATA_FILENAME { get { return JConstants.PATH_TO_DATA + ("Design.json"); } }
-        public static string PLAYERPREFS_FILENAME { get { return JConstants.PATH_TO_DATA + ("PlayerPrefs.json"); } }
+        public static string USERDATA_FILENAME { get { return JConstants.PATH_TO_DATA + ("UserData.json"); } }
         public static string TASKS_FILENAME { get { return JConstants.PATH_TO_DATA + ("Tasks.json"); } }
         public static string JOURNAL_FILENAME { get { return JConstants.PATH_TO_DATA + ("Notebook.json"); } }
         public static string POMODORO_FILENAME { get { return JConstants.PATH_TO_DATA + ("Pomodoro.json"); } }
