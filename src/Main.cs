@@ -81,6 +81,11 @@ class Program
                 string cursorText = lastCommand.IsEmpty() ? "JARVIS>" : "JARVIS " + lastCommand.ToUpper() + ">";
                 string customJarvisCommand = Utils.CLI.GetUserInputString(cursorText, app.DesignData.HighlightColorForText);
 
+                if (customJarvisCommand.IsEmpty())
+                {
+                    continue;
+                }
+
                 //@todo - Move these somewhere else
                 if (customJarvisCommand.ToLower() == "exit")
                     break;
