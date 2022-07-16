@@ -610,24 +610,24 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
         SharedLogic.PrintHelp_SubText(">task list", "lists all the tasks which are open");
-        SharedLogic.PrintHelp_SubText(">task list --all", "Shows everything across all statuses!");
+        SharedLogic.PrintHelp_SubText(">task list --allstatus", "Shows everything across all statuses!(Short form : -a)");
         SharedLogic.PrintHelp_SubText(">task list --status:<status>", "Shows tasks within a specific status.See examples for how to use it.(Shortform:-s)");
-        SharedLogic.PrintHelp_SubText(">task list --story", "Shows only stories. Can be used with --all");
-        SharedLogic.PrintHelp_SubText(">task list --collection", "Shows only collections. Can be used with --all");
-        SharedLogic.PrintHelp_SubText(">task list --task", "Shows only tasks. Can be used with --all");
-        SharedLogic.PrintHelp_SubText(">task list --cat:<category>", "Shows only those category. Can be used with --all");
-        SharedLogic.PrintHelp_SubText(">task list --search:<text>", "Searches for stuff with the current filter. Use it with --all for overall search");
+        SharedLogic.PrintHelp_SubText(">task list --story", "Shows only stories. Can be used with --allstatus");
+        SharedLogic.PrintHelp_SubText(">task list --collection", "Shows only collections. Can be used with --allstats");
+        SharedLogic.PrintHelp_SubText(">task list --task", "Shows only tasks. Can be used with --allstatus");
+        SharedLogic.PrintHelp_SubText(">task list --cat:<category>", "Shows only those category. Can be used with --allstatus");
+        SharedLogic.PrintHelp_SubText(">task list --search:<text>", "Searches for stuff with the current filter. Use it with --allstatus for overall search");
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
         SharedLogic.PrintHelp_SubText(">task list");
-        SharedLogic.PrintHelp_SubText(">task list --all", "Shows all the tasks");
+        SharedLogic.PrintHelp_SubText(">task list --allstatus", "Shows all the tasks");
         SharedLogic.PrintHelp_SubText(">task list --story");
         SharedLogic.PrintHelp_SubText(">task list --status:archieve", "Shows all the tasks archieved");
         SharedLogic.PrintHelp_SubText(">task list --status:open", "Shows only the open tasks ( this is also the default setting )");
         SharedLogic.PrintHelp_SubText(">task list --status:complete", "Shows only the tasks completed");
         SharedLogic.PrintHelp_SubText(">task list --status:discard", "Shows only the tasks discard");
         SharedLogic.PrintHelp_SubText(">task list --cat:office", "filter by category");
-        SharedLogic.PrintHelp_SubText(">task list --search:\"Buy shoes\" --all", "Search in all the statuses");
+        SharedLogic.PrintHelp_SubText(">task list --search:\"Buy shoes\" --allstatus", "Search in all the statuses");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -672,7 +672,7 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
         bool isCollectionOnly = optionalArguments_ReadOnly.Contains("--collection");
         bool isTaskOnly = optionalArguments_ReadOnly.Contains("--task");
 
-        bool isAll = optionalArguments_ReadOnly.Contains("--all");
+        bool isAll = optionalArguments_ReadOnly.Contains("--allstatus") || optionalArguments_ReadOnly.Contains("-a");
 
         #region CATEGORY
         string categoryFilter;

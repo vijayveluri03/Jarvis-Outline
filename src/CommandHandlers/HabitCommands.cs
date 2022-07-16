@@ -205,11 +205,14 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">habit list", "Lists all the habits");
+        SharedLogic.PrintHelp_SubText(">habit list", "Lists the habits which are in-progress");
+        SharedLogic.PrintHelp_SubText(">habit list --allstatus", "Lists all the habits");
+
         SharedLogic.PrintHelp_SubText(">habit list --cat:<category>", "Lists all the habits under this category");
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
         SharedLogic.PrintHelp_SubText(">habit list");
+        SharedLogic.PrintHelp_SubText(">habit list --allstatus", "Shows even the disabled habits!");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -245,6 +248,8 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
+        bool isAll = optionalArguments_ReadOnly.Contains("--allstatus") || optionalArguments_ReadOnly.Contains("-a");
+
         // output Heading 
         if (habits.Count > 0)
         {
@@ -258,6 +263,16 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
 
             foreach (var habit in habits)
             {
+                if(isAll)
+                {
+                    // No code
+                }
+                else
+                {
+                    if (habit.status != Habit.Status.In_Progress)
+                        continue;
+                }
+
                 if (categoryFilter != string.Empty && !habit.categories.Contains(categoryFilter))
                     continue;
 
