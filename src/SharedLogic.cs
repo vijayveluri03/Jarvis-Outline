@@ -50,12 +50,12 @@ namespace Jarvis
             return ed;
         }
 
-        public static void TryAddHabitEntry(JApplication application, int[] ids, Date date, HabitStatus status)
+        public static void TryAddHabitEntry(JModel application, int[] ids, Date date, HabitStatus status)
         {
             foreach( var id in ids )
                 TryAddHabitEntry(application, id, date, status);
         }
-        public static void TryAddHabitEntry(JApplication application, int id, Date date, HabitStatus status)
+        public static void TryAddHabitEntry(JModel application, int id, Date date, HabitStatus status)
         {
             Habit hb = application.habitManager.GetHabit_Editable(id);
 
@@ -107,7 +107,7 @@ namespace Jarvis
 
         #region HABITS AND CALENDAR SUPPORT 
 
-        public static void PrintMonth( JApplication application, Date month, Habit hb)
+        public static void PrintMonth( JModel application, Date month, Habit hb)
         {
             ConsoleWriter.PrintInColor(string.Format("Calendar for month : {0} {1}".ToUpper(), month.ToString("MMMM"), month.Year), application.DesignData.HighlightColorForText);
 
@@ -334,7 +334,7 @@ namespace Jarvis
             Utils.FileHandler.Remove(path + id);
         }
 
-        public void OpenNote(JApplication application, int id, string externalProgram, bool waitForTheProgramToEnd, bool feedback = true)
+        public void OpenNote(JModel application, int id, string externalProgram, bool waitForTheProgramToEnd, bool feedback = true)
         {
             if (feedback)
                 ConsoleWriter.Print("Opening Notes");

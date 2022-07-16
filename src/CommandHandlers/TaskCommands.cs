@@ -50,7 +50,7 @@ public class TaskHandler : CommandHandlerBaseWithUtility
         return true;
     }
 
-    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler, bool printErrors)
+    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JModel application, out List<string> argumentsForSpecializedHandler, bool printErrors)
     {
         string action = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
         CommandHandlerBase selectedHander = null;

@@ -25,12 +25,15 @@ public class CommandSelector : CommandHandlerBaseWithUtility
                 return new NotebookHandler().Init(application, new NotesUtility(JConstants.PATH_TO_JOURNAL_NOTE));
             case "game":
                 return new GameHandler().Init(application, null);
+            case "pomo":
+            case "pomodoro":
+                return new PomodoroHandler().Init(application, null);
             default:
                 break;
         }
         return null;
     }
-    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler, bool printErrors)
+    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JModel application, out List<string> argumentsForSpecializedHandler, bool printErrors)
     {
         // @todo printErrors is not being used 
         string command = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;

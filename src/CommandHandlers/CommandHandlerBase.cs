@@ -9,7 +9,7 @@ using Jarvis; //@todo
 
 public abstract class CommandHandlerBase
 {
-    public bool TryHandle(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
+    public bool TryHandle(List<string> arguments, List<string> optionalArguments, Jarvis.JModel application)
     {
         this.arguments_ReadOnly = arguments;
         this.optionalArguments_ReadOnly = optionalArguments;
@@ -29,7 +29,7 @@ public abstract class CommandHandlerBase
             return Run();
     }
 
-    protected virtual CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler, bool printErrors )
+    protected virtual CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JModel application, out List<string> argumentsForSpecializedHandler, bool printErrors )
     {
         argumentsForSpecializedHandler = null;
         return null;
@@ -47,7 +47,7 @@ public abstract class CommandHandlerBase
 
 public abstract class CommandHandlerBaseWithUtility : CommandHandlerBase
 {
-    public CommandHandlerBase Init ( JApplication application, NotesUtility notes )
+    public CommandHandlerBase Init ( JModel application, NotesUtility notes )
     {
         this.application = application;
         this.notes = notes;
@@ -55,5 +55,5 @@ public abstract class CommandHandlerBaseWithUtility : CommandHandlerBase
     }
 
     protected NotesUtility notes;
-    protected JApplication application; // @todo, unnecessary interlinking
+    protected JModel application; // @todo, unnecessary interlinking
 }
