@@ -60,7 +60,8 @@
     <Compile Include="src\CommonModel\JConstants.cs" />
     <Compile Include="src\CommonModel\JDesignData.cs" />
     <Compile Include="src\CommonModel\JUserData.cs" />
-    <Compile Include="src\CommonUtils\ConsoleWriter.cs" />
+    <Compile Include="src\View\Console\SoundPlayer.cs" />
+    <Compile Include="src\View\Console\ConsoleWriter.cs" />
     <Compile Include="src\CommonUtils\Date.cs" />
     <Compile Include="src\CommonUtils\Utils.cs" />
     <Compile Include="src\JApplication.cs" />

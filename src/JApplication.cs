@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
-
+using Jarvis;
 public class JApplication
 {
     public void Init(string[] args)
@@ -26,15 +26,17 @@ public class JApplication
 #endif
 
         ConsoleWriter.Initialize();
-        app = new Jarvis.JModel();
-        app.Initialize();
+        model = new Jarvis.JModel();
+        model.Initialize();
+
+        SetCWD();
+        SetDefaultColor();
 
         commandSelector = new CommandSelector();
-        commandSelector.Init(app, null);
+        commandSelector.Init(model, null);
 
         StartPomodoroObserverThread();
     }
-
     public void UpdateLoop()
     {
         string[] args = null;
@@ -54,7 +56,7 @@ public class JApplication
                     firstTime = false;
                 }
                 string cursorText = GetCursorText();
-                string userCommand = Utils.CLI.GetUserInputString(cursorText, app.DesignData.HighlightColorForText);
+                string userCommand = Utils.CLI.GetUserInputString(cursorText, model.DesignData.HighlightColorForText);
 
                 if (userCommand.IsEmpty())
                 {
@@ -67,7 +69,7 @@ public class JApplication
 
                 if (userCommand.ToLower() == "save")
                 {
-                    app.Save();
+                    model.Save();
                     continue;
                 }
 
@@ -101,11 +103,10 @@ public class JApplication
 
                 ConsoleWriter.EmptyLine();
 
-                commandSelector.TryHandle(arguments[0] /*Manditory arguments*/, arguments[1] /*Optional ones*/, app);
+                commandSelector.TryHandle(arguments[0] /*Manditory arguments*/, arguments[1] /*Optional ones*/, model);
             }
         } while (true);
     }
-
     public void DeInit()
     {
         KillObserverThread();
@@ -113,20 +114,20 @@ public class JApplication
 #if RELEASE_LOG
         ConsoleWriter.Print(">>> Exiting main thread!");
 #endif
-        app.Save();
+        model.Save();
 
         ConsoleWriter.EmptyLine();       // A bit of space at the end
         ConsoleWriter.DestroyAndCleanUp();
     }
 
-
+    // Threads
     private void StartPomodoroObserverThread()
     {
         shouldStopAllThreads = false;
         pomodoroObserver = new Thread(() =>
         {
             var pomodoroObserver = new PomodoroObserver();
-            pomodoroObserver.Run(app, ShouldDestroyAllThreads);
+            pomodoroObserver.Run(model, ShouldDestroyAllThreads);
         });
         pomodoroObserver.Start();
     }
@@ -136,9 +137,33 @@ public class JApplication
         pomodoroObserver.Join();
     }
 
+    // Setters 
+    private void SetDefaultColor()
+    {
+        ConsoleWriter.PushColor(model.DesignData.DefaultColorForText);
+    }
+    private void SetCWD()
+    {
+        // Set working directory, before we access any files. 
+        {
+#if DEBUG_TROUBLESHOOT
+                Console.WriteLine("Current working directory : " + Environment.CurrentDirectory + " CWD of the program: " + System.Reflection.Assembly.GetExecutingAssembly().Location);
+#endif
+
+            // program working directory
+            string programWD = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "/";
+            // Loading Design and user data.
+#if DEBUG
+            programWD = "c:/Users/vijay/mybin/";
+#endif
+            JConstants.WORKING_DIRECTORY = programWD;
+        }
+    }
+
+    ///  Getters
     private string GetCursorText()
     {
-        string lastCommand = app.UserData.GetLastCommand();
+        string lastCommand = model.UserData.GetLastCommand();
         string statusStr = GetStatusStr();
 
         if (lastCommand != null)
@@ -169,10 +194,10 @@ public class JApplication
     }
     private string GetStatusStr()
     {
-        if( app.UserData.IsPomodoroInProgress())
+        if( model.UserData.IsPomodoroInProgress())
         {
-            int totalMinsNeeded = app.UserData.GetPomodoroData().pomoCount * Jarvis.JConstants.POMODORO_TIME;
-            int minsRemaining = totalMinsNeeded - (int)(DateTime.Now - app.UserData.GetPomodoroStartTime()).TotalMinutes;
+            int totalMinsNeeded = model.UserData.GetPomodoroData().pomoCount * Jarvis.JConstants.POMODORO_TIME;
+            int minsRemaining = totalMinsNeeded - (int)(DateTime.Now - model.UserData.GetPomodoroStartTime()).TotalMinutes;
             return minsRemaining.ToString();
         }
         return "";
@@ -230,11 +255,13 @@ public class JApplication
         }
     }
 
+    // properties 
     bool ShouldDestroyAllThreads() { return shouldStopAllThreads; }
 
 
+    // Private members
     private bool shouldStopAllThreads = false;
-    Jarvis.JModel app = null;
+    Jarvis.JModel model = null;
     Thread pomodoroObserver = null;
     CommandSelector commandSelector = null;
 }

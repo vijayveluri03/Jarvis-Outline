@@ -17,22 +17,22 @@ public class CommandSelector : CommandHandlerBaseWithUtility
         switch (command)
         {
             case "task":
-                return new TaskHandler().Init(application, new NotesUtility(JConstants.PATH_TO_TASKS_NOTE));
+                return new TaskHandler().Init(model, new NotesUtility(JConstants.PATH_TO_TASKS_NOTE));
             case "habit":
-                return new HabitHandler().Init(application, new NotesUtility(JConstants.PATH_TO_HABITS_NOTE));
+                return new HabitHandler().Init(model, new NotesUtility(JConstants.PATH_TO_HABITS_NOTE));
             case "notebook":
-                return new NotebookHandler().Init(application, new NotesUtility(JConstants.PATH_TO_JOURNAL_NOTE));
+                return new NotebookHandler().Init(model, new NotesUtility(JConstants.PATH_TO_JOURNAL_NOTE));
             case "game":
-                return new GameHandler().Init(application, null);
+                return new GameHandler().Init(model, null);
             case "pomo":
             case "pomodoro":
-                return new PomodoroHandler().Init(application, null);
+                return new PomodoroHandler().Init(model, null);
             default:
                 break;
         }
         return null;
     }
-    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JModel application, out List<string> argumentsForSpecializedHandler, bool printErrors)
+    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JModel model, out List<string> argumentsForSpecializedHandler, bool printErrors)
     {
         // @todo printErrors is not being used 
         string command = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
@@ -42,13 +42,13 @@ public class CommandSelector : CommandHandlerBaseWithUtility
 
         if (selectedHander != null) // If the command is provided 
         {
-            application.UserData.SetCommandUsed(command);
+            model.UserData.SetCommandUsed(command);
             argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
             argumentsForSpecializedHandler.RemoveAt(0);     // stripping the command from the arguments before sending it along
         }
         else
         {   
-            selectedHander = GetCommandHandler(application.UserData.GetLastCommand());
+            selectedHander = GetCommandHandler(model.UserData.GetLastCommand());
             argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);  // since the command is not provided anyway, there is nothing to strip
         }
 

@@ -20,25 +20,7 @@ namespace Jarvis
 
         public void Initialize()
         {
-           // Set working directory, before we access any files. 
-            {
-#if DEBUG_TROUBLESHOOT
-                Console.WriteLine("Current working directory : " + Environment.CurrentDirectory + " CWD of the program: " + System.Reflection.Assembly.GetExecutingAssembly().Location);
-#endif
-
-                // program working directory
-                string programWD = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location) + "/";
-                // Loading Design and user data.
-#if DEBUG
-                programWD = "c:/Users/vijay/mybin/";
-#endif
-                JConstants.WORKING_DIRECTORY = programWD;
-            }
-
-
             designData = JDesignData.Load();
-
-            ConsoleWriter.PushColor(designData.DefaultColorForText);
 
             userData = JUserData.Load();
             taskManager = new TaskManager(designData.TaskDefaultStatus, designData.DoesTaskStatusExist);

@@ -8,18 +8,18 @@ using Jarvis; //@todo
 
 public abstract class CommandHandlerBase
 {
-    public bool TryHandle(List<string> arguments, List<string> optionalArguments, Jarvis.JModel application)
+    public bool TryHandle(List<string> arguments, List<string> optionalArguments, Jarvis.JModel model)
     {
         this.arguments_ReadOnly = arguments;
         this.optionalArguments_ReadOnly = optionalArguments;
         bool help = optionalArguments.Contains("--help");
 
         List<string> argumentsForSpecializedHandler;
-        CommandHandlerBase command = GetSpecializedCommandHandler(application, out argumentsForSpecializedHandler, !help );
+        CommandHandlerBase command = GetSpecializedCommandHandler(model, out argumentsForSpecializedHandler, !help );
         
         if (command != null)
         {
-            return command.TryHandle( argumentsForSpecializedHandler, optionalArguments, application );
+            return command.TryHandle( argumentsForSpecializedHandler, optionalArguments, model );
         }
 
         if (help)
@@ -28,7 +28,7 @@ public abstract class CommandHandlerBase
             return Run();
     }
 
-    protected virtual CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JModel application, out List<string> argumentsForSpecializedHandler, bool printErrors )
+    protected virtual CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JModel model, out List<string> argumentsForSpecializedHandler, bool printErrors )
     {
         argumentsForSpecializedHandler = null;
         return null;
@@ -46,13 +46,13 @@ public abstract class CommandHandlerBase
 
 public abstract class CommandHandlerBaseWithUtility : CommandHandlerBase
 {
-    public CommandHandlerBase Init ( JModel application, NotesUtility notes )
+    public CommandHandlerBase Init ( JModel model, NotesUtility notes )
     {
-        this.application = application;
+        this.model = model;
         this.notes = notes;
         return this;
     }
 
     protected NotesUtility notes;
-    protected JModel application; // @todo, unnecessary interlinking
+    protected JModel model; // @todo, unnecessary interlinking
 }
