@@ -216,11 +216,12 @@ public class JApplication
     }
     private string GetStatusStr()
     {
-        if( model.UserData.IsPomodoroInProgress())
+        if( model.UserData.IsPomodoroTaskInProgress())
         {
-            int totalMinsNeeded = model.UserData.GetPomodoroData().pomoCount * Jarvis.JConstants.POMODORO_TIME;
-            int minsRemaining = totalMinsNeeded - (int)(DateTime.Now - model.UserData.GetPomodoroStartTime()).TotalMinutes;
-            return minsRemaining.ToString();
+            int minsRemaining = 0;
+            string status = "";
+            SharedLogic.GetActivePomodoroTime(model, out minsRemaining, out status);
+            return status + "-" + minsRemaining.ToString();
         }
         return "";
     }

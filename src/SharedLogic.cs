@@ -105,6 +105,36 @@ namespace Jarvis
             ConsoleWriter.Print("You can also try 'show' command for more details. Cheers!");
         }
 
+        public static void GetActivePomodoroTime (JModel model, out int timeRemaining, out string status)
+        {
+            int totalMinsNeeded = 0;
+
+            var data = model.UserData.GetPomodoroData();
+            if (data.taskType == (int)PomodoroTaskType.WORK)
+            {
+                status = "WORK";
+                totalMinsNeeded = JConstants.POMODORO_WORK_TIME;
+            }
+            else if (data.taskType == (int)PomodoroTaskType.REST)
+            {
+                status = "REST";
+                totalMinsNeeded = JConstants.POMODORO_REST_TIME;
+            }
+            else if (data.taskType == (int)PomodoroTaskType.LONGREST)
+            {
+                status = "LONG REST";
+                totalMinsNeeded = JConstants.POMODORO_LONG_REST_TIME;
+            }
+            else
+            {
+                status = "INVALID";
+                Utils.Assert(false);
+            }
+
+            timeRemaining = totalMinsNeeded - (int)(DateTime.Now - model.UserData.GetPomodoroStartTime()).TotalMinutes;
+        }
+
+
         #region HABITS AND CALENDAR SUPPORT 
 
         public static void PrintMonth( JModel model, Date month, Habit hb)

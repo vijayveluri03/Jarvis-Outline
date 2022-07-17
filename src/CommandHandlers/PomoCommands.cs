@@ -6,6 +6,13 @@ using System.Threading;
 using Jarvis; //@todo 
 
 
+enum PomodoroTaskType
+{
+    WORK = 1, 
+    REST = 2,
+    LONGREST = 3
+};
+
 public class PomodoroHandler : CommandHandlerBaseWithUtility
 {
     public PomodoroHandler()
@@ -18,8 +25,15 @@ public class PomodoroHandler : CommandHandlerBaseWithUtility
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
         SharedLogic.PrintHelp_SubText(">pomo start", "To start a new pomodoro timer!");
-        SharedLogic.PrintHelp_SubText(">pomo report", "To list all the progress today");
+        SharedLogic.PrintHelp_SubText(">pomo rest", "To start a small break!");
+        SharedLogic.PrintHelp_SubText(">pomo longrest", "To start a long break!");
+        
+        SharedLogic.PrintHelp_SubText(">pomo status", "To list all the progress + status today");
+
         SharedLogic.PrintHelp_SubText(">pomo discard", "To discard the current timer!");
+
+        SharedLogic.PrintHelp_Heading("ADVANCED");
+        SharedLogic.PrintHelp_SubText(">pomo addoffline", "To add a new pomodoro timer directly!");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -40,11 +54,21 @@ public class PomodoroHandler : CommandHandlerBaseWithUtility
             case "start":
                 selectedHander = new PomodoroStartCommand();
                 break;
-            case "report":
-                selectedHander = new PomodoroReportCommand();
+            case "rest":
+                selectedHander = new PomodoroRestCommand();
+                break;
+            case "longrest":
+                selectedHander = new PomodoroLongRestCommand();
+                break;
+
+            case "status":
+                selectedHander = new PomodoroStatusCommand();
                 break;
             case "discard":
                 selectedHander = new PomodoroDiscardCommand();
+                break;
+            case "addoffline":
+                selectedHander = new PomodoroAddOfflineCommand();
                 break;
             default:
                 if(printErrors)
@@ -83,12 +107,11 @@ public class PomodoroStartCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">pomo start <category> <count>", "This will start a new timer. Count is number of pomodoros you want to work for. Each is for " + JConstants.POMODORO_TIME + " mins.");
-        //SharedLogic.PrintHelp_SubText(">pomo start <category> -1", "This will start a new timer. this will keep on going till you say 'pomodoro stop'");
-
+        SharedLogic.PrintHelp_SubText(">pomo start <category>", "This will start a new timer. Each is for " + JConstants.POMODORO_WORK_TIME + " mins.");
+        
         SharedLogic.PrintHelp_Heading("EXAMPLE");
-        SharedLogic.PrintHelp_SubText(">pomo start office 1", "This will start a new timer for office for " + JConstants.POMODORO_TIME  + " mins.");
-        SharedLogic.PrintHelp_SubText(">pomo start health 2", "This will start a new timer for health for " + JConstants.POMODORO_TIME *2 +" mins");
+        SharedLogic.PrintHelp_SubText(">pomo start office", "This will start a new timer for office for " + JConstants.POMODORO_WORK_TIME  + " mins.");
+        SharedLogic.PrintHelp_SubText(">pomo start health", "This will start a new timer for health for " + JConstants.POMODORO_WORK_TIME +" mins");
         //SharedLogic.PrintHelp_SubText(">pomo start health -1", "This will start a new count up timer. keeps on going up till you say 'stop'");
 
         SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", model.DesignData.categories.listOfCategories, "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
@@ -98,14 +121,14 @@ public class PomodoroStartCommand : CommandHandlerBaseWithUtility
     }
     protected override bool Run()
     {
-        if (arguments_ReadOnly.Count != 2 )
+        if (arguments_ReadOnly.Count != 1 )
         {
             ConsoleWriter.Print("Invalid arguments! \n");
             ShowHelp();
             return true;
         }
 
-        if (model.UserData.IsPomodoroInProgress())
+        if (model.UserData.IsPomodoroTaskInProgress())
         {
             ConsoleWriter.Print("Pomodoro already in progress!");
             return true;
@@ -120,21 +143,161 @@ public class PomodoroStartCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        int count = Utils.Conversions.Atoi( arguments_ReadOnly[1]);
+        //int count = Utils.Conversions.Atoi( arguments_ReadOnly[1]);
 
-        if (count < 0 || count >5)
+        //if (count < 0 || count >5)
+        //{
+        //    ConsoleWriter.Print("Count is invalid. It has to be between 1 to 5. that is " + JConstants.POMODORO_WORK_TIME + " mins to " + JConstants.POMODORO_WORK_TIME * 5 + " mins!");
+        //    return true;
+        //}
+
+        model.UserData.StorePomodoroStatus(DateTime.Now, category, (int)PomodoroTaskType.WORK);
+        SoundPlayer.PlayPomodoroWorkStarted();
+
+        ConsoleWriter.Print("New Pomodoro started");
+
+        return true;
+    }
+}
+
+public class PomodoroRestCommand : CommandHandlerBaseWithUtility
+{
+    public PomodoroRestCommand()
+    {
+
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">pomo rest", "This will start a short break.");
+
+        SharedLogic.PrintHelp_Heading("EXAMPLE");
+        SharedLogic.PrintHelp_SubText(">pomo rest", "Short break;");
+
+        SharedLogic.FlushHelpText();
+        return true;
+    }
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 0)
         {
-            ConsoleWriter.Print("Count is invalid. It has to be between 1 to 5. that is " + JConstants.POMODORO_TIME + " mins to " + JConstants.POMODORO_TIME * 5 + " mins!");
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
             return true;
         }
 
-        model.UserData.StartPomodoro(DateTime.Now, category, count);
-        ConsoleWriter.Print("New Pomodoro started");
-
-        if(count == -1 )
+        if (model.UserData.IsPomodoroTaskInProgress())
         {
-            ConsoleWriter.Print("This is a count up timer. Will continue till a 'stop' command is issued or for a max is 5 pomodoros though!");
+            ConsoleWriter.Print("Pomodoro in progress. Cant rest now!");
+            return true;
         }
+
+        model.UserData.StorePomodoroStatus(DateTime.Now, "", (int)PomodoroTaskType.REST);
+        SoundPlayer.PlayPomodoroRestStarted();
+
+        ConsoleWriter.Print("Break started");
+
+        return true;
+    }
+}
+
+public class PomodoroLongRestCommand : CommandHandlerBaseWithUtility
+{
+    public PomodoroLongRestCommand()
+    {
+
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">pomo longrest", "This will start a long break.");
+
+        SharedLogic.PrintHelp_Heading("EXAMPLE");
+        SharedLogic.PrintHelp_SubText(">pomo longrest", "Long break;");
+
+        SharedLogic.FlushHelpText();
+        return true;
+    }
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 0)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        if (model.UserData.IsPomodoroTaskInProgress())
+        {
+            ConsoleWriter.Print("Pomodoro in progress. Cant rest now!");
+            return true;
+        }
+
+        model.UserData.StorePomodoroStatus(DateTime.Now, "", (int)PomodoroTaskType.LONGREST);
+        SoundPlayer.PlayPomodoroRestStarted();
+
+        ConsoleWriter.Print("Long break started");
+
+        return true;
+    }
+}
+
+public class PomodoroAddOfflineCommand : CommandHandlerBaseWithUtility
+{
+    public PomodoroAddOfflineCommand()
+    {
+
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">pomo addoffline <category> <count>", "This will add a new timer directly (with out starting it). Count is number of pomodoros");
+        
+        SharedLogic.PrintHelp_Heading("EXAMPLE");
+        SharedLogic.PrintHelp_SubText(">pomo addoffline office 1", "This will add an offline timer for office for " + JConstants.POMODORO_WORK_TIME + " mins.");
+        SharedLogic.PrintHelp_SubText(">pomo addoffline health 2", "This will add an offline timer for health for " + JConstants.POMODORO_WORK_TIME * 2 + " mins");
+        //SharedLogic.PrintHelp_SubText(">pomo addoffline health -1", "This will start a new count up timer. keeps on going up till you say 'stop'");
+
+        SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", model.DesignData.categories.listOfCategories, "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
+        SharedLogic.FlushHelpText();
+
+        return true;
+    }
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 2)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        string category = arguments_ReadOnly[0];
+
+        if (!model.DesignData.DoesCategoryExist(category))
+        {
+            ConsoleWriter.Print("Invalid categories.\n");
+            SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", model.DesignData.categories.listOfCategories, "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
+            return true;
+        }
+
+        int count = Utils.Conversions.Atoi(arguments_ReadOnly[1]);
+
+        if (count < 0 || count > 5)
+        {
+            ConsoleWriter.Print("Count is invalid. It has to be between 1 to 5. that is " + JConstants.POMODORO_WORK_TIME + " mins to " + JConstants.POMODORO_WORK_TIME * 5 + " mins!");
+            return true;
+        }
+
+        model.pomoManager.CreatePomoForTodayIfNecessary();
+        model.pomoManager.GetPomo_EditableForToday().AddNewEntry(category, count);
+        ConsoleWriter.Print("Added " +count +" offline Pomodoro(s) under category : " + category);
 
         return true;
     }
@@ -169,13 +332,13 @@ public class PomodoroDiscardCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        if (!model.UserData.IsPomodoroInProgress())
+        if (!model.UserData.IsPomodoroTaskInProgress())
         {
             ConsoleWriter.Print("There is no Pomodoro in progress!");
             return true;
         }
 
-        model.UserData.StopPomodoro();
+        model.UserData.ResetPomodoroStatus();
 
         ConsoleWriter.Print("Progress discarded!");
 
@@ -183,9 +346,9 @@ public class PomodoroDiscardCommand : CommandHandlerBaseWithUtility
     }
 }
 
-public class PomodoroReportCommand : CommandHandlerBaseWithUtility
+public class PomodoroStatusCommand : CommandHandlerBaseWithUtility
 {
-    public PomodoroReportCommand()
+    public PomodoroStatusCommand()
     {
 
     }
@@ -194,10 +357,10 @@ public class PomodoroReportCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">pomo report", "This will show the progress for today");
+        SharedLogic.PrintHelp_SubText(">pomo status", "This will show the status for today");
 
         SharedLogic.PrintHelp_Heading("EXAMPLE");
-        SharedLogic.PrintHelp_SubText(">pomo report", "This will show the progress for today");
+        SharedLogic.PrintHelp_SubText(">pomo status", "This will show the status for today");
 
         SharedLogic.FlushHelpText();
 
@@ -211,6 +374,19 @@ public class PomodoroReportCommand : CommandHandlerBaseWithUtility
             ShowHelp();
             return true;
         }
+
+        if (model.UserData.IsPomodoroTaskInProgress())
+        {
+            int minsRemaining = 0;
+            string status = "";
+            SharedLogic.GetActivePomodoroTime(model, out minsRemaining, out status);
+
+            ConsoleWriter.Print("Pomodoro task is active! " + status + " for another " + minsRemaining + " mins!");
+        }
+        else
+            ConsoleWriter.Print("No pomodoro task is active!");
+
+        ConsoleWriter.EmptyLine();
 
         var pomoEntryForToday = model.pomoManager.GetPomo_ReadOnly(Date.Today);
 
@@ -234,25 +410,51 @@ public class PomodoroObserver
     {
         while( !stopObserving())
         {
-            if (model.UserData.IsPomodoroInProgress())
+            if (model.UserData.IsPomodoroTaskInProgress())
             {
-                int totalMinsNeeded = model.UserData.GetPomodoroData().pomoCount * JConstants.POMODORO_TIME;
+                int totalMinsNeeded = 0;
+
+                var data = model.UserData.GetPomodoroData();
+                if (data.taskType == (int)PomodoroTaskType.WORK)
+                    totalMinsNeeded = JConstants.POMODORO_WORK_TIME;
+                else if (data.taskType == (int)PomodoroTaskType.REST)
+                    totalMinsNeeded = JConstants.POMODORO_REST_TIME;
+                else if (data.taskType == (int)PomodoroTaskType.LONGREST)
+                    totalMinsNeeded = JConstants.POMODORO_LONG_REST_TIME;
+                else
+                    Utils.Assert(false);
 
                 //ConsoleWriter.Print("Total mins passed : " + (DateTime.Now - model.UserData.GetPomodoroStartTime()).TotalMinutes);
 
-                if ((DateTime.Now - model.UserData.GetPomodoroStartTime()).TotalMinutes >= totalMinsNeeded)
+                if ((DateTime.Now - data.startTime).TotalMinutes >= totalMinsNeeded)
                 {
                     model.pomoManager.CreatePomoForTodayIfNecessary();
                     var pomoEntryForToday = model.pomoManager.GetPomo_Editable(Date.Today);
-                    pomoEntryForToday.AddNewEntry(model.UserData.GetPomodoroData().category, model.UserData.GetPomodoroData().pomoCount);
 
-                    model.UserData.StopPomodoro();
+
+                    if (data.taskType == (int)PomodoroTaskType.WORK)
+                    {
+                        pomoEntryForToday.AddNewEntry(model.UserData.GetPomodoroData().category, 1);
 #if RELEASE_LOG
-                    ConsoleWriter.Print(">>> Pomodoro ended >>>");
+                        ConsoleWriter.Print(">>> Pomodoro work ended >>>");
 #endif
-                    Console.Beep();
-                    System.Media.SoundPlayer player= new System.Media.SoundPlayer( JConstants.PATH_TO_DATA + @"Notification.mp3");
-                    player.Play();
+                        SoundPlayer.PlayPomodoroWorkComplete();
+                        // play sound
+                    }
+                    else if (data.taskType == (int)PomodoroTaskType.REST)
+                    {
+                        SoundPlayer.PlayPomodoroRestComplete();
+                        // todo - play sound; do nothing;
+                    }
+                    else if (data.taskType == (int)PomodoroTaskType.LONGREST)
+                    {
+                        SoundPlayer.PlayPomodoroRestComplete();
+                        // todo - play sound; do nothing;
+                    }
+                    else
+                        Utils.Assert(false);
+
+                    model.UserData.ResetPomodoroStatus();
                 }
             }
 

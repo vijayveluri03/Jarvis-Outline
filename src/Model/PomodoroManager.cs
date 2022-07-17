@@ -143,6 +143,10 @@ namespace Jarvis
             return null;
         }
 
+        public Pomo GetPomo_EditableForToday()
+        {
+            return GetPomo_Editable(Date.Today);
+        }
         public Pomo GetPomo_Editable(Date date)
         {
             IsDirty = true;

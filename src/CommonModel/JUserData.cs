@@ -19,10 +19,10 @@ namespace Jarvis
         }
 
         [Serializable]
-        public class PomodoroProgress
+        public class PomodoroParams
         {
             [JsonProperty] public DateTime startTime = DateTime.MinValue;
-            [JsonProperty] public int pomoCount = 0;
+            [JsonProperty] public int taskType = 0; // this is a custom type which only pomodoro manager knows about
             [JsonProperty] public string category = "";
         }
 
@@ -30,7 +30,7 @@ namespace Jarvis
         [JsonProperty] public string userName = string.Empty;
         [JsonProperty] public DateTime lastLoginDate = DateTime.MinValue;
         [JsonProperty] public TaskProgress taskProgress = new TaskProgress();
-        [JsonProperty] public PomodoroProgress pomodoroProgress = new PomodoroProgress();
+        [JsonProperty] public PomodoroParams pomodoroParams = new PomodoroParams();
         [JsonIgnore] public string lastCommandUsed = "";
 
         public static JUserData Load()
@@ -72,41 +72,38 @@ namespace Jarvis
         }
 
         #region POMODORO
-        public void StartPomodoro(DateTime time, string category, int count)
+        public void StorePomodoroStatus(DateTime time, string category, int type)
         {
             lock (lockObj)
             {
-                pomodoroProgress.startTime = time;
-                pomodoroProgress.pomoCount = count;
-                pomodoroProgress.category = category;
+                pomodoroParams.startTime = time;
+                pomodoroParams.taskType = type;
+                pomodoroParams.category = category;
                 IsDirty = true;
             }
         }
-        public void StopPomodoro()
+        public void ResetPomodoroStatus()
         {
             lock (lockObj)
             {
-                pomodoroProgress.startTime = DateTime.MinValue;
-                pomodoroProgress.pomoCount = 0;
-                pomodoroProgress.category = "";
+                pomodoroParams.startTime = DateTime.MinValue;
+                pomodoroParams.taskType = -1;
+                pomodoroParams.category = "";
                 IsDirty = true;
             }
         }
-        public bool IsPomodoroInProgress()
+        public bool IsPomodoroTaskInProgress()
         {
-            return !pomodoroProgress.startTime.IsThisMinDate();
+            return !pomodoroParams.startTime.IsThisMinDate();
         }
-        public bool IsPomodoroCountUpTimer()
-        {
-            return IsPomodoroInProgress() && pomodoroProgress.pomoCount == -1;
-        }
+        
         public DateTime GetPomodoroStartTime()
         {
-            return pomodoroProgress.startTime;
+            return pomodoroParams.startTime;
         }
-        public PomodoroProgress GetPomodoroData()
+        public PomodoroParams GetPomodoroData()
         {
-            return pomodoroProgress;
+            return pomodoroParams;
         }
 
         private static readonly Object lockObj = new Object();
