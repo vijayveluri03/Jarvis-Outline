@@ -26,11 +26,14 @@ public class JApplication
 #endif
 
         ConsoleWriter.Initialize();
-        model = new Jarvis.JModel();
-        model.Initialize();
-
         SetCWD();
-        SetDefaultColor();
+
+        model = new Jarvis.JModel();
+        model.InitializeCore();
+
+        SetDefaultColorForConsole();
+
+        model.InitializeRest();
 
         commandSelector = new CommandSelector();
         commandSelector.Init(model, null);
@@ -65,7 +68,12 @@ public class JApplication
 
                 //@todo - Move these somewhere else
                 if (userCommand.ToLower() == "exit")
-                    break;
+                {
+                    if (PopState())
+                        continue;   // State popped. 
+                    else
+                        break;// nothing to pop. So Exit the program
+                }
 
                 if (userCommand.ToLower() == "save")
                 {
@@ -138,7 +146,7 @@ public class JApplication
     }
 
     // Setters 
-    private void SetDefaultColor()
+    private void SetDefaultColorForConsole()
     {
         ConsoleWriter.PushColor(model.DesignData.DefaultColorForText);
     }
@@ -158,6 +166,18 @@ public class JApplication
 #endif
             JConstants.WORKING_DIRECTORY = programWD;
         }
+    }
+
+    // This is created to be flexibile in the future, but as of now, it just handles LastCommand
+    private bool PopState()
+    {
+        if (!model.UserData.GetLastCommand().IsEmpty())
+        {
+            model.UserData.SetCommandUsed(string.Empty);
+            return true;
+        }
+        
+        return false;
     }
 
     ///  Getters

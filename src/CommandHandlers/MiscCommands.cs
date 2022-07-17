@@ -26,6 +26,12 @@ public class GameHandler : CommandHandlerBaseWithUtility
         string action = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
         CommandHandlerBase selectedHander = null;
 
+        if(AreArgumentsEmpty())
+        {
+            argumentsForSpecializedHandler = null;
+            return null;
+        }
+
         switch (action)
         {
             case "snake":
@@ -53,15 +59,6 @@ public class GameHandler : CommandHandlerBaseWithUtility
 
     protected override bool Run()
     {
-
-        if (arguments_ReadOnly.Count < 1)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ShowHelp();
-            return true;
-        }
-        
-        Utils.Assert(false, "Shouldnt be here");
         return true;
     }
 }

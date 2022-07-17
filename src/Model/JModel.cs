@@ -16,12 +16,14 @@ namespace Jarvis
         public HabitManager habitManager { get; private set; }
         public NotebookManager notebookManager { get; private set; }
         public TaskTimeManagement logManager { get; private set; }
-        public PomoManager pomoManager { get; private set; }    
+        public PomoManager pomoManager { get; private set; }
 
-        public void Initialize()
+        public void InitializeCore()
         {
             designData = JDesignData.Load();
-
+        }
+        public void InitializeRest()
+        {
             userData = JUserData.Load();
             taskManager = new TaskManager(designData.TaskDefaultStatus, designData.DoesTaskStatusExist);
             habitManager = new HabitManager();

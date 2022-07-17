@@ -40,6 +40,8 @@ public abstract class CommandHandlerBase
     // Returns true if a request is handled. else move on to the next element in the chain of responsibility
     protected abstract bool Run();
 
+    protected bool AreArgumentsEmpty() {  return ( arguments_ReadOnly == null || arguments_ReadOnly.Count == 0 ) && (optionalArguments_ReadOnly == null || optionalArguments_ReadOnly.Count == 0); }
+
     protected List<string> arguments_ReadOnly;
     protected List<string> optionalArguments_ReadOnly;
 }

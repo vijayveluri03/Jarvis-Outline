@@ -51,6 +51,12 @@ public class HabitHandler : CommandHandlerBaseWithUtility
         string action = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
         CommandHandlerBase selectedHander = null;
 
+        if (AreArgumentsEmpty())
+        {
+            argumentsForSpecializedHandler = null;
+            return null;
+        }
+
         switch (action)
         {
             case "add":
@@ -130,8 +136,6 @@ public class HabitHandler : CommandHandlerBaseWithUtility
 
     protected override bool Run()
     {
-        ConsoleWriter.Print("Invalid arguments! \n");
-        ShowHelp();
         return true;
     }
 }

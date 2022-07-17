@@ -28,6 +28,7 @@ public class CommandSelector : CommandHandlerBaseWithUtility
             case "pomodoro":
                 return new PomodoroHandler().Init(model, null);
             default:
+
                 break;
         }
         return null;
@@ -35,21 +36,33 @@ public class CommandSelector : CommandHandlerBaseWithUtility
     protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JModel model, out List<string> argumentsForSpecializedHandler, bool printErrors)
     {
         // @todo printErrors is not being used 
-        string command = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
-        CommandHandlerBase selectedHander = GetCommandHandler(command);
+        string action = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
         //bool help = optionalArguments.Contains("--help");
 
+        if (AreArgumentsEmpty())
+        {
+            argumentsForSpecializedHandler = null;
+            return null;
+        }
+
+        CommandHandlerBase selectedHander = GetCommandHandler(action);
 
         if (selectedHander != null) // If the command is provided 
         {
-            model.UserData.SetCommandUsed(command);
+            model.UserData.SetCommandUsed(action);
             argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);
             argumentsForSpecializedHandler.RemoveAt(0);     // stripping the command from the arguments before sending it along
         }
-        else
+        else if (!model.UserData.GetLastCommand().IsEmpty())
         {   
             selectedHander = GetCommandHandler(model.UserData.GetLastCommand());
             argumentsForSpecializedHandler = new List<string>(arguments_ReadOnly);  // since the command is not provided anyway, there is nothing to strip
+        }
+        else
+        {
+            ConsoleWriter.Print("Invalid Command. Try '--help'!");
+            selectedHander = null;
+            argumentsForSpecializedHandler = null;
         }
 
         return selectedHander;
@@ -77,7 +90,6 @@ public class CommandSelector : CommandHandlerBaseWithUtility
 
     protected override bool Run()
     {
-        ShowHelp();
         return false;
     }
 }
