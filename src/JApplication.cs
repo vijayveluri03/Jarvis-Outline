@@ -48,7 +48,8 @@ public class JApplication
         do
         {
             {
-                ConsoleWriter.EmptyLine();
+                if(!model.DesignData.GetBoolProperty("view.compact"))
+                    ConsoleWriter.EmptyLine();
 
                 if (firstTime)
                 {
@@ -109,9 +110,10 @@ public class JApplication
                 List<string>[] arguments = LocalUtils.SplitCommandIntoManditoryAndOptional(command);
                 Utils.Assert(arguments.Length == 2);   // 0 being manditory and 1 being optional
 
-                ConsoleWriter.EmptyLine();
+                if (!model.DesignData.GetBoolProperty("view.compact"))
+                    ConsoleWriter.EmptyLine();
 
-                commandSelector.TryHandle(arguments[0] /*Manditory arguments*/, arguments[1] /*Optional ones*/, model);
+                    commandSelector.TryHandle(arguments[0] /*Manditory arguments*/, arguments[1] /*Optional ones*/, model);
             }
         } while (true);
     }

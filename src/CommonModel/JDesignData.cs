@@ -100,6 +100,10 @@ namespace Jarvis
         {
             return Utils.Conversions.Atoi(GetProperty(key));
         }
+        public bool GetBoolProperty(string key)
+        {
+            return Utils.Conversions.Atob(GetProperty(key));
+        }
 
         #endregion // PROPERTIES
 

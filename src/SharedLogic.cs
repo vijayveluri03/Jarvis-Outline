@@ -229,7 +229,6 @@ namespace Jarvis
 
         public static void PrintHelp_Heading(string statement, string comments = "", bool addToCache = true, int reservedSpaceForStatement = DEFAULT_RESERVED_SPACE_FOR_HELP, int fallbackReserveSpaceIfOverflowing = FALLBACK_RESERVED_SPACE_FOR_HELP)
         {
-            PrintHelp(""); //new line
             PrintHelp( statement.ToUpper(), comments, addToCache, reservedSpaceForStatement, fallbackReserveSpaceIfOverflowing);
         }
 
