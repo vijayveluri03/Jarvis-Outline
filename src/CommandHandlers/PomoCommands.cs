@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CommandLine;
 using System.Threading;
 using Jarvis; //@todo 
 
@@ -18,9 +17,9 @@ public class PomodoroHandler : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">Pomodoro start", "To start a new pomodoro timer!");
-        SharedLogic.PrintHelp_SubText(">Pomodoro report", "To list all the progress today");
-        SharedLogic.PrintHelp_SubText(">Pomodoro discard", "To discard the current timer!");
+        SharedLogic.PrintHelp_SubText(">pomo start", "To start a new pomodoro timer!");
+        SharedLogic.PrintHelp_SubText(">pomo report", "To list all the progress today");
+        SharedLogic.PrintHelp_SubText(">pomo discard", "To discard the current timer!");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -80,13 +79,13 @@ public class PomodoroStartCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">Pomodoro start <category> <count>", "This will start a new timer. Count is number of pomodoros you want to work for. Each is for " + JConstants.POMODORO_TIME + " mins.");
-        //SharedLogic.PrintHelp_SubText(">Pomodoro start <category> -1", "This will start a new timer. this will keep on going till you say 'pomodoro stop'");
+        SharedLogic.PrintHelp_SubText(">pomo start <category> <count>", "This will start a new timer. Count is number of pomodoros you want to work for. Each is for " + JConstants.POMODORO_TIME + " mins.");
+        //SharedLogic.PrintHelp_SubText(">pomo start <category> -1", "This will start a new timer. this will keep on going till you say 'pomodoro stop'");
 
         SharedLogic.PrintHelp_Heading("EXAMPLE");
-        SharedLogic.PrintHelp_SubText(">Pomodoro start office 1", "This will start a new timer for office for " + JConstants.POMODORO_TIME  + " mins.");
-        SharedLogic.PrintHelp_SubText(">Pomodoro start health 2", "This will start a new timer for health for " + JConstants.POMODORO_TIME *2 +" mins");
-        //SharedLogic.PrintHelp_SubText(">Pomodoro start health -1", "This will start a new count up timer. keeps on going up till you say 'stop'");
+        SharedLogic.PrintHelp_SubText(">pomo start office 1", "This will start a new timer for office for " + JConstants.POMODORO_TIME  + " mins.");
+        SharedLogic.PrintHelp_SubText(">pomo start health 2", "This will start a new timer for health for " + JConstants.POMODORO_TIME *2 +" mins");
+        //SharedLogic.PrintHelp_SubText(">pomo start health -1", "This will start a new count up timer. keeps on going up till you say 'stop'");
 
         SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", application.DesignData.categories.listOfCategories, "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
         SharedLogic.FlushHelpText();
@@ -148,10 +147,10 @@ public class PomodoroDiscardCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">Pomodoro discard", "This will discard entire progress");
+        SharedLogic.PrintHelp_SubText(">pomo discard", "This will discard entire progress");
         
         SharedLogic.PrintHelp_Heading("EXAMPLE");
-        SharedLogic.PrintHelp_SubText(">Pomodoro discard", "This will discard entire progress");
+        SharedLogic.PrintHelp_SubText(">pomo discard", "This will discard entire progress");
 
         SharedLogic.FlushHelpText();
 
@@ -191,10 +190,10 @@ public class PomodoroReportCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">Pomodoro report", "This will show the progress for today");
+        SharedLogic.PrintHelp_SubText(">pomo report", "This will show the progress for today");
 
         SharedLogic.PrintHelp_Heading("EXAMPLE");
-        SharedLogic.PrintHelp_SubText(">Pomodoro report", "This will show the progress for today");
+        SharedLogic.PrintHelp_SubText(">pomo report", "This will show the progress for today");
 
         SharedLogic.FlushHelpText();
 
@@ -248,6 +247,8 @@ public class PomodoroObserver
                     ConsoleWriter.Print(">>> Pomodoro ended >>>");
 #endif
                     Console.Beep();
+                    //System.Media. player = new System.Media.SoundPlayer(@"c:\mywavfile.wav");
+                    //player.Play();
                 }
             }
 
