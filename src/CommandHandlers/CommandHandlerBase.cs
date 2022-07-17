@@ -3,24 +3,23 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using CommandLine;
 using Jarvis; //@todo 
 
 
 public abstract class CommandHandlerBase
 {
-    public bool TryHandle(List<string> arguments, List<string> optionalArguments, Jarvis.JApplication application)
+    public bool TryHandle(List<string> arguments, List<string> optionalArguments, Jarvis.JModel model)
     {
         this.arguments_ReadOnly = arguments;
         this.optionalArguments_ReadOnly = optionalArguments;
         bool help = optionalArguments.Contains("--help");
 
         List<string> argumentsForSpecializedHandler;
-        CommandHandlerBase command = GetSpecializedCommandHandler(application, out argumentsForSpecializedHandler, !help );
+        CommandHandlerBase command = GetSpecializedCommandHandler(model, out argumentsForSpecializedHandler, !help );
         
         if (command != null)
         {
-            return command.TryHandle( argumentsForSpecializedHandler, optionalArguments, application );
+            return command.TryHandle( argumentsForSpecializedHandler, optionalArguments, model );
         }
 
         if (help)
@@ -29,7 +28,7 @@ public abstract class CommandHandlerBase
             return Run();
     }
 
-    protected virtual CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler, bool printErrors )
+    protected virtual CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JModel model, out List<string> argumentsForSpecializedHandler, bool printErrors )
     {
         argumentsForSpecializedHandler = null;
         return null;
@@ -41,19 +40,21 @@ public abstract class CommandHandlerBase
     // Returns true if a request is handled. else move on to the next element in the chain of responsibility
     protected abstract bool Run();
 
+    protected bool AreArgumentsEmpty() {  return ( arguments_ReadOnly == null || arguments_ReadOnly.Count == 0 ) && (optionalArguments_ReadOnly == null || optionalArguments_ReadOnly.Count == 0); }
+
     protected List<string> arguments_ReadOnly;
     protected List<string> optionalArguments_ReadOnly;
 }
 
 public abstract class CommandHandlerBaseWithUtility : CommandHandlerBase
 {
-    public CommandHandlerBase Init ( JApplication application, NotesUtility notes )
+    public CommandHandlerBase Init ( JModel model, NotesUtility notes )
     {
-        this.application = application;
+        this.model = model;
         this.notes = notes;
         return this;
     }
 
     protected NotesUtility notes;
-    protected JApplication application; // @todo, unnecessary interlinking
+    protected JModel model; // @todo, unnecessary interlinking
 }

@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CommandLine;
 using Jarvis; //@todo 
 
 
@@ -37,10 +36,16 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
         return true;
     }
 
-    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler, bool printErrors)
+    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JModel model, out List<string> argumentsForSpecializedHandler, bool printErrors)
     {
         string action = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
         CommandHandlerBase selectedHander = null;
+
+        if (AreArgumentsEmpty())
+        {
+            argumentsForSpecializedHandler = null;
+            return null;
+        }
 
         switch (action)
         {
@@ -75,7 +80,7 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
             argumentsForSpecializedHandler.RemoveAt(0);
 
             Utils.Assert(selectedHander is CommandHandlerBaseWithUtility);
-            (selectedHander as CommandHandlerBaseWithUtility).Init(application, notes);
+            (selectedHander as CommandHandlerBaseWithUtility).Init(model, notes);
         }
         else
             argumentsForSpecializedHandler = null;
@@ -85,8 +90,6 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
 
     protected override bool Run()
     {
-        ConsoleWriter.Print("Invalid arguments! \n");
-        ShowHelp();
         return true;
     }
 }
@@ -110,7 +113,7 @@ public class NotebookAddCommand : CommandHandlerBaseWithUtility
         SharedLogic.PrintHelp_SubText(">notebook add \"Stuff that i did today!\"", "This will create a notebook entry." );
         SharedLogic.PrintHelp_SubText(">notebook add \"dailylog\" \"Stuff that i did today!\"", "This will create a notebook entry with a tag DailyLog. ");
 
-        SharedLogic.PrintHelp_WithHeadingAndSubText("TAGS", application.DesignData.notebook.listOfTags, "you can use these tags below, or create more in data/Design.json");
+        SharedLogic.PrintHelp_WithHeadingAndSubText("TAGS", model.DesignData.notebook.listOfTags, "you can use these tags below, or create more in data/Design.json");
       
         SharedLogic.FlushHelpText();
 
@@ -130,7 +133,7 @@ public class NotebookAddCommand : CommandHandlerBaseWithUtility
         if (arguments_ReadOnly.Count == 1)
         {
             title = arguments_ReadOnly[0];
-            tags = new string[] { application.DesignData.NotebookDefaultTag };
+            tags = new string[] { model.DesignData.NotebookDefaultTag };
         }
         else if (arguments_ReadOnly.Count == 2)
         {
@@ -140,20 +143,20 @@ public class NotebookAddCommand : CommandHandlerBaseWithUtility
         else
             Utils.Assert(false);
 
-        if (!application.DesignData.DoesNotebookTagExist(tags))
+        if (!model.DesignData.DoesNotebookTagExist(tags))
         {
             ConsoleWriter.Print("Invalid Tag");
-            SharedLogic.PrintHelp_WithHeadingAndSubText("TAGS", application.DesignData.notebook.listOfTags, "you can use these tags below, or create more in data/Design.json");
+            SharedLogic.PrintHelp_WithHeadingAndSubText("TAGS", model.DesignData.notebook.listOfTags, "you can use these tags below, or create more in data/Design.json");
             return true;
         }
 
-        var entry = SharedLogic.CreateNewNotebookEntry(application.notebookManager, tags, title);
-        application.notebookManager.AddNotebook(entry);
+        var entry = SharedLogic.CreateNewNotebookEntry(model.notebookManager, tags, title);
+        model.notebookManager.AddNotebook(entry);
 
         ConsoleWriter.Print("New Notebook entry added with id : {0}. You can also edit the notes using 'notebook note'", entry.id);
 
         notes.CreateNoteIfUnavailable(entry.id);
-        notes.OpenNote(application, entry.id, null, true, true);
+        notes.OpenNote(model, entry.id, null, true, true);
 
         return true;
     }
@@ -187,7 +190,7 @@ public class NotebookListCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        List<NotebookEntry> notebooks = new List<NotebookEntry>(application.notebookManager.Data.entries);
+        List<NotebookEntry> notebooks = new List<NotebookEntry>(model.notebookManager.Data.entries);
 
         int lineCount = 0;
         int categoryArea = 30;
@@ -198,7 +201,7 @@ public class NotebookListCommand : CommandHandlerBaseWithUtility
         if (notebooks.Count > 0)
         {
             ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15}",
-                application.DesignData.HighlightColorForText,
+                model.DesignData.HighlightColorForText,
                 "ID", "TAGS", "TITLE", "LOGGED ON"
                 );
 
@@ -257,7 +260,7 @@ public class NotebookShowCommand : CommandHandlerBaseWithUtility
 
         int categoryArea = 45;
 
-        NotebookEntry notebook = application.notebookManager.GetNotebook_ReadOnly(id);
+        NotebookEntry notebook = model.notebookManager.GetNotebook_ReadOnly(id);
 
         if (notebook == null)
         {
@@ -269,7 +272,7 @@ public class NotebookShowCommand : CommandHandlerBaseWithUtility
         {
             // Heading
             ConsoleWriter.PrintInColor("{0, -4} {1, -" + categoryArea + "} {2}",
-                application.DesignData.HighlightColorForText,
+                model.DesignData.HighlightColorForText,
                 "ID", "TAGS", "TITLE"
                 );
 
@@ -321,7 +324,7 @@ public class NotebookEditTitleCommand : CommandHandlerBaseWithUtility
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
         string title = arguments_ReadOnly[1];
 
-        NotebookEntry hb = application.notebookManager.GetNotebook_ReadOnly(id);
+        NotebookEntry hb = model.notebookManager.GetNotebook_ReadOnly(id);
 
         if (hb == null)
         {
@@ -329,7 +332,7 @@ public class NotebookEditTitleCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        application.notebookManager.GetNotebook_Editable(id).title = title;
+        model.notebookManager.GetNotebook_Editable(id).title = title;
         ConsoleWriter.Print("Notebook with id : {0} renamed to - {1}", id, title);
 
         return true;
@@ -368,13 +371,13 @@ public class NotebookCatNotesCommand : CommandHandlerBaseWithUtility
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
         
-        if (application.notebookManager.DoesNotebookExist(id))
+        if (model.notebookManager.DoesNotebookExist(id))
         {
             if( !notes.DoesNoteExist(id))
                 ConsoleWriter.Print("Notes not found for the notebook with id : {0}", id);
             else 
             {
-                ConsoleWriter.PrintInColor("NOTES :", application.DesignData.HighlightColorForText);
+                ConsoleWriter.PrintInColor("NOTES :", model.DesignData.HighlightColorForText);
                 ConsoleWriter.PrintText(notes.GetNoteContent(id));
             }
         }
@@ -457,7 +460,7 @@ public class NotebookEditNoteCommand : CommandHandlerBaseWithUtility
             appendMessage = "Log on " +  DateTime.Now.ToShortDateString() + " " + appendLogMessage;
         }
 
-        if (application.notebookManager.DoesNotebookExist(id))
+        if (model.notebookManager.DoesNotebookExist(id))
         {
             notes.CreateNoteIfUnavailable(id);
 
@@ -468,7 +471,7 @@ public class NotebookEditNoteCommand : CommandHandlerBaseWithUtility
             }
             else
             {
-                notes.OpenNote(application, id, externalProgram, waitForTheProgramToEnd, true);
+                notes.OpenNote(model, id, externalProgram, waitForTheProgramToEnd, true);
             }
         }
         else

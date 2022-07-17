@@ -61,9 +61,8 @@ public static class ConsoleWriter
     }
     public static void Print(string message, params object[] parms)
     {
-        ConsoleColor foregroundColor;
-        if (foregroundTextColorStack.TryPeek(out foregroundColor))
-            Console.ForegroundColor = foregroundColor;
+        if (foregroundTextColorStack.Count > 0)
+            Console.ForegroundColor = foregroundTextColorStack.Peek();
 
         message = GetIndentationPrefix() + message;
         Console.Write(message + "\n", parms);
@@ -71,9 +70,8 @@ public static class ConsoleWriter
     }
     public static void PrintText(string message)
     {
-        ConsoleColor foregroundColor;
-        if (foregroundTextColorStack.TryPeek(out foregroundColor))
-            Console.ForegroundColor = foregroundColor;
+        if (foregroundTextColorStack.Count > 0)
+            Console.ForegroundColor = foregroundTextColorStack.Peek();
 
         message = GetIndentationPrefix() + message;
         Console.Write(message + "\n");

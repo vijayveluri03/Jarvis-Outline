@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CommandLine;
 using Jarvis; //@todo 
 
 
@@ -22,10 +21,16 @@ public class GameHandler : CommandHandlerBaseWithUtility
         return true;
     }
 
-    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler, bool printErrors)
+    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JModel model, out List<string> argumentsForSpecializedHandler, bool printErrors)
     {
         string action = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
         CommandHandlerBase selectedHander = null;
+
+        if(AreArgumentsEmpty())
+        {
+            argumentsForSpecializedHandler = null;
+            return null;
+        }
 
         switch (action)
         {
@@ -44,7 +49,7 @@ public class GameHandler : CommandHandlerBaseWithUtility
             argumentsForSpecializedHandler.RemoveAt(0);
 
             Utils.Assert(selectedHander is CommandHandlerBaseWithUtility);
-            (selectedHander as CommandHandlerBaseWithUtility).Init(application, notes);
+            (selectedHander as CommandHandlerBaseWithUtility).Init(model, notes);
         }
         else 
             argumentsForSpecializedHandler = null;
@@ -54,15 +59,6 @@ public class GameHandler : CommandHandlerBaseWithUtility
 
     protected override bool Run()
     {
-
-        if (arguments_ReadOnly.Count < 1)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ShowHelp();
-            return true;
-        }
-        
-        Utils.Assert(false, "Shouldnt be here");
         return true;
     }
 }

@@ -324,6 +324,14 @@ public static class Utils
             return fallback;
         }
 
+        public static bool Atob(string txt, bool fallback = false)
+        {
+            bool b = fallback;
+            if (bool.TryParse(txt, out b))
+                return b;
+            return fallback;
+        }
+
         public static float Atof(string txt, float fallback = -1)
         {
             float num = fallback;

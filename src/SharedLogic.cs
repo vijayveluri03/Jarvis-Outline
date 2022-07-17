@@ -50,14 +50,14 @@ namespace Jarvis
             return ed;
         }
 
-        public static void TryAddHabitEntry(JApplication application, int[] ids, Date date, HabitStatus status)
+        public static void TryAddHabitEntry(JModel model, int[] ids, Date date, HabitStatus status)
         {
             foreach( var id in ids )
-                TryAddHabitEntry(application, id, date, status);
+                TryAddHabitEntry(model, id, date, status);
         }
-        public static void TryAddHabitEntry(JApplication application, int id, Date date, HabitStatus status)
+        public static void TryAddHabitEntry(JModel model, int id, Date date, HabitStatus status)
         {
-            Habit hb = application.habitManager.GetHabit_Editable(id);
+            Habit hb = model.habitManager.GetHabit_Editable(id);
 
             if (hb == null)
             {
@@ -98,21 +98,51 @@ namespace Jarvis
 
             {
                 ConsoleWriter.EmptyLine();
-                SharedLogic.PrintMonth(application, dateForEntry, hb);
+                SharedLogic.PrintMonth(model, dateForEntry, hb);
                 ConsoleWriter.EmptyLine();
             }
 
             ConsoleWriter.Print("You can also try 'show' command for more details. Cheers!");
         }
 
+        public static void GetActivePomodoroTime (JModel model, out int timeRemaining, out string status)
+        {
+            int totalMinsNeeded = 0;
+
+            var data = model.UserData.GetPomodoroData();
+            if (data.taskType == (int)PomodoroTaskType.WORK)
+            {
+                status = "WORK";
+                totalMinsNeeded = JConstants.POMODORO_WORK_TIME;
+            }
+            else if (data.taskType == (int)PomodoroTaskType.REST)
+            {
+                status = "REST";
+                totalMinsNeeded = JConstants.POMODORO_REST_TIME;
+            }
+            else if (data.taskType == (int)PomodoroTaskType.LONGREST)
+            {
+                status = "LONG REST";
+                totalMinsNeeded = JConstants.POMODORO_LONG_REST_TIME;
+            }
+            else
+            {
+                status = "INVALID";
+                Utils.Assert(false);
+            }
+
+            timeRemaining = totalMinsNeeded - (int)(DateTime.Now - model.UserData.GetPomodoroStartTime()).TotalMinutes;
+        }
+
+
         #region HABITS AND CALENDAR SUPPORT 
 
-        public static void PrintMonth( JApplication application, Date month, Habit hb)
+        public static void PrintMonth( JModel model, Date month, Habit hb)
         {
-            ConsoleWriter.PrintInColor(string.Format("Calendar for month : {0} {1}".ToUpper(), month.ToString("MMMM"), month.Year), application.DesignData.HighlightColorForText);
+            ConsoleWriter.PrintInColor(string.Format("Calendar for month : {0} {1}".ToUpper(), month.ToString("MMMM"), month.Year), model.DesignData.HighlightColorForText);
 
             ConsoleWriter.PushIndent();
-            ConsoleWriter.PrintInColor(string.Format("{0} {1} {2} {3} {4} {5} {6}", "M", "T", "W", "T", "F", "S", "S"), application.DesignData.HighlightColorForText_2);
+            ConsoleWriter.PrintInColor(string.Format("{0} {1} {2} {3} {4} {5} {6}", "M", "T", "W", "T", "F", "S", "S"), model.DesignData.HighlightColorForText_2);
 
             Date currentDate = new Date(month.Year, month.Month, 1);
             int emptyBlocksAtStart = GetNumberOfEmptySpacesAtTheStartOfTheMonth(currentDate);
@@ -135,12 +165,12 @@ namespace Jarvis
                 if (currentDate >= Date.Today)
                 {
                     text = "-";
-                    color = application.DesignData.DefaultColorForText;
+                    color = model.DesignData.DefaultColorForText;
                 }
                 else if (currentDate < hb._startDate)// @todo, using private member directly
                 {
                     text = "-";
-                    color = application.DesignData.DefaultColorForText;
+                    color = model.DesignData.DefaultColorForText;
                 }
                 else if (ticked)
                 {
@@ -150,7 +180,7 @@ namespace Jarvis
                 else if(isIgnored)
                 {
                     text = "I";
-                    color = application.DesignData.DefaultColorForText;
+                    color = model.DesignData.DefaultColorForText;
                 }
                 else
                 {
@@ -229,7 +259,6 @@ namespace Jarvis
 
         public static void PrintHelp_Heading(string statement, string comments = "", bool addToCache = true, int reservedSpaceForStatement = DEFAULT_RESERVED_SPACE_FOR_HELP, int fallbackReserveSpaceIfOverflowing = FALLBACK_RESERVED_SPACE_FOR_HELP)
         {
-            PrintHelp(""); //new line
             PrintHelp( statement.ToUpper(), comments, addToCache, reservedSpaceForStatement, fallbackReserveSpaceIfOverflowing);
         }
 
@@ -334,13 +363,13 @@ namespace Jarvis
             Utils.FileHandler.Remove(path + id);
         }
 
-        public void OpenNote(JApplication application, int id, string externalProgram, bool waitForTheProgramToEnd, bool feedback = true)
+        public void OpenNote(JModel model, int id, string externalProgram, bool waitForTheProgramToEnd, bool feedback = true)
         {
             if (feedback)
                 ConsoleWriter.Print("Opening Notes");
             Utils.OpenAFileInEditor(
                 path + id,
-                externalProgram.IsEmpty() ? application.DesignData.defaultExternalEditor : externalProgram,
+                externalProgram.IsEmpty() ? model.DesignData.defaultExternalEditor : externalProgram,
                 waitForTheProgramToEnd);
 
             if (feedback)

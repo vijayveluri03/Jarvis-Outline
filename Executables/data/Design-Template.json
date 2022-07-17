@@ -12,7 +12,8 @@
   },
   "properties": {
     "view.habit.titleWidthDefault": 40,
-    "view.habit.titleWidthExtended": 120
+    "view.habit.titleWidthExtended": 120,
+    "view.compact": false
   },
   "categories": {
     "listOfCategories": [

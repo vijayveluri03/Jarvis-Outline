@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using CommandLine;
 using Jarvis; //@todo 
 
 
@@ -47,10 +46,16 @@ public class HabitHandler : CommandHandlerBaseWithUtility
         return true;
     }
 
-    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JApplication application, out List<string> argumentsForSpecializedHandler, bool printErrors)
+    protected override CommandHandlerBase GetSpecializedCommandHandler(Jarvis.JModel model, out List<string> argumentsForSpecializedHandler, bool printErrors)
     {
         string action = arguments_ReadOnly != null && arguments_ReadOnly.Count > 0 ? arguments_ReadOnly[0] : null;
         CommandHandlerBase selectedHander = null;
+
+        if (AreArgumentsEmpty())
+        {
+            argumentsForSpecializedHandler = null;
+            return null;
+        }
 
         switch (action)
         {
@@ -121,7 +126,7 @@ public class HabitHandler : CommandHandlerBaseWithUtility
             argumentsForSpecializedHandler.RemoveAt(0);
 
             Utils.Assert(selectedHander is CommandHandlerBaseWithUtility);
-            (selectedHander as CommandHandlerBaseWithUtility).Init(application, notes);
+            (selectedHander as CommandHandlerBaseWithUtility).Init(model, notes);
         }
         else
             argumentsForSpecializedHandler = null;
@@ -131,8 +136,6 @@ public class HabitHandler : CommandHandlerBaseWithUtility
 
     protected override bool Run()
     {
-        ConsoleWriter.Print("Invalid arguments! \n");
-        ShowHelp();
         return true;
     }
 }
@@ -155,7 +158,7 @@ public class HabitAddCommand : CommandHandlerBaseWithUtility
         SharedLogic.PrintHelp_SubText(">habit add health \"Wake up at 6AM everyday!\"");
         SharedLogic.PrintHelp_SubText(">habit add health \"Walk daily\" --previousstreak:20", "In this case, the tick count starts from 20!");
 
-        SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", application.DesignData.categories.listOfCategories, "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
+        SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", model.DesignData.categories.listOfCategories, "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -171,10 +174,10 @@ public class HabitAddCommand : CommandHandlerBaseWithUtility
         string[] categories = arguments_ReadOnly[0].Split(',');
         string title = arguments_ReadOnly[1];
 
-        if (!application.DesignData.DoesCategoryExist(categories))
+        if (!model.DesignData.DoesCategoryExist(categories))
         {
             ConsoleWriter.Print("Invalid categories.");
-            SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", application.DesignData.categories.listOfCategories, "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
+            SharedLogic.PrintHelp_WithHeadingAndSubText("Whats category", model.DesignData.categories.listOfCategories, "Category can be one of these following. you can add more in the Data/Design.json as per your need.");
             return true;
         }
 
@@ -187,8 +190,8 @@ public class HabitAddCommand : CommandHandlerBaseWithUtility
         }
 
 
-        var entry = SharedLogic.CreateNewHabit(application.habitManager, categories, title, previousStreak);
-        application.habitManager.AddHabit(entry);
+        var entry = SharedLogic.CreateNewHabit(model.habitManager, categories, title, previousStreak);
+        model.habitManager.AddHabit(entry);
 
         ConsoleWriter.Print("New Habit added with id : " + entry.id);
         return true;
@@ -226,12 +229,12 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        List<Habit> habits = new List<Habit>(application.habitManager.Data.entries);
+        List<Habit> habits = new List<Habit>(model.habitManager.Data.entries);
 
         int lineCount = 0;
         int titleArea = (optionalArguments_ReadOnly.Contains("-e") || optionalArguments_ReadOnly.Contains("--expand")) ? 
-            application.DesignData.GetIntegerProperty("view.habit.titleWidthExtended") : 
-            application.DesignData.GetIntegerProperty("view.habit.titleWidthDefault");
+            model.DesignData.GetIntegerProperty("view.habit.titleWidthExtended") : 
+            model.DesignData.GetIntegerProperty("view.habit.titleWidthDefault");
         int categoryArea = 15;
         int newLineAfter = 5;
 
@@ -243,7 +246,7 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
             categoryFilter = string.Empty;
             return true;
         }
-        else if (categoryFilter != string.Empty && !application.DesignData.DoesCategoryExist(categoryFilter))
+        else if (categoryFilter != string.Empty && !model.DesignData.DoesCategoryExist(categoryFilter))
         {
             ConsoleWriter.Print("Invalid category");
             categoryFilter = string.Empty;
@@ -256,7 +259,7 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
         if (habits.Count > 0)
         {
             ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -10} {5, -15}",
-                application.DesignData.HighlightColorForText,
+                model.DesignData.HighlightColorForText,
                 "ID", "DEPT", "TITLE", "LAST UPDATED", "COUNT", "SUCCESS %"
                 );
 
@@ -279,7 +282,7 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
                     continue;
 
                 ConsoleWriter.PrintInColor("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15} {4, -10} {5, -5} {6, -10}",
-                    habit.IsDisabled ? application.DesignData.HighlightColorForText_Disabled : application.DesignData.DefaultColorForText,
+                    habit.IsDisabled ? model.DesignData.HighlightColorForText_Disabled : model.DesignData.DefaultColorForText,
                     habit.id,
                     (habit.categories != null && habit.categories.Length > 0 ? Utils.Conversions.ArrayToString(habit.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                     habit.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/)
@@ -334,7 +337,7 @@ public class HabitStreakUpTodayCommand : CommandHandlerBaseWithUtility
         int[] id = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
         Date date = Date.Today;
 
-        SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Completed);
+        SharedLogic.TryAddHabitEntry(model, id, date, HabitStatus.Completed);
 
         return true;
     }
@@ -371,7 +374,7 @@ public class HabitStreakUpYesterdayCommand : CommandHandlerBaseWithUtility
         int[] id = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
         Date date = Date.Today - 1;
 
-        SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Completed);
+        SharedLogic.TryAddHabitEntry(model, id, date, HabitStatus.Completed);
 
         return true;
     }
@@ -407,7 +410,7 @@ public class HabitIgnoreTodayCommand : CommandHandlerBaseWithUtility
         int[] id = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
         Date date = Date.Today;
 
-        SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Ignored);
+        SharedLogic.TryAddHabitEntry(model, id, date, HabitStatus.Ignored);
 
         return true;
     }
@@ -444,7 +447,7 @@ public class HabitIgnoreYesterdayCommand : CommandHandlerBaseWithUtility
         int[] id = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
         Date date = Date.Today - 1;
 
-        SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Ignored);
+        SharedLogic.TryAddHabitEntry(model, id, date, HabitStatus.Ignored);
 
         return true;
     }
@@ -486,7 +489,7 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        SharedLogic.TryAddHabitEntry(application, id, date, HabitStatus.Completed);
+        SharedLogic.TryAddHabitEntry(model, id, date, HabitStatus.Completed);
 
         return true;
     }
@@ -519,7 +522,7 @@ public class HabitDeleteCommand : CommandHandlerBaseWithUtility
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
-        Habit hb = application.habitManager.GetHabit_Editable(id);
+        Habit hb = model.habitManager.GetHabit_Editable(id);
 
         if (hb == null)
         {
@@ -527,7 +530,7 @@ public class HabitDeleteCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        application.habitManager.RemoveHabit(hb);
+        model.habitManager.RemoveHabit(hb);
 
         ConsoleWriter.Print("Habit with id : {0} removed!", id);
         return true;
@@ -564,7 +567,7 @@ public class HabitDisableCommand : CommandHandlerBaseWithUtility
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
-        Habit hb = application.habitManager.GetHabit_Editable(id);
+        Habit hb = model.habitManager.GetHabit_Editable(id);
 
         if (hb == null)
         {
@@ -615,7 +618,7 @@ public class HabitReEnableCommand : CommandHandlerBaseWithUtility
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
-        Habit hb = application.habitManager.GetHabit_Editable(id);
+        Habit hb = model.habitManager.GetHabit_Editable(id);
 
         if (hb == null)
         {
@@ -665,7 +668,7 @@ public class HabitResetCommand : CommandHandlerBaseWithUtility
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
-        Habit hb = application.habitManager.GetHabit_Editable(id);
+        Habit hb = model.habitManager.GetHabit_Editable(id);
 
         if (hb == null)
         {
@@ -715,7 +718,7 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
-        Habit hb = application.habitManager.GetHabit_ReadOnly(id);
+        Habit hb = model.habitManager.GetHabit_ReadOnly(id);
 
         if (hb == null)
         {
@@ -727,7 +730,7 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
         {
             // Heading
             ConsoleWriter.PrintInColor("{0, -4} {1,-15} {2}",
-                application.DesignData.HighlightColorForText,
+                model.DesignData.HighlightColorForText,
                 "ID", "DEPT", "TITLE"
                 );
 
@@ -777,7 +780,7 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
             ConsoleWriter.EmptyLine();
             for ( Date month = Date.Today; ShouldPrintMonth( month, hb._entries ); month = month.AddMonths(-1) )
             {
-                SharedLogic.PrintMonth(application, month, hb);
+                SharedLogic.PrintMonth(model, month, hb);
                 ConsoleWriter.EmptyLine();
             }
         }
@@ -828,7 +831,7 @@ public class HabitEditTitleCommand : CommandHandlerBaseWithUtility
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
         string title = arguments_ReadOnly[1];
 
-        Habit hb = application.habitManager.GetHabit_ReadOnly(id);
+        Habit hb = model.habitManager.GetHabit_ReadOnly(id);
 
         if (hb == null)
         {
@@ -836,7 +839,7 @@ public class HabitEditTitleCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        application.habitManager.GetHabit_Editable(id).title = title;
+        model.habitManager.GetHabit_Editable(id).title = title;
         ConsoleWriter.Print("Habit with id : {0} renamed to - {1}", id, title);
 
         return true;
@@ -875,13 +878,13 @@ public class HabitCatNotesCommand : CommandHandlerBaseWithUtility
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
         
-        if (application.habitManager.DoesHabitExist(id))
+        if (model.habitManager.DoesHabitExist(id))
         {
             if (!notes.DoesNoteExist(id))
                 ConsoleWriter.Print("Notes not found for the habit with id : {0}", id);
             else
             {
-                ConsoleWriter.PrintInColor("NOTES :", application.DesignData.HighlightColorForText);
+                ConsoleWriter.PrintInColor("NOTES :", model.DesignData.HighlightColorForText);
                 ConsoleWriter.PrintText(notes.GetNoteContent(id));
             }
         }
@@ -963,7 +966,7 @@ public class HabitEditNoteCommand : CommandHandlerBaseWithUtility
             appendMessage = "Log on " +  DateTime.Now.ToShortDateString() + " " + appendLogMessage;
         }
 
-        if (application.habitManager.DoesHabitExist(id))
+        if (model.habitManager.DoesHabitExist(id))
         {
             notes.CreateNoteIfUnavailable(id);
 
@@ -974,7 +977,7 @@ public class HabitEditNoteCommand : CommandHandlerBaseWithUtility
             }
             else
             {
-                notes.OpenNote(application, id, externalProgram, waitForTheProgramToEnd, true);
+                notes.OpenNote(model, id, externalProgram, waitForTheProgramToEnd, true);
             }
         }
         else
@@ -1011,7 +1014,7 @@ public class HabitDeleteNoteCommand : CommandHandlerBaseWithUtility
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
-        if (application.habitManager.DoesHabitExist(id))
+        if (model.habitManager.DoesHabitExist(id))
         {
             if (notes.DoesNoteExist(id))
             {
