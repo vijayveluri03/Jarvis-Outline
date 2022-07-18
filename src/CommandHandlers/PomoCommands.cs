@@ -6,7 +6,7 @@ using System.Threading;
 using Jarvis; //@todo 
 
 
-enum PomodoroTaskType
+public enum PomodoroTaskType
 {
     WORK = 1, 
     REST = 2,
@@ -34,6 +34,8 @@ public class PomodoroHandler : CommandHandlerBaseWithUtility
 
         SharedLogic.PrintHelp_Heading("ADVANCED");
         SharedLogic.PrintHelp_SubText(">pomo addoffline", "To add a new pomodoro timer directly!");
+        SharedLogic.PrintHelp_SubText(">pomo queue", "See the tasks in queue!");
+        SharedLogic.PrintHelp_SubText(">pomo clearqueue", "clears all the tasks in the queue!");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -67,6 +69,12 @@ public class PomodoroHandler : CommandHandlerBaseWithUtility
             case "discard":
                 selectedHander = new PomodoroDiscardCommand();
                 break;
+            case "queue":
+                selectedHander = new PomodoroQueueCommand();
+                break;
+            case "clearqueue":
+                selectedHander = new PomodoroClearQueueCommand();
+                break;
             case "addoffline":
                 selectedHander = new PomodoroAddOfflineCommand();
                 break;
@@ -82,7 +90,7 @@ public class PomodoroHandler : CommandHandlerBaseWithUtility
             argumentsForSpecializedHandler.RemoveAt(0);
 
             Utils.Assert(selectedHander is CommandHandlerBaseWithUtility);
-            (selectedHander as CommandHandlerBaseWithUtility).Init(model, notes);
+            (selectedHander as CommandHandlerBaseWithUtility).Init(model, sharedData, notes);
         }
         else
             argumentsForSpecializedHandler = null;
@@ -128,7 +136,9 @@ public class PomodoroStartCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        if (model.UserData.IsPomodoroTaskInProgress())
+        bool addToQueue = optionalArguments_ReadOnly.Contains("--queue") || optionalArguments_ReadOnly.Contains("-q");
+
+        if (model.UserData.IsPomodoroTaskInProgress() && !addToQueue)
         {
             ConsoleWriter.Print("Pomodoro already in progress!");
             return true;
@@ -151,10 +161,12 @@ public class PomodoroStartCommand : CommandHandlerBaseWithUtility
         //    return true;
         //}
 
-        model.UserData.StorePomodoroStatus(DateTime.Now, category, (int)PomodoroTaskType.WORK);
-        SoundPlayer.PlayPomodoroWorkStarted();
+        sharedData.InsertIntoPomodoroQueue(PomodoroTaskType.WORK, category);
 
-        ConsoleWriter.Print("New Pomodoro started");
+        if (addToQueue)
+            ConsoleWriter.Print("Inserted the Pomodoro item to Queue. It will start when everything in the queue is done!");
+        else
+            ConsoleWriter.Print("Starting Pomodoro Task");
 
         return true;
     }
@@ -188,16 +200,20 @@ public class PomodoroRestCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        if (model.UserData.IsPomodoroTaskInProgress())
+        bool addToQueue = optionalArguments_ReadOnly.Contains("--queue") || optionalArguments_ReadOnly.Contains("-q");
+
+        if (model.UserData.IsPomodoroTaskInProgress() && !addToQueue)
         {
             ConsoleWriter.Print("Pomodoro in progress. Cant rest now!");
             return true;
         }
 
-        model.UserData.StorePomodoroStatus(DateTime.Now, "", (int)PomodoroTaskType.REST);
-        SoundPlayer.PlayPomodoroRestStarted();
+        sharedData.InsertIntoPomodoroQueue(PomodoroTaskType.REST, "");
 
-        ConsoleWriter.Print("Break started");
+        if (addToQueue)
+            ConsoleWriter.Print("Inserted the Pomodoro item to Queue. It will start when everything in the queue is done!");
+        else
+            ConsoleWriter.Print("Starting Break");
 
         return true;
     }
@@ -231,16 +247,20 @@ public class PomodoroLongRestCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        if (model.UserData.IsPomodoroTaskInProgress())
+        bool addToQueue = optionalArguments_ReadOnly.Contains("--queue") || optionalArguments_ReadOnly.Contains("-q");
+
+        if (model.UserData.IsPomodoroTaskInProgress() && !addToQueue)
         {
             ConsoleWriter.Print("Pomodoro in progress. Cant rest now!");
             return true;
         }
 
-        model.UserData.StorePomodoroStatus(DateTime.Now, "", (int)PomodoroTaskType.LONGREST);
-        SoundPlayer.PlayPomodoroRestStarted();
+        sharedData.InsertIntoPomodoroQueue(PomodoroTaskType.LONGREST, "");
 
-        ConsoleWriter.Print("Long break started");
+        if (addToQueue)
+            ConsoleWriter.Print("Inserted the Pomodoro item to Queue. It will start when everything in the queue is done!");
+        else
+            ConsoleWriter.Print("Starting Long Break");
 
         return true;
     }
@@ -404,13 +424,87 @@ public class PomodoroStatusCommand : CommandHandlerBaseWithUtility
     }
 }
 
+public class PomodoroQueueCommand : CommandHandlerBaseWithUtility
+{
+    public PomodoroQueueCommand()
+    {
+
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">pomo queue", "See all the tasks in queue");
+
+        SharedLogic.FlushHelpText();
+
+        return true;
+    }
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 0)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        // cloning list for thread safety
+        List<JSharedData.PomodoroQueueItem> items = new List<JSharedData.PomodoroQueueItem>(sharedData._pomodoroTaskQueue);
+
+        foreach (var item in items)
+        {
+            ConsoleWriter.Print("{0,-15} {1}", item.type, item.category);
+        }
+        return true;
+    }
+}
+
+public class PomodoroClearQueueCommand : CommandHandlerBaseWithUtility
+{
+    public PomodoroClearQueueCommand()
+    {
+
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">pomo clearqueue", "Clears all the tasks in queue");
+
+        SharedLogic.FlushHelpText();
+
+        return true;
+    }
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 0)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        sharedData.ClearPomodoroQueue();
+        ConsoleWriter.Print("Queue cleared!");
+        return true;
+    }
+}
+
+
 public class PomodoroObserver
 {
-    public void Run( JModel model, System.Func<bool> stopObserving )
+    public void Run( JModel model, JSharedData sharedData, System.Func<bool> stopObserving )
     {
+        DateTime waitTill = DateTime.Now;
         while( !stopObserving())
         {
-            if (model.UserData.IsPomodoroTaskInProgress())
+            if (DateTime.Now < waitTill)
+            { 
+            }
+            else if (model.UserData.IsPomodoroTaskInProgress())
             {
                 int totalMinsNeeded = 0;
 
@@ -444,11 +538,13 @@ public class PomodoroObserver
                     else if (data.taskType == (int)PomodoroTaskType.REST)
                     {
                         SoundPlayer.PlayPomodoroRestComplete();
+                        ConsoleWriter.Print(">>> Pomodoro break ended >>>");
                         // todo - play sound; do nothing;
                     }
                     else if (data.taskType == (int)PomodoroTaskType.LONGREST)
                     {
                         SoundPlayer.PlayPomodoroRestComplete();
+                        ConsoleWriter.Print(">>> Pomodoro long break ended >>>");
                         // todo - play sound; do nothing;
                     }
                     else
@@ -457,8 +553,38 @@ public class PomodoroObserver
                     model.UserData.ResetPomodoroStatus();
                 }
             }
+            else if( !sharedData.IsPomodoroQueueEmpty())
+            {
+                var queueItem = sharedData.PopPomodoroQueue();
+                Utils.Assert(queueItem != null);
 
-            Thread.Sleep(1000);
+                if (queueItem.type == PomodoroTaskType.WORK)
+                {
+                    model.UserData.StorePomodoroStatus(DateTime.Now, queueItem.category, (int)PomodoroTaskType.WORK);
+                    SoundPlayer.PlayPomodoroWorkStarted();
+
+                    ConsoleWriter.Print(">>> New Pomodoro Work started >>>");
+                }
+                else if (queueItem.type == PomodoroTaskType.REST)
+                {
+                    model.UserData.StorePomodoroStatus(DateTime.Now, "", (int)PomodoroTaskType.REST);
+                    SoundPlayer.PlayPomodoroRestStarted();
+
+                    ConsoleWriter.Print(">>> New Pomodoro Break started >>>");
+                }
+                else if (queueItem.type == PomodoroTaskType.LONGREST)
+                {
+                    model.UserData.StorePomodoroStatus(DateTime.Now, "", (int)PomodoroTaskType.LONGREST);
+                    SoundPlayer.PlayPomodoroRestStarted();
+
+                    ConsoleWriter.Print(">>> New Pomodoro Long break started >>>");
+                }
+                else
+                    Utils.Assert(false);
+            }
+            
+
+            Thread.Sleep(3000);
         }
 #if RELEASE_LOG
         ConsoleWriter.Print(">>> Observer thread ended >>>");

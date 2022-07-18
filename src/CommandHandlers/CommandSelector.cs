@@ -17,16 +17,16 @@ public class CommandSelector : CommandHandlerBaseWithUtility
         switch (command)
         {
             case "task":
-                return new TaskHandler().Init(model, new NotesUtility(JConstants.PATH_TO_TASKS_NOTE));
+                return new TaskHandler().Init(model, sharedData, new NotesUtility(JConstants.PATH_TO_TASKS_NOTE));
             case "habit":
-                return new HabitHandler().Init(model, new NotesUtility(JConstants.PATH_TO_HABITS_NOTE));
+                return new HabitHandler().Init(model, sharedData, new NotesUtility(JConstants.PATH_TO_HABITS_NOTE));
             case "notebook":
-                return new NotebookHandler().Init(model, new NotesUtility(JConstants.PATH_TO_JOURNAL_NOTE));
+                return new NotebookHandler().Init(model, sharedData, new NotesUtility(JConstants.PATH_TO_JOURNAL_NOTE));
             case "game":
-                return new GameHandler().Init(model, null);
+                return new GameHandler().Init(model, sharedData, null);
             case "pomo":
             case "pomodoro":
-                return new PomodoroHandler().Init(model, null);
+                return new PomodoroHandler().Init(model, sharedData, null);
             default:
 
                 break;

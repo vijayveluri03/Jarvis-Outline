@@ -48,13 +48,15 @@ public abstract class CommandHandlerBase
 
 public abstract class CommandHandlerBaseWithUtility : CommandHandlerBase
 {
-    public CommandHandlerBase Init ( JModel model, NotesUtility notes )
+    public CommandHandlerBase Init ( JModel model, JSharedData sharedData, NotesUtility notes )
     {
         this.model = model;
         this.notes = notes;
+        this.sharedData = sharedData;
         return this;
     }
 
     protected NotesUtility notes;
     protected JModel model; // @todo, unnecessary interlinking
+    protected JSharedData sharedData;
 }

@@ -28,6 +28,7 @@ public class JApplication
         ConsoleWriter.Initialize();
         SetCWD();
 
+        sharedData = new JSharedData();
         model = new Jarvis.JModel();
         model.InitializeCore();
 
@@ -36,7 +37,7 @@ public class JApplication
         model.InitializeRest();
 
         commandSelector = new CommandSelector();
-        commandSelector.Init(model, null);
+        commandSelector.Init(model, sharedData, null);
 
         StartPomodoroObserverThread();
     }
@@ -137,7 +138,7 @@ public class JApplication
         pomodoroObserver = new Thread(() =>
         {
             var pomodoroObserver = new PomodoroObserver();
-            pomodoroObserver.Run(model, ShouldDestroyAllThreads);
+            pomodoroObserver.Run(model, sharedData, ShouldDestroyAllThreads);
         });
         pomodoroObserver.Start();
     }
@@ -285,6 +286,7 @@ public class JApplication
     // Private members
     private bool shouldStopAllThreads = false;
     Jarvis.JModel model = null;
+    Jarvis.JSharedData sharedData = null;
     Thread pomodoroObserver = null;
     CommandSelector commandSelector = null;
 }

@@ -30,7 +30,7 @@ namespace Jarvis
                 return this.date.CompareTo(other.date);
         }
 
-        public bool Equals(object other)
+        public override bool Equals(object other)
         {
             if (other == null) 
                 return false;

@@ -80,7 +80,7 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
             argumentsForSpecializedHandler.RemoveAt(0);
 
             Utils.Assert(selectedHander is CommandHandlerBaseWithUtility);
-            (selectedHander as CommandHandlerBaseWithUtility).Init(model, notes);
+            (selectedHander as CommandHandlerBaseWithUtility).Init(model, sharedData, notes);
         }
         else
             argumentsForSpecializedHandler = null;
