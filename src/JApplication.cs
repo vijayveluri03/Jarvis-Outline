@@ -217,7 +217,7 @@ public class JApplication
     }
     private string GetStatusStr()
     {
-        if( model.UserData.IsPomodoroTaskInProgress())
+        if( model.UserData.IsPomodoroSessionInProgress())
         {
             int minsRemaining = 0;
             string status = "";

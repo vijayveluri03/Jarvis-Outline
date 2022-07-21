@@ -22,7 +22,7 @@ namespace Jarvis
         public class PomodoroParams
         {
             [JsonProperty] public DateTime startTime = DateTime.MinValue;
-            [JsonProperty] public int taskType = 0; // this is a custom type which only pomodoro manager knows about
+            [JsonProperty] public int sessionType = 0; // this is a custom type which only pomodoro manager knows about
             [JsonProperty] public string category = "";
         }
 
@@ -77,7 +77,7 @@ namespace Jarvis
             lock (lockObj)
             {
                 pomodoroParams.startTime = time;
-                pomodoroParams.taskType = type;
+                pomodoroParams.sessionType = type;
                 pomodoroParams.category = category;
                 IsDirty = true;
             }
@@ -87,12 +87,12 @@ namespace Jarvis
             lock (lockObj)
             {
                 pomodoroParams.startTime = DateTime.MinValue;
-                pomodoroParams.taskType = -1;
+                pomodoroParams.sessionType = -1;
                 pomodoroParams.category = "";
                 IsDirty = true;
             }
         }
-        public bool IsPomodoroTaskInProgress()
+        public bool IsPomodoroSessionInProgress()
         {
             return !pomodoroParams.startTime.IsThisMinDate();
         }

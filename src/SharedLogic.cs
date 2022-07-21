@@ -110,19 +110,24 @@ namespace Jarvis
             int totalMinsNeeded = 0;
 
             var data = model.UserData.GetPomodoroData();
-            if (data.taskType == (int)PomodoroTaskType.WORK)
+            if (data.sessionType == (int)PomodoroSessionType.WORK)
             {
                 status = "WORK";
                 totalMinsNeeded = JConstants.POMODORO_WORK_TIME;
             }
-            else if (data.taskType == (int)PomodoroTaskType.REST)
+            else if (data.sessionType == (int)PomodoroSessionType.LONGWORK)
+            {
+                status = "LONG-WORK";
+                totalMinsNeeded = JConstants.POMODORO_LONG_WORK_TIME;
+            }
+            else if (data.sessionType == (int)PomodoroSessionType.REST)
             {
                 status = "REST";
                 totalMinsNeeded = JConstants.POMODORO_REST_TIME;
             }
-            else if (data.taskType == (int)PomodoroTaskType.LONGREST)
+            else if (data.sessionType == (int)PomodoroSessionType.LONGREST)
             {
-                status = "LONG REST";
+                status = "LONG-REST";
                 totalMinsNeeded = JConstants.POMODORO_LONG_REST_TIME;
             }
             else

@@ -37,6 +37,7 @@ namespace Jarvis
         public static string POMODORO_TEMPLATE_FILENAME { get { return JConstants.PATH_TO_DATA + ("Pomodoro-Template.json"); } }
 
         public static int POMODORO_WORK_TIME { get { return 25; } }
+        public static int POMODORO_LONG_WORK_TIME { get { return 25*2; } }
         public static int POMODORO_REST_TIME { get { return 5; } }
         public static int POMODORO_LONG_REST_TIME { get { return 15; } }
     }
