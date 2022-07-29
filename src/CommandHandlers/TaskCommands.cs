@@ -696,17 +696,17 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
             }
         }
         #endregion
-        string searchFilter = "";
+        string searchFilterLC = "";
         {
             bool syntaxError = false;
-            searchFilter = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--search", string.Empty, null, null, out syntaxError);
+            searchFilterLC = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--search", string.Empty, null, null, out syntaxError);
             if (syntaxError)
             {
                 ConsoleWriter.Print("Invalid syntax for --search argument.");
-                searchFilter = string.Empty;
+                searchFilterLC = string.Empty;
                 return true;
             }
-            searchFilter = searchFilter.ToLower();
+            searchFilterLC = searchFilterLC.ToLower();
         }
 
         // by default only open ones are shown, unless specified in which case open ones are not shown. 
@@ -739,7 +739,7 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
             if (!categoryFilter.IsEmpty() && !task.categories.Contains(categoryFilter))
                 continue;
 
-            if( !searchFilter.IsEmpty() && !task.title.ToLower().Contains(searchFilter))
+            if( !searchFilterLC.IsEmpty() && !task.title.ToLower().Contains(searchFilterLC))
                     continue;
 
             foreach (var category in task.categories)

@@ -19,6 +19,7 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
         SharedLogic.PrintHelp_SubText(">notebook add ", "To add a new notebook entry");
         SharedLogic.PrintHelp_SubText(">notebook list", "To list all the notebook entries");
         SharedLogic.PrintHelp_SubText(">notebook show", "Show more details of an entry");
+        SharedLogic.PrintHelp_SubText(">notebook tags", "To list all the tags. This will help organize the notes");
 
         SharedLogic.PrintHelp_Heading("ADVANCED"); 
         SharedLogic.PrintHelp_SubText(">notebook edittitle ", "To edit the title of an entry");
@@ -51,6 +52,9 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
         {
             case "add":
                 selectedHander = new NotebookAddCommand();
+                break;
+            case "tags":
+                selectedHander = new NotebookTagsCommand();
                 break;
             case "list":
                 selectedHander = new NotebookListCommand();
@@ -162,6 +166,47 @@ public class NotebookAddCommand : CommandHandlerBaseWithUtility
     }
 }
 
+public class NotebookTagsCommand : CommandHandlerBaseWithUtility
+{
+    public NotebookTagsCommand()
+    {
+
+    }
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">notebook tags", "lists all the tags\n");
+
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">notebook tags");
+        SharedLogic.FlushHelpText();
+
+        return true;
+    }
+
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 0)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        ConsoleWriter.PrintInColor("TAGS", model.DesignData.HighlightColorForText);
+        ConsoleWriter.PushIndent();
+        foreach( var tag in model.DesignData.notebook.listOfTags )
+        {
+            ConsoleWriter.Print(tag);
+
+        }
+        ConsoleWriter.PopIndent();
+
+        return true;
+    }
+}
+
 public class NotebookListCommand : CommandHandlerBaseWithUtility
 {
     public NotebookListCommand()
@@ -173,9 +218,14 @@ public class NotebookListCommand : CommandHandlerBaseWithUtility
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
         SharedLogic.PrintHelp_SubText(">notebook list", "lists all the entries\n" );
+        SharedLogic.PrintHelp_SubText(">notebook list --tag:<tagname>", "lists all the entries with a specific tag\n");
+        SharedLogic.PrintHelp_SubText(">notebook list --search:<text>", "lists all the entries with a specific text in the title\n");
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
         SharedLogic.PrintHelp_SubText(">notebook list");
+        SharedLogic.PrintHelp_SubText(">notebook list --tag:health");
+        SharedLogic.PrintHelp_SubText(">notebook list --tag:health --search:dailyrun");
+
         SharedLogic.FlushHelpText();
 
         return true;
@@ -194,8 +244,45 @@ public class NotebookListCommand : CommandHandlerBaseWithUtility
 
         int lineCount = 0;
         int categoryArea = 30;
-        int titleArea = (optionalArguments_ReadOnly.Contains("-e") || optionalArguments_ReadOnly.Contains("--expand")) ? 120 : 40;
+        int titleArea = (optionalArguments_ReadOnly.Contains("-e") || optionalArguments_ReadOnly.Contains("--expand")) ? 120 : 60;
         const int newLineAfter = 5;
+
+        #region TAGS
+        string tagFilter;
+        {
+            bool syntaxErrorInTagFilter = false;
+            tagFilter = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--tag", string.Empty, null, null, out syntaxErrorInTagFilter);
+            if (syntaxErrorInTagFilter)
+            {
+                ConsoleWriter.Print("Invalid syntax for --tag argument.");
+                tagFilter = string.Empty;
+                return true;
+            }
+            //else if (tagFilter != string.Empty && !model.DesignData.DoesNotebookTagExist(tagFilter))
+            //{
+            //    ConsoleWriter.Print("Invalid Tag");
+            //    SharedLogic.PrintHelp_WithHeadingAndSubText("TAGS", model.DesignData.notebook.listOfTags, "you can use these tags below, or create more in data/Design.json");
+
+            //    tagFilter = string.Empty;
+            //    return true;
+            //}
+        }
+        #endregion
+
+        #region SEARCH
+        string searchFilterLC = "";
+        {
+            bool syntaxError = false;
+            searchFilterLC = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--search", string.Empty, null, null, out syntaxError);
+            if (syntaxError)
+            {
+                ConsoleWriter.Print("Invalid syntax for --search argument.");
+                searchFilterLC = string.Empty;
+                return true;
+            }
+            searchFilterLC = searchFilterLC.ToLower();
+        }
+        #endregion
 
         // output Heading 
         if (notebooks.Count > 0)
@@ -207,6 +294,11 @@ public class NotebookListCommand : CommandHandlerBaseWithUtility
 
             foreach (var notebook in notebooks)
             {
+                if (!tagFilter.IsEmpty() && !notebook.HasTag(tagFilter, true))
+                    continue;
+
+                if (!searchFilterLC.IsEmpty() && !notebook.title.ToLower().Contains(searchFilterLC))
+                    continue;
 
                 ConsoleWriter.Print("{0, -4} {1,-" + categoryArea + "} {2,-" + titleArea + "} {3, -15}",
                     notebook.id,

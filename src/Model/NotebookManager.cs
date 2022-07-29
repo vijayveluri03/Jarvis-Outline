@@ -16,6 +16,26 @@ namespace Jarvis
 
         // Unique ID
         public int id;
+
+        public bool HasTag(string searchTag, bool fuzzySearch)
+        {
+            if (tags == null || tags.Length == 0)
+                return false;
+            foreach(var tag in tags)
+            {
+                if(fuzzySearch)
+                {
+                    if (tag.Contains(searchTag))
+                        return true;
+                }
+                else
+                {
+                    if (tag == searchTag)
+                        return true;
+                }
+            }
+            return false;
+        }
     }
 
     // List of all the Entries
