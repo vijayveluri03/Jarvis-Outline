@@ -428,7 +428,7 @@ public class PomodoroDiscardCommand : CommandHandlerBaseWithUtility
 
         model.UserData.ResetPomodoroStatus();
 
-        ConsoleWriter.Print("Progress Session!");
+        ConsoleWriter.Print("Session discarded!");
 
         return true;
     }
