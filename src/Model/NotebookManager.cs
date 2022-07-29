@@ -17,6 +17,18 @@ namespace Jarvis
         // Unique ID
         public int id;
 
+        public string TagsString
+        {
+            get
+            {
+                string tagsString = "";
+                foreach( var tag in tags )
+                {
+                    tagsString += tag + ",";
+                }
+                return tagsString;
+            }
+        }
         public bool HasTag(string searchTag, bool fuzzySearch)
         {
             if (tags == null || tags.Length == 0)
@@ -58,7 +70,7 @@ namespace Jarvis
             Load(JConstants.JOURNAL_FILENAME, defaultTag, isTagValid);
         }
 
-        public void AddNotebook(NotebookEntry ed)
+        public void AddNotebookEntry(NotebookEntry ed)
         {
             Data.entries.Add(ed);
             IsDirty = true;
@@ -128,7 +140,7 @@ namespace Jarvis
 
         // Getters
 
-        public bool DoesNotebookExist(int id)
+        public bool DoesNotebookEntryExist(int id)
         {
             foreach (NotebookEntry ed in Data.entries)
             {
@@ -139,7 +151,7 @@ namespace Jarvis
         }
 
         // Because C# doesnt in const (-|-)
-        public NotebookEntry GetNotebook_ReadOnly(int id)
+        public NotebookEntry GetNotebookEntry_ReadOnly(int id)
         {
             foreach (NotebookEntry ed in Data.entries)
             {
@@ -149,11 +161,27 @@ namespace Jarvis
             return null;
         }
 
-        public NotebookEntry GetNotebook_Editable(int id)
+        public NotebookEntry GetNotebookEntry_Editable(int id)
         {
             IsDirty = true;
-            return GetNotebook_ReadOnly(id);
+            return GetNotebookEntry_ReadOnly(id);
         }
+
+        public bool RemoveNotebookEntry(NotebookEntry ed)
+        {
+            IsDirty = true;
+            return Data.entries.Remove(ed);
+        }
+        public bool RemoveNotebookEntryIfExists(int id)
+        {
+            IsDirty = true;
+
+            var ed = GetNotebookEntry_Editable(id);
+            if (ed != null)
+                return Data.entries.Remove(ed);
+            return false;
+        }
+
 
         public int GetAvailableID()
         {

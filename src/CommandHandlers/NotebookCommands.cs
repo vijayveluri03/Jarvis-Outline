@@ -23,6 +23,9 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
 
         SharedLogic.PrintHelp_Heading("ADVANCED"); 
         SharedLogic.PrintHelp_SubText(">notebook edittitle ", "To edit the title of an entry");
+        SharedLogic.PrintHelp_SubText(">notebook delete ", "To delete a notebook entry");
+        SharedLogic.PrintHelp_SubText(">notebook settag ", "To set a new tag for a notebook entry");
+
 
         SharedLogic.PrintHelp_Heading("NOTES"); 
         SharedLogic.PrintHelp_SubText(">notebook note" , "Open notebook entry");
@@ -55,6 +58,9 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
                 break;
             case "tags":
                 selectedHander = new NotebookTagsCommand();
+                break;
+            case "settag":
+                selectedHander = new NotebookSetTagCommand();
                 break;
             case "list":
                 selectedHander = new NotebookListCommand();
@@ -155,7 +161,7 @@ public class NotebookAddCommand : CommandHandlerBaseWithUtility
         }
 
         var entry = SharedLogic.CreateNewNotebookEntry(model.notebookManager, tags, title);
-        model.notebookManager.AddNotebook(entry);
+        model.notebookManager.AddNotebookEntry(entry);
 
         ConsoleWriter.Print("New Notebook entry added with id : {0}. You can also edit the notes using 'notebook note'", entry.id);
 
@@ -322,6 +328,117 @@ public class NotebookListCommand : CommandHandlerBaseWithUtility
 }
 
 
+public class NotebookRemoveCommand : CommandHandlerBaseWithUtility
+{
+    public NotebookRemoveCommand()
+    {
+
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">notebook delete <ID> ", "id is the ID of the notebook entry you want to delete!");
+
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">notebook delete 1", "Deletes Notebook entry with ID : 1");
+        SharedLogic.FlushHelpText();
+        return true;
+    }
+
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 1)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int[] ids = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
+
+        foreach (var id in ids)
+        {
+            if (model.notebookManager.RemoveNotebookEntryIfExists(id))
+            {
+                ConsoleWriter.Print("Notebook entry removed with id : " + id);
+
+                if (notes.DoesNoteExist(id))
+                {
+                    notes.RemoveNote(id);
+                    ConsoleWriter.Print("Notes removed");
+                }
+            }
+            else
+                ConsoleWriter.Print("Notebook entry not found with id : " + id);
+        }
+
+        return true;
+    }
+}
+
+public class NotebookSetTagCommand : CommandHandlerBaseWithUtility
+{
+    public NotebookSetTagCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">notebook settag <ID> <newtag>", "This will set the status to open/complete/discard");
+
+        SharedLogic.PrintHelp_WithHeadingAndSubText("WHAT'S TAG", model.DesignData.notebook.listOfTags, "You can set these following tags");
+        SharedLogic.PrintHelp_SubText("You can add new tags or change any of the existing tags in the data/Design.Json. Feel free to add more as you wish!");
+
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">notebook settag 1 health", "entry with ID 1 is now under tag health");
+        SharedLogic.PrintHelp_SubText(">notebook settag 1 fun");
+        SharedLogic.PrintHelp_SubText(">notebook settag 1 coffeebreak");
+        SharedLogic.FlushHelpText();
+
+        return true;
+    }
+
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 2)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int[] ids = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
+        string[] tags = arguments_ReadOnly[1].ToLower().Split(',');
+
+        if (!model.DesignData.DoesNotebookTagExist(tags))
+        {
+            ConsoleWriter.Print("Invalid tag");
+            SharedLogic.PrintHelp_WithHeadingAndSubText("Whats TAG", model.DesignData.notebook.listOfTags, "Tags can be one of these following. you can add more in the Data/Design.json as per your need.");
+
+            return true;
+        }
+
+        foreach (var id in ids)
+        {
+            if (model.notebookManager.DoesNotebookEntryExist(id))
+            {
+                var entry = model.notebookManager.GetNotebookEntry_Editable(id);
+                entry.tags = (tags);
+                ConsoleWriter.Print("Entry with id : {0} set under tag(s) {1}", id, entry.TagsString);
+            }
+            else
+                ConsoleWriter.Print("Noebook entry not found with id : " + id);
+        }
+
+        return true;
+    }
+
+}
+
 public class NotebookShowCommand : CommandHandlerBaseWithUtility
 {
     public NotebookShowCommand()
@@ -352,7 +469,7 @@ public class NotebookShowCommand : CommandHandlerBaseWithUtility
 
         int categoryArea = 45;
 
-        NotebookEntry notebook = model.notebookManager.GetNotebook_ReadOnly(id);
+        NotebookEntry notebook = model.notebookManager.GetNotebookEntry_ReadOnly(id);
 
         if (notebook == null)
         {
@@ -416,7 +533,7 @@ public class NotebookEditTitleCommand : CommandHandlerBaseWithUtility
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
         string title = arguments_ReadOnly[1];
 
-        NotebookEntry hb = model.notebookManager.GetNotebook_ReadOnly(id);
+        NotebookEntry hb = model.notebookManager.GetNotebookEntry_ReadOnly(id);
 
         if (hb == null)
         {
@@ -424,7 +541,7 @@ public class NotebookEditTitleCommand : CommandHandlerBaseWithUtility
             return true;
         }
 
-        model.notebookManager.GetNotebook_Editable(id).title = title;
+        model.notebookManager.GetNotebookEntry_Editable(id).title = title;
         ConsoleWriter.Print("Notebook with id : {0} renamed to - {1}", id, title);
 
         return true;
@@ -463,7 +580,7 @@ public class NotebookCatNotesCommand : CommandHandlerBaseWithUtility
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
 
         
-        if (model.notebookManager.DoesNotebookExist(id))
+        if (model.notebookManager.DoesNotebookEntryExist(id))
         {
             if( !notes.DoesNoteExist(id))
                 ConsoleWriter.Print("Notes not found for the notebook with id : {0}", id);
@@ -552,7 +669,7 @@ public class NotebookEditNoteCommand : CommandHandlerBaseWithUtility
             appendMessage = "Log on " +  DateTime.Now.ToShortDateString() + " " + appendLogMessage;
         }
 
-        if (model.notebookManager.DoesNotebookExist(id))
+        if (model.notebookManager.DoesNotebookEntryExist(id))
         {
             notes.CreateNoteIfUnavailable(id);
 

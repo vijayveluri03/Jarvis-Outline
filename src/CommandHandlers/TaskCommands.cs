@@ -35,6 +35,8 @@ public class TaskHandler : CommandHandlerBaseWithUtility
         SharedLogic.PrintHelp_SubText(">task report", "to show all the work done in the last day/week");
         SharedLogic.PrintHelp_SubText(">task edittitle", "To edit the title of a task");
         SharedLogic.PrintHelp_SubText(">task clone", "To clone a task!");
+        SharedLogic.PrintHelp_SubText(">task delete", "to delete a task");
+
 
         SharedLogic.PrintHelp_Heading("NOTES");
         SharedLogic.PrintHelp_SubText(">task note", "open note for a task");
