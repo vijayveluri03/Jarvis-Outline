@@ -154,9 +154,9 @@ public static class Utils
                     return defaul;
                 }
 
-                string[] subStrings = listItem.Split(':');
-
-                if (subStrings.Length <= 1)
+                int index = listItem.IndexOf(':');
+               
+                if (index <= 0 || index >= (listItem.Length - 1))
                 {
                     syntaxError = true;
                     if (syntaxNotValidCB != null)
@@ -164,7 +164,7 @@ public static class Utils
                     return defaul;
                 }
 
-                return subStrings[1];
+                return listItem.Substring(index + 1);
             }
             if (itemNotFoundCB != null)
                 itemNotFoundCB();
