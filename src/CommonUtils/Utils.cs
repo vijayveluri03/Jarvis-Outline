@@ -27,10 +27,12 @@ public static class Utils
 
     public static class CLI
     {
-        public static string GetUserInputString(string message, string defaultInput = "")
+        public static string GetUserInputString(string message, string defaultInput = "", bool addColon = true)
         {
             if (!string.IsNullOrEmpty(defaultInput))
-                message += "( defaults to " + defaultInput + ")";
+                message += "(defaults to '" + defaultInput + "')";
+            if (addColon)
+                message += ":";
             ConsoleWriter.PrintWithOutLineBreak(message);
             string input = Console.ReadLine();
             if (string.IsNullOrEmpty(input) && !string.IsNullOrEmpty(defaultInput))
@@ -38,10 +40,12 @@ public static class Utils
             return input;
         }
         
-        public static string GetUserInputString(string message, ConsoleColor color, string defaultInput = "")
+        public static string GetUserInputString(string message, ConsoleColor color, string defaultInput = "", bool addColon = true)
         {
             if (!string.IsNullOrEmpty(defaultInput))
                 message += "( defaults to '" + defaultInput + "')";
+            if (addColon)
+                message += ":";
 
             ConsoleWriter.PushColor(color);
             ConsoleWriter.PrintWithOutLineBreak(message);
@@ -52,10 +56,12 @@ public static class Utils
                 return defaultInput;
             return input;
         }
-        public static int GetUserInputInt(string message, int defaultInput = -999)
+        public static int GetUserInputInt(string message, int defaultInput = -999, bool addColon = true)
         {
             if (defaultInput != -999)
                 message += "( defaults to " + defaultInput + ")";
+            if (addColon)
+                message += ":";
             ConsoleWriter.PrintWithOutLineBreak(message);
             string input = Console.ReadLine();
 
@@ -65,12 +71,17 @@ public static class Utils
             int result = 0;
             return int.TryParse(input, out result) ? result : 0;
         }
-        public static bool GetConfirmationFromUser(string message, bool takeNoByDefault = false)
+        public static bool GetConfirmationFromUser(string message, bool takeNoByDefault = false, bool addColon = true)
         {
             if (!takeNoByDefault)
-                ConsoleWriter.PrintWithOutLineBreak(message + " (enter yes or y to confirm, default) :");
+                message += " (enter yes or y to confirm, default)";
             else
-                ConsoleWriter.PrintWithOutLineBreak(message + " (enter no or n to confirm, default) :");
+                message += " (enter no or n to confirm, default)";
+
+            if (addColon)
+                message += ":";
+
+            ConsoleWriter.PrintWithOutLineBreak(message + " (enter yes or y to confirm, default)");
 
             string input = Console.ReadLine();
             bool isYes = input.ToLower() == "yes" || input.ToLower() == "y";

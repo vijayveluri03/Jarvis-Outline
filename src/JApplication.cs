@@ -61,7 +61,7 @@ public class JApplication
                     firstTime = false;
                 }
                 string cursorText = GetCursorText();
-                string userCommand = Utils.CLI.GetUserInputString(cursorText, model.DesignData.HighlightColorForText);
+                string userCommand = Utils.CLI.GetUserInputString(cursorText, model.DesignData.HighlightColorForText, string.Empty, false);
 
                 if (userCommand.IsEmpty())
                 {

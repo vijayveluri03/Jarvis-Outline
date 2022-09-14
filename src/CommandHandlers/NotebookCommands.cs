@@ -17,26 +17,21 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
         SharedLogic.PrintHelp_SubText(">notebook add ", "To add a new notebook entry");
-        SharedLogic.PrintHelp_SubText(">notebook delete ", "To delete an entry");
         SharedLogic.PrintHelp_SubText(">notebook list", "To list all the notebook entries");
         SharedLogic.PrintHelp_SubText(">notebook show", "Show more details of an entry");
         SharedLogic.PrintHelp_SubText(">notebook tags", "To list all the tags. This will help organize the notes");
 
         SharedLogic.PrintHelp_Heading("ADVANCED"); 
-        SharedLogic.PrintHelp_SubText(">notebook edittitle ", "To edit the title of an entry");
+        SharedLogic.PrintHelp_SubText(">notebook edit ", "To edit the title of an entry");
         SharedLogic.PrintHelp_SubText(">notebook delete ", "To delete a notebook entry");
-        SharedLogic.PrintHelp_SubText(">notebook settag ", "To set a new tag for a notebook entry");
-
-
+        
         SharedLogic.PrintHelp_Heading("NOTES"); 
         SharedLogic.PrintHelp_SubText(">notebook note" , "Open notebook entry");
-        SharedLogic.PrintHelp_SubText(">notebook printnote", "Print the notebook entry");
-        SharedLogic.PrintHelp_SubText(">notebook cat", "Same as printnotes");
+        SharedLogic.PrintHelp_SubText(">notebook printnote", "Print the notebook entry (shortcut 'cat')");
 
         SharedLogic.PrintHelp_Heading("HELP");
         SharedLogic.PrintHelp_SubText("All the commands have their own help section. Use the argument '--help'");
         SharedLogic.PrintHelp_SubText("Example - 'notebook add --help' for more examples on how to use it. Try it!");
-        SharedLogic.PrintHelp_SubText("This works for every single command! Cheers!");
         SharedLogic.FlushHelpText();
         return true;
     }
@@ -64,9 +59,6 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
             case "tags":
                 selectedHander = new NotebookTagsCommand();
                 break;
-            case "settag":
-                selectedHander = new NotebookSetTagCommand();
-                break;
             case "list":
                 selectedHander = new NotebookListCommand();
                 break;
@@ -80,8 +72,8 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
             case "note":
                 selectedHander = new NotebookEditNoteCommand();
                 break;
-            case "edittitle":
-                selectedHander = new NotebookEditTitleCommand();
+            case "edit":
+                selectedHander = new NotebookEditCommand();
                 break;
             default:
                 if(printErrors)
@@ -398,67 +390,6 @@ public class NotebookRemoveCommand : CommandHandlerBaseWithUtility
     }
 }
 
-public class NotebookSetTagCommand : CommandHandlerBaseWithUtility
-{
-    public NotebookSetTagCommand()
-    {
-    }
-
-    protected override bool ShowHelp()
-    {
-        SharedLogic.StartCachingHelpText();
-        SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">notebook settag <ID> <newtag>", "This will set the status to open/complete/discard");
-
-        SharedLogic.PrintHelp_WithHeadingAndSubText("WHAT'S TAG", model.DesignData.notebook.listOfTags, "You can set these following tags");
-        SharedLogic.PrintHelp_SubText("You can add new tags or change any of the existing tags in the data/Design.Json. Feel free to add more as you wish!");
-
-        SharedLogic.PrintHelp_Heading("EXAMPLES");
-        SharedLogic.PrintHelp_SubText(">notebook settag 1 health", "entry with ID 1 is now under tag health");
-        SharedLogic.PrintHelp_SubText(">notebook settag 1 fun");
-        SharedLogic.PrintHelp_SubText(">notebook settag 1 coffeebreak");
-        SharedLogic.FlushHelpText();
-
-        return true;
-    }
-
-    protected override bool Run()
-    {
-        if (arguments_ReadOnly.Count != 2)
-        {
-            ConsoleWriter.Print("Invalid arguments! \n");
-            ShowHelp();
-            return true;
-        }
-
-        int[] ids = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
-        string[] tags = arguments_ReadOnly[1].ToLower().Split(',');
-
-        if (!model.DesignData.DoesNotebookTagExist(tags))
-        {
-            ConsoleWriter.Print("Invalid tag");
-            SharedLogic.PrintHelp_WithHeadingAndSubText("Whats TAG", model.DesignData.notebook.listOfTags, "Tags can be one of these following. you can add more in the Data/Design.json as per your need.");
-
-            return true;
-        }
-
-        foreach (var id in ids)
-        {
-            if (model.notebookManager.DoesNotebookEntryExist(id))
-            {
-                var entry = model.notebookManager.GetNotebookEntry_Editable(id);
-                entry.tags = (tags);
-                ConsoleWriter.Print("Entry with id : {0} set under tag(s) {1}", id, entry.TagsString);
-            }
-            else
-                ConsoleWriter.Print("Noebook entry not found with id : " + id);
-        }
-
-        return true;
-    }
-
-}
-
 public class NotebookShowCommand : CommandHandlerBaseWithUtility
 {
     public NotebookShowCommand()
@@ -524,9 +455,9 @@ public class NotebookShowCommand : CommandHandlerBaseWithUtility
     }
 }
 
-public class NotebookEditTitleCommand : CommandHandlerBaseWithUtility
+public class NotebookEditCommand : CommandHandlerBaseWithUtility
 {
-    public NotebookEditTitleCommand()
+    public NotebookEditCommand()
     {
     }
 
@@ -534,16 +465,16 @@ public class NotebookEditTitleCommand : CommandHandlerBaseWithUtility
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">notebook edittitle <id> <new title>", "Renames the entry title");
+        SharedLogic.PrintHelp_SubText(">notebook edit <id>", "Edits a task. More options will be provided during the edit process");
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
-        SharedLogic.PrintHelp_SubText(">notebook edittitle 1 \"Wake up at 7 AM\"", "rename the title of notebook : 1 to 'Wake up at 7 AM'");
+        SharedLogic.PrintHelp_SubText(">notebook edit 1");
         SharedLogic.FlushHelpText();
         return true;
     }
     protected override bool Run()
     {
-        if (arguments_ReadOnly.Count != 2)
+        if (arguments_ReadOnly.Count != 1)
         {
             ConsoleWriter.Print("Invalid arguments! \n");
             ShowHelp();
@@ -551,18 +482,37 @@ public class NotebookEditTitleCommand : CommandHandlerBaseWithUtility
         }
 
         int id = Utils.Conversions.Atoi(arguments_ReadOnly[0]);
-        string title = arguments_ReadOnly[1];
 
         NotebookEntry hb = model.notebookManager.GetNotebookEntry_ReadOnly(id);
-
         if (hb == null)
         {
             ConsoleWriter.Print("Notebook with id : {0} not found!", id);
             return true;
         }
 
-        model.notebookManager.GetNotebookEntry_Editable(id).title = title;
-        ConsoleWriter.Print("Notebook with id : {0} renamed to - {1}", id, title);
+        string newTitle = Utils.CLI.GetUserInputString("Enter the new title", hb.title);
+        string[] newTags = Utils.CLI.GetUserInputString("Enter the new tags, comma seperated if you have multiple", hb.TagsCommaSeperatedString).ToLower().Split(',');
+
+        if (!model.DesignData.DoesNotebookTagExist(newTags))
+        {
+            ConsoleWriter.Print("Invalid tag");
+            SharedLogic.PrintHelp_WithHeadingAndSubText("Whats TAG", model.DesignData.notebook.listOfTags, "Tags can be one of these following. you can add more in the Data/Design.json as per your need.");
+
+            return true;
+        }
+
+
+        NotebookEntry hbEditable = model.notebookManager.GetNotebookEntry_Editable(id);
+        {
+            string oldTitle = hb.title;
+            hbEditable.title = newTitle;
+            ConsoleWriter.Print("Notebook with id : {0} title updated from '{1}' to '{2}'", id, oldTitle, newTitle);
+        }
+        {
+            string oldTags = hbEditable.TagsCommaSeperatedString;
+            hbEditable.tags = (newTags);
+            ConsoleWriter.Print("Entry with id : {0} tags updated from '{1}' to '{2}'", id, oldTags, hbEditable.TagsCommaSeperatedString);
+        }
 
         return true;
     }

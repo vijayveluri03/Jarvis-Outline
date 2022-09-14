@@ -17,16 +17,17 @@ namespace Jarvis
         // Unique ID
         public int id;
 
-        public string TagsString
+        public string TagsCommaSeperatedString
         {
             get
             {
-                string tagsString = "";
+                System.Text.StringBuilder tagsString = new System.Text.StringBuilder();
                 foreach( var tag in tags )
                 {
-                    tagsString += tag + ",";
+                    tagsString.Append( tag + "," );
                 }
-                return tagsString;
+                tagsString.Remove(tagsString.Length - 1, 1 );
+                return tagsString.ToString();
             }
         }
         public bool HasTag(string searchTag, bool fuzzySearch)
