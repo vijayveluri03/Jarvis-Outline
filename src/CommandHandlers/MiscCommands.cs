@@ -49,7 +49,7 @@ public class GameHandler : CommandHandlerBaseWithUtility
             argumentsForSpecializedHandler.RemoveAt(0);
 
             Utils.Assert(selectedHander is CommandHandlerBaseWithUtility);
-            (selectedHander as CommandHandlerBaseWithUtility).Init(model, sharedData, notes);
+            (selectedHander as CommandHandlerBaseWithUtility).Init(model, sharedData, noteUtility);
         }
         else 
             argumentsForSpecializedHandler = null;

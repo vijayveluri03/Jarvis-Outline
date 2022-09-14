@@ -17,6 +17,7 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
         SharedLogic.PrintHelp_SubText(">notebook add ", "To add a new notebook entry");
+        SharedLogic.PrintHelp_SubText(">notebook delete ", "To delete an entry");
         SharedLogic.PrintHelp_SubText(">notebook list", "To list all the notebook entries");
         SharedLogic.PrintHelp_SubText(">notebook show", "Show more details of an entry");
         SharedLogic.PrintHelp_SubText(">notebook tags", "To list all the tags. This will help organize the notes");
@@ -56,6 +57,10 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
             case "add":
                 selectedHander = new NotebookAddCommand();
                 break;
+            case "delete":
+            case "remove":
+                selectedHander = new NotebookRemoveCommand();
+                break;
             case "tags":
                 selectedHander = new NotebookTagsCommand();
                 break;
@@ -90,7 +95,7 @@ public class NotebookHandler : CommandHandlerBaseWithUtility
             argumentsForSpecializedHandler.RemoveAt(0);
 
             Utils.Assert(selectedHander is CommandHandlerBaseWithUtility);
-            (selectedHander as CommandHandlerBaseWithUtility).Init(model, sharedData, notes);
+            (selectedHander as CommandHandlerBaseWithUtility).Init(model, sharedData, noteUtility);
         }
         else
             argumentsForSpecializedHandler = null;
@@ -165,12 +170,14 @@ public class NotebookAddCommand : CommandHandlerBaseWithUtility
 
         ConsoleWriter.Print("New Notebook entry added with id : {0}. You can also edit the notes using 'notebook note'", entry.id);
 
-        notes.CreateNoteIfUnavailable(entry.id);
-        notes.OpenNote(model, entry.id, null, true, true);
+        noteUtility.CreateNoteIfUnavailable(entry.id);
+        noteUtility.OpenNote(model, entry.id, null, true, true);
 
         return true;
     }
 }
+
+
 
 public class NotebookTagsCommand : CommandHandlerBaseWithUtility
 {
@@ -225,6 +232,7 @@ public class NotebookListCommand : CommandHandlerBaseWithUtility
         SharedLogic.PrintHelp_Heading("USAGE");
         SharedLogic.PrintHelp_SubText(">notebook list", "lists all the entries\n" );
         SharedLogic.PrintHelp_SubText(">notebook list --tag:<tagname>", "lists all the entries with a specific tag\n");
+        SharedLogic.PrintHelp_SubText(">notebook list --excludetag:<tagname>", "lists all the entries without a specific tag\n");
         SharedLogic.PrintHelp_SubText(">notebook list --search:<text>", "lists all the entries with a specific text in the title\n");
 
         SharedLogic.PrintHelp_Heading("EXAMPLES");
@@ -254,14 +262,23 @@ public class NotebookListCommand : CommandHandlerBaseWithUtility
         const int newLineAfter = 5;
 
         #region TAGS
-        string tagFilter;
+        List<string> tagsToInclude = new List<string>();
+        List<string> tagsToExclude = new List<string>();
         {
             bool syntaxErrorInTagFilter = false;
-            tagFilter = Utils.CLI.ExtractStringFromCLIParameter(optionalArguments_ReadOnly, "--tag", string.Empty, null, null, out syntaxErrorInTagFilter);
+            tagsToInclude = Utils.CLI.ExtractMultipleStringsFromCLIParameter(optionalArguments_ReadOnly, "--tag", out syntaxErrorInTagFilter);
             if (syntaxErrorInTagFilter)
             {
                 ConsoleWriter.Print("Invalid syntax for --tag argument.");
-                tagFilter = string.Empty;
+                tagsToInclude.Clear();
+                return true;
+            }
+
+            tagsToExclude = Utils.CLI.ExtractMultipleStringsFromCLIParameter(optionalArguments_ReadOnly, "--excludetag", out syntaxErrorInTagFilter);
+            if (syntaxErrorInTagFilter)
+            {
+                ConsoleWriter.Print("Invalid syntax for --excludetag argument.");
+                tagsToInclude.Clear();
                 return true;
             }
             //else if (tagFilter != string.Empty && !model.DesignData.DoesNotebookTagExist(tagFilter))
@@ -300,7 +317,10 @@ public class NotebookListCommand : CommandHandlerBaseWithUtility
 
             foreach (var notebook in notebooks)
             {
-                if (!tagFilter.IsEmpty() && !notebook.HasTag(tagFilter, true))
+                if (tagsToInclude.Count > 0 && !notebook.HasTag(tagsToInclude, true))
+                    continue;
+
+                if (tagsToExclude.Count > 0 && notebook.HasTag(tagsToExclude, true))
                     continue;
 
                 if (!searchFilterLC.IsEmpty() && !notebook.title.ToLower().Contains(searchFilterLC))
@@ -364,9 +384,9 @@ public class NotebookRemoveCommand : CommandHandlerBaseWithUtility
             {
                 ConsoleWriter.Print("Notebook entry removed with id : " + id);
 
-                if (notes.DoesNoteExist(id))
+                if (noteUtility.DoesNoteExist(id))
                 {
-                    notes.RemoveNote(id);
+                    noteUtility.RemoveNote(id);
                     ConsoleWriter.Print("Notes removed");
                 }
             }
@@ -582,12 +602,12 @@ public class NotebookCatNotesCommand : CommandHandlerBaseWithUtility
         
         if (model.notebookManager.DoesNotebookEntryExist(id))
         {
-            if( !notes.DoesNoteExist(id))
+            if( !noteUtility.DoesNoteExist(id))
                 ConsoleWriter.Print("Notes not found for the notebook with id : {0}", id);
             else 
             {
                 ConsoleWriter.PrintInColor("NOTES :", model.DesignData.HighlightColorForText);
-                ConsoleWriter.PrintText(notes.GetNoteContent(id));
+                ConsoleWriter.PrintText(noteUtility.GetNoteContent(id));
             }
         }
         else
@@ -671,16 +691,16 @@ public class NotebookEditNoteCommand : CommandHandlerBaseWithUtility
 
         if (model.notebookManager.DoesNotebookEntryExist(id))
         {
-            notes.CreateNoteIfUnavailable(id);
+            noteUtility.CreateNoteIfUnavailable(id);
 
             if (!appendMessage.IsEmpty())
             {
                 ConsoleWriter.Print("Message appended to the notes");
-                notes.AppendToNote(id, appendMessage);
+                noteUtility.AppendToNote(id, appendMessage);
             }
             else
             {
-                notes.OpenNote(model, id, externalProgram, waitForTheProgramToEnd, true);
+                noteUtility.OpenNote(model, id, externalProgram, waitForTheProgramToEnd, true);
             }
         }
         else

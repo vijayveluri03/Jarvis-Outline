@@ -51,12 +51,26 @@ public abstract class CommandHandlerBaseWithUtility : CommandHandlerBase
     public CommandHandlerBase Init ( JModel model, JSharedData sharedData, NotesUtility notes )
     {
         this.model = model;
-        this.notes = notes;
+        this.noteUtility = notes;
         this.sharedData = sharedData;
         return this;
     }
 
-    protected NotesUtility notes;
+    public void Copy( CommandHandlerBaseWithUtility other )
+    {
+        arguments_ReadOnly = other.arguments_ReadOnly;
+        optionalArguments_ReadOnly = other.optionalArguments_ReadOnly;
+        model = other.model;
+        noteUtility = other.noteUtility;
+        sharedData = other.sharedData;
+    }
+
+    public virtual bool ForceRun()
+    {
+        return Run();
+    }
+
+    protected NotesUtility noteUtility;
     protected JModel model; // @todo, unnecessary interlinking
     protected JSharedData sharedData;
 }

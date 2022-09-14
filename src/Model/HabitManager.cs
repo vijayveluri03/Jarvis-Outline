@@ -134,11 +134,20 @@ namespace Jarvis
         }
 
         // Gets success rate till yesterday. Doesnt include today!
-        public int GetSuccessRate ()
+        public int GetSuccessRate ( int forTheLastDayCount = -1 )
         {
-            int totalDays = Date.Today - _startDate; // This will not include today
-            int totalEntryCount = GetEntryCountForTheDuration( HabitStatus.Completed, _startDate, Date.Today - 1);
-            int totalIgnoreDays = GetEntryCountForTheDuration(HabitStatus.Ignored, _startDate, Date.Today - 1);
+            Date startDate;
+            if (forTheLastDayCount == -1)
+                startDate = _startDate;
+            else 
+                startDate = Date.Today.SubtractDays( forTheLastDayCount );
+
+            if ( startDate < _startDate)
+                startDate = _startDate;
+
+            int totalDays = Date.Today - startDate; // This will not include today
+            int totalEntryCount = GetEntryCountForTheDuration( HabitStatus.Completed, startDate, Date.Today - 1);
+            int totalIgnoreDays = GetEntryCountForTheDuration(HabitStatus.Ignored, startDate, Date.Today - 1);
 
             totalDays -= totalIgnoreDays; // removing the ignorable days 
 #if RELEASE_LOG

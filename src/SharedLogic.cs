@@ -92,7 +92,9 @@ namespace Jarvis
             if (status == HabitStatus.Completed)
                 ConsoleWriter.Print("Habit with id : {0} ticked on {1}! Success rate {2} -> {3}", id, date.ShortForm(), previousSuccess, hb.GetSuccessRate());
             else if (status == HabitStatus.Ignored)
-                ConsoleWriter.Print("Habit with id : {0} ticked on {1}! Success rate {2} -> {3}", id, date.ShortForm(), previousSuccess, hb.GetSuccessRate());
+                ConsoleWriter.Print("Habit with id : {0} ignored on {1}! Success rate {2} -> {3}", id, date.ShortForm(), previousSuccess, hb.GetSuccessRate());
+            else if (status == HabitStatus.Missed)
+                ConsoleWriter.Print("Habit with id : {0} missed on {1}! Success rate {2} -> {3}", id, date.ShortForm(), previousSuccess, hb.GetSuccessRate());
             else
                 Utils.Assert(false, "This condition is not programmed");
 
@@ -167,12 +169,18 @@ namespace Jarvis
                 bool isIgnored = hb.IsIgnoredOn(currentDate);
                 ConsoleColor color = ConsoleColor.Green;
                 string text = "";
-                if (currentDate >= Date.Today)
+                if (currentDate > Date.Today)
                 {
                     text = "-";
                     color = model.DesignData.DefaultColorForText;
                 }
-                else if (currentDate < hb._startDate)// @todo, using private member directly
+                else if (currentDate == Date.Today && !hb.IsEntryOn(currentDate))
+                {
+                    text = "-";
+                    color = model.DesignData.DefaultColorForText;
+                }
+                else
+                if (currentDate < hb._startDate)// @todo, using private member directly
                 {
                     text = "-";
                     color = model.DesignData.DefaultColorForText;

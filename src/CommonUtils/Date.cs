@@ -196,14 +196,29 @@ namespace System
 			return new Date(this._dt.AddDays(value));
 		}
 
+		public Date SubtractDays(int value)
+        {
+			return AddDays(-1 * value);
+        }
+
 		public Date AddMonths(int value)
 		{
 			return new Date(this._dt.AddMonths(value));
 		}
 
+		public Date SubtractMonths(int value)
+		{
+			return AddMonths(-1 * value);
+		}
+
 		public Date AddYears(int value)
 		{
 			return new Date(this._dt.AddYears(value));
+		}
+
+		public Date SubtractYears(int value)
+		{
+			return AddYears(-1 * value);
 		}
 
 		public static int Compare(Date d1, Date d2)

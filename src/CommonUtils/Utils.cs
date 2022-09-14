@@ -119,20 +119,45 @@ public static class Utils
             return ExtractIntFromCLIParameter(arguments, new List<string> { startingSubString }, defaul, itemNotFoundCB, syntaxNotValidCB, out syntaxError); 
         }
 
+        public static List<string> ExtractMultipleStringsFromCLIParameter(List<string> arguments, string startingSubString, out bool syntaxError)
+        {
+            List<string> argumentsClone = new List<string>(arguments);
+            List<string> result = new List<string>();
+
+            syntaxError = false;
+            string defaultString = "dEfAuLt";   // :( need a better approach
+
+            while (true)
+            {
+                string extractedString = ExtractStringFromCLIParameter(argumentsClone, new List<string> { startingSubString }, defaultString, null, null, true, out syntaxError);
+
+                if (syntaxError || extractedString == defaultString)
+                    break;
+
+                result.Add(extractedString);
+            }
+            return result;
+        }
+
         public static string ExtractStringFromCLIParameter(List<string> arguments, string startingSubString, string defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
         {
-            return ExtractStringFromCLIParameter(arguments, new List<string> { startingSubString }, defaul, itemNotFoundCB, syntaxNotValidCB, out syntaxError);
+            return ExtractStringFromCLIParameter(arguments, new List<string> { startingSubString }, defaul, itemNotFoundCB, syntaxNotValidCB, false, out syntaxError);
         }
 
         public static int ExtractIntFromCLIParameter(List<string> arguments, List<string> startingSubstring, int defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
         {
             syntaxError = false;
-            string subString = ExtractStringFromCLIParameter(arguments, startingSubstring, string.Empty, itemNotFoundCB, syntaxNotValidCB, out syntaxError);
+            string subString = ExtractStringFromCLIParameter(arguments, startingSubstring, string.Empty, itemNotFoundCB, syntaxNotValidCB, false, out syntaxError);
             if (subString == string.Empty)
                 return defaul;
             return Utils.Conversions.Atoi(subString);
         }
+
         public static string ExtractStringFromCLIParameter(List<string> arguments, List<string> startingSubStrings, string defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, out bool syntaxError)
+        {
+            return ExtractStringFromCLIParameter(arguments,startingSubStrings, defaul, itemNotFoundCB, syntaxNotValidCB, false, out syntaxError);  
+        }
+        public static string ExtractStringFromCLIParameter(List<string> arguments, List<string> startingSubStrings, string defaul, System.Action itemNotFoundCB, System.Action syntaxNotValidCB, bool removeAfterExtraction, out bool syntaxError)
         {
             syntaxError = false;
             foreach (var startingSubstring in startingSubStrings)
@@ -162,6 +187,11 @@ public static class Utils
                     if (syntaxNotValidCB != null)
                         syntaxNotValidCB();
                     return defaul;
+                }
+
+                if (removeAfterExtraction)
+                {
+                    arguments.Remove(listItem);
                 }
 
                 return listItem.Substring(index + 1);

@@ -139,11 +139,20 @@ namespace Jarvis
             [JsonProperty] public string[] statusList;
             [JsonProperty] public string defaultStatus;
             [JsonProperty] public string completeStatus;
+            [JsonProperty] public string projectStatus;
+            [JsonProperty] public string nextactionStatus;
+            [JsonProperty] public string reviewStatus;
+            [JsonProperty] public string laterStatus;
         }
         [JsonProperty] public Tasks tasks;
         [JsonIgnore] private HashSet<string> cachedTaskStatuses = new HashSet<string>();
         [JsonIgnore] public string TaskDefaultStatus { get { return tasks.defaultStatus; } }
         [JsonIgnore] public string TaskCompletedStatus { get { return tasks.completeStatus; } }
+        [JsonIgnore] public string TaskProjectStatus { get { return tasks.projectStatus; } }
+        [JsonIgnore] public string TaskNextActionStatus { get { return tasks.nextactionStatus; } }
+        [JsonIgnore] public string TaskReviewStatus { get { return tasks.reviewStatus; } }
+        [JsonIgnore] public string TaskLaterStatus { get { return tasks.laterStatus; } }
+
 
         void InitializeTasks()
         {

@@ -48,6 +48,27 @@ namespace Jarvis
             }
             return false;
         }
+        public bool HasTag(List<string> searchTags, bool fuzzySearch)
+        {
+            if (tags == null || tags.Length == 0)
+                return false;
+            foreach (var tag in tags)
+            {
+                if (fuzzySearch)
+                {
+                    foreach(var searchTag in searchTags)
+                        if( tag.Contains(searchTag) )
+                            return true;
+                }
+                else
+                {
+                    foreach (var searchTag in searchTags)
+                        if (tag == searchTag)
+                            return true;
+                }
+            }
+            return false;
+        }
     }
 
     // List of all the Entries

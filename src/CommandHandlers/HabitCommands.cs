@@ -28,6 +28,7 @@ public class HabitHandler : CommandHandlerBaseWithUtility
 
         SharedLogic.PrintHelp_Heading("ADVANCED");
         SharedLogic.PrintHelp_SubText(">habit tick", "To mark a certain date as completed");
+        SharedLogic.PrintHelp_SubText(">habit ignore", "To mark a certain date as ignored");
         SharedLogic.PrintHelp_SubText(">habit delete", "to delete a habit");
         SharedLogic.PrintHelp_SubText(">habit disable", "to disable a habit");
         SharedLogic.PrintHelp_SubText(">habit re-enable", "to re-enable a disabled habit"); 
@@ -68,6 +69,12 @@ public class HabitHandler : CommandHandlerBaseWithUtility
             case "tickyesterday":
                 selectedHander = new HabitStreakUpYesterdayCommand();
                 break;
+            case "failtoday":
+                selectedHander = new HabitFailTodayCommand();
+                break;
+            case "failyesterday":
+                selectedHander = new HabitFailYesterdayCommand();
+                break;
             case "ignoretoday":
                 selectedHander = new HabitIgnoreTodayCommand();
                 break;
@@ -76,6 +83,9 @@ public class HabitHandler : CommandHandlerBaseWithUtility
                 break;
             case "tick":
                 selectedHander = new HabitStreakUpCommand();
+                break;
+            case "ignore":
+                selectedHander = new HabitIgnoreCommand();
                 break;
             case "list":
                 selectedHander = new HabitListCommand();
@@ -126,7 +136,7 @@ public class HabitHandler : CommandHandlerBaseWithUtility
             argumentsForSpecializedHandler.RemoveAt(0);
 
             Utils.Assert(selectedHander is CommandHandlerBaseWithUtility);
-            (selectedHander as CommandHandlerBaseWithUtility).Init(model, sharedData, notes);
+            (selectedHander as CommandHandlerBaseWithUtility).Init(model, sharedData, noteUtility);
         }
         else
             argumentsForSpecializedHandler = null;
@@ -286,10 +296,10 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
                     habit.id,
                     (habit.categories != null && habit.categories.Length > 0 ? Utils.Conversions.ArrayToString(habit.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                     habit.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/)
-                        + (notes.DoesNoteExist(habit.id) ? "+(N)" : ""),
+                        + (noteUtility.DoesNoteExist(habit.id) ? "+(N)" : ""),
                     (habit.GetLastUpdatedOn().IsThisMinDate() ? "Never" : habit.GetLastUpdatedOn().ShortForm()),
                     habit.GetAllEntryCount( HabitStatus.Completed, true),
-                    habit.GetSuccessRate(),
+                    habit.GetSuccessRate(14) + " -> " + habit.GetSuccessRate(),
                     habit.IsDisabled ? "Disabled" : ""
                     );
 
@@ -375,6 +385,79 @@ public class HabitStreakUpYesterdayCommand : CommandHandlerBaseWithUtility
         Date date = Date.Today - 1;
 
         SharedLogic.TryAddHabitEntry(model, id, date, HabitStatus.Completed);
+
+        return true;
+    }
+}
+
+public class HabitFailTodayCommand : CommandHandlerBaseWithUtility
+{
+    public HabitFailTodayCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit failtoday <id>");
+
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit failtoday 1");
+        SharedLogic.FlushHelpText();
+
+        return true;
+    }
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 1)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int[] id = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
+        Date date = Date.Today;
+
+        SharedLogic.TryAddHabitEntry(model, id, date, HabitStatus.Missed);
+
+        return true;
+    }
+}
+
+// @todo - lot of code repeatition here. club all the three classes into one.
+public class HabitFailYesterdayCommand : CommandHandlerBaseWithUtility
+{
+    public HabitFailYesterdayCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit failyesterday <id>");
+
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit failyesterday 1");
+        SharedLogic.FlushHelpText();
+
+        return true;
+    }
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 1)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int[] id = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
+        Date date = Date.Today - 1;
+
+        SharedLogic.TryAddHabitEntry(model, id, date, HabitStatus.Missed);
 
         return true;
     }
@@ -490,6 +573,50 @@ public class HabitStreakUpCommand : CommandHandlerBaseWithUtility
         }
 
         SharedLogic.TryAddHabitEntry(model, id, date, HabitStatus.Completed);
+
+        return true;
+    }
+}
+
+// @todo - lot of code repeatition here. club all the three classes into one.
+
+public class HabitIgnoreCommand : CommandHandlerBaseWithUtility
+{
+    public HabitIgnoreCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">habit ignore <id> dd/mm/yy", "ignore a habit, on a specific date");
+
+        SharedLogic.PrintHelp_Heading("EXAMPLES");
+        SharedLogic.PrintHelp_SubText(">habit ignore 1 01/01/2022", "ignore a habit with id 1 on jan 1st 2022");
+        SharedLogic.FlushHelpText();
+
+        return true;
+    }
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count != 2)
+        {
+            ConsoleWriter.Print("Invalid arguments! \n");
+            ShowHelp();
+            return true;
+        }
+
+        int[] id = Utils.Conversions.SplitAndAtoi(arguments_ReadOnly[0]);
+        Date date = new Date();
+
+        if (!Date.TryParse(arguments_ReadOnly[1], new System.Globalization.CultureInfo("es-ES"), out date))
+        {
+            ConsoleWriter.Print("Date mentioned is invalid. it has to be in the format dd/mm/yy");
+            return true;
+        }
+
+        SharedLogic.TryAddHabitEntry(model, id, date, HabitStatus.Ignored);
 
         return true;
     }
@@ -764,7 +891,7 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
                 (hb.GetLastUpdatedOn().IsThisMinDate() ? "Never" : hb.GetLastUpdatedOn().ShortFormWithDay()),
 
                 hb.StatusStr,
-                (notes.DoesNoteExist(hb.id) ? "YES" : "NO")
+                (noteUtility.DoesNoteExist(hb.id) ? "YES" : "NO")
                 );
         }
 
@@ -778,7 +905,7 @@ public class HabitShowCommand : CommandHandlerBaseWithUtility
         else
         {
             ConsoleWriter.EmptyLine();
-            for ( Date month = Date.Today; ShouldPrintMonth( month, hb._entries ); month = month.AddMonths(-1) )
+            for ( Date month = hb._startDate; month.Month <= Date.Today.Month; month = month.AddMonths(1) )
             {
                 SharedLogic.PrintMonth(model, month, hb);
                 ConsoleWriter.EmptyLine();
@@ -880,12 +1007,12 @@ public class HabitCatNotesCommand : CommandHandlerBaseWithUtility
         
         if (model.habitManager.DoesHabitExist(id))
         {
-            if (!notes.DoesNoteExist(id))
+            if (!noteUtility.DoesNoteExist(id))
                 ConsoleWriter.Print("Notes not found for the habit with id : {0}", id);
             else
             {
                 ConsoleWriter.PrintInColor("NOTES :", model.DesignData.HighlightColorForText);
-                ConsoleWriter.PrintText(notes.GetNoteContent(id));
+                ConsoleWriter.PrintText(noteUtility.GetNoteContent(id));
             }
         }
         else
@@ -968,16 +1095,16 @@ public class HabitEditNoteCommand : CommandHandlerBaseWithUtility
 
         if (model.habitManager.DoesHabitExist(id))
         {
-            notes.CreateNoteIfUnavailable(id);
+            noteUtility.CreateNoteIfUnavailable(id);
 
             if (!appendMessage.IsEmpty())
             {
                 ConsoleWriter.Print("Message appended to the notes");
-                notes.AppendToNote(id, appendMessage);
+                noteUtility.AppendToNote(id, appendMessage);
             }
             else
             {
-                notes.OpenNote(model, id, externalProgram, waitForTheProgramToEnd, true);
+                noteUtility.OpenNote(model, id, externalProgram, waitForTheProgramToEnd, true);
             }
         }
         else
@@ -1016,9 +1143,9 @@ public class HabitDeleteNoteCommand : CommandHandlerBaseWithUtility
 
         if (model.habitManager.DoesHabitExist(id))
         {
-            if (notes.DoesNoteExist(id))
+            if (noteUtility.DoesNoteExist(id))
             {
-                notes.RemoveNote(id);
+                noteUtility.RemoveNote(id);
                 ConsoleWriter.Print("Notes deleted");
             }
             else

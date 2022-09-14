@@ -36,6 +36,7 @@ public class TaskHandler : CommandHandlerBaseWithUtility
         SharedLogic.PrintHelp_SubText(">task edittitle", "To edit the title of a task");
         SharedLogic.PrintHelp_SubText(">task clone", "To clone a task!");
         SharedLogic.PrintHelp_SubText(">task delete", "to delete a task");
+        SharedLogic.PrintHelp_SubText(">task <later/nextaction/review/project/inbox>", "direct commands to set the status");
 
 
         SharedLogic.PrintHelp_Heading("NOTES");
@@ -80,6 +81,23 @@ public class TaskHandler : CommandHandlerBaseWithUtility
             case "complete":
             case "done":
                 selectedHander = new TaskCompleteCommand();
+                break;
+            case "na":
+            case "nextaction":
+                selectedHander = new TaskNextActionCommand();
+                break;
+            case "inbox":
+            case "default":
+                selectedHander = new TaskInboxCommand();
+                break;
+            case "project":
+                selectedHander = new TaskProjectCommand();
+                break;
+            case "later":
+                selectedHander = new TaskLaterCommand();
+                break;
+            case "review":
+                selectedHander = new TaskReviewCommand();
                 break;
             case "starttimelog":
                 selectedHander = new TaskStartCommand();
@@ -136,7 +154,7 @@ public class TaskHandler : CommandHandlerBaseWithUtility
             argumentsForSpecializedHandler.RemoveAt(0);
 
             Utils.Assert(selectedHander is CommandHandlerBaseWithUtility);
-            (selectedHander as CommandHandlerBaseWithUtility).Init(model, sharedData, notes);
+            (selectedHander as CommandHandlerBaseWithUtility).Init(model, sharedData, noteUtility);
         }
         else
             argumentsForSpecializedHandler = null;
@@ -295,33 +313,191 @@ public class TaskCloneCommand : CommandHandlerBaseWithUtility
 
         ConsoleWriter.Print("New task added with id : " + clonedTask.id);
 
-        if (notes.DoesNoteExist(originalTask.id))
+        if (noteUtility.DoesNoteExist(originalTask.id))
         {
-            notes.CreateNoteIfUnavailable(clonedTask.id);
-            notes.AppendToNote(clonedTask.id, notes.GetNoteContent(originalTask.id));
+            noteUtility.CreateNoteIfUnavailable(clonedTask.id);
+            noteUtility.AppendToNote(clonedTask.id, noteUtility.GetNoteContent(originalTask.id));
             ConsoleWriter.Print("Notes is cloned!");
         }
 
         return true;
     }
 }
-
 public class TaskCompleteCommand : CommandHandlerBaseWithUtility
 {
     public TaskCompleteCommand()
     {
-
     }
 
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
         SharedLogic.PrintHelp_Heading("USAGE");
-        SharedLogic.PrintHelp_SubText(">task complete <taskID> ", "Task id is the ID of the task which is done");
+        SharedLogic.PrintHelp_SubText(">task complete", " to list the tasks with status complete");
+        SharedLogic.PrintHelp_SubText(">task complete <taskID>", "So set a task status as complete");
+        return true;
+    }
 
-        SharedLogic.PrintHelp_Heading("EXAMPLES");
-        SharedLogic.PrintHelp_SubText(">task complete 1", "If you want to complete a task with ID : 1");
-        SharedLogic.FlushHelpText();
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count > 0)
+            return (new TaskSetStateCommand(model.DesignData.TaskCompletedStatus, this)).ForceRun();
+        else
+        {
+            optionalArguments_ReadOnly.Add("-s:" + model.DesignData.TaskCompletedStatus);
+            return (new TaskListCommand(this)).ForceRun();
+        }
+    }
+}
+
+public class TaskNextActionCommand : CommandHandlerBaseWithUtility
+{
+    public TaskNextActionCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task nextaction", " to list the tasks with status nextaction");
+        SharedLogic.PrintHelp_SubText(">task nextaction <taskID>", "So set a task status as nextaction");
+        return true;
+    }
+
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count > 0)
+            return (new TaskSetStateCommand(model.DesignData.TaskNextActionStatus, this)).ForceRun();
+        else
+        {
+            optionalArguments_ReadOnly.Add("-s:" + model.DesignData.TaskNextActionStatus);
+            return (new TaskListCommand(this)).ForceRun();
+        }
+    }
+}
+
+public class TaskProjectCommand : CommandHandlerBaseWithUtility
+{
+    public TaskProjectCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task project", " to list the tasks with status project");
+        SharedLogic.PrintHelp_SubText(">task project <taskID>", "So set a task status as project");
+        return true;
+    }
+
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count > 0)
+            return (new TaskSetStateCommand(model.DesignData.TaskProjectStatus, this)).ForceRun();
+        else
+        {
+            optionalArguments_ReadOnly.Add("-s:" + model.DesignData.TaskProjectStatus);
+            return (new TaskListCommand(this)).ForceRun();
+        }
+    }
+}
+
+public class TaskLaterCommand : CommandHandlerBaseWithUtility
+{
+    public TaskLaterCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task later", " to list the tasks with status later");
+        SharedLogic.PrintHelp_SubText(">task later <taskID>", "So set a task status as later");
+        return true;
+    }
+
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count > 0)
+            return (new TaskSetStateCommand(model.DesignData.TaskLaterStatus, this)).ForceRun();
+        else
+        {
+            optionalArguments_ReadOnly.Add("-s:" + model.DesignData.TaskLaterStatus);
+            return (new TaskListCommand(this)).ForceRun();
+        }
+    }
+}
+
+public class TaskReviewCommand : CommandHandlerBaseWithUtility
+{
+    public TaskReviewCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task review", " to list the tasks with status review");
+        SharedLogic.PrintHelp_SubText(">task review <taskID>", "So set a task status as review");
+        return true;
+    }
+
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count > 0)
+            return (new TaskSetStateCommand(model.DesignData.TaskReviewStatus, this)).ForceRun();
+        else
+        {
+            optionalArguments_ReadOnly.Add("-s:" + model.DesignData.TaskReviewStatus);
+            return (new TaskListCommand(this)).ForceRun();
+        }
+    }
+}
+
+
+public class TaskInboxCommand : CommandHandlerBaseWithUtility
+{
+    public TaskInboxCommand()
+    {
+    }
+
+    protected override bool ShowHelp()
+    {
+        SharedLogic.StartCachingHelpText();
+        SharedLogic.PrintHelp_Heading("USAGE");
+        SharedLogic.PrintHelp_SubText(">task inbox", " to list the tasks with status inbox");
+        SharedLogic.PrintHelp_SubText(">task inbox <taskID>", "So set a task status as inbox");
+        SharedLogic.PrintHelp_SubText(">task default", " to list the tasks with status inbox");
+        SharedLogic.PrintHelp_SubText(">task default <taskID>", "So set a task status as inbox");
+        return true;
+    }
+
+    protected override bool Run()
+    {
+        if (arguments_ReadOnly.Count > 0)
+            return (new TaskSetStateCommand(model.DesignData.TaskDefaultStatus, this)).ForceRun();
+        else
+        {
+            optionalArguments_ReadOnly.Add("-s:" + model.DesignData.TaskDefaultStatus);
+            return (new TaskListCommand(this)).ForceRun();
+        }
+    }
+}
+
+public class TaskSetStateCommand : CommandHandlerBaseWithUtility
+{
+    public TaskSetStateCommand(string status, CommandHandlerBaseWithUtility parent)
+    {
+        this.status = status;
+        Copy(parent);
+    }
+
+    protected override bool ShowHelp()
+    {
         return true;
     }
 
@@ -342,7 +518,7 @@ public class TaskCompleteCommand : CommandHandlerBaseWithUtility
             if (model.taskManager.DoesTaskExist(id))
             {
                 var task = model.taskManager.GetTask_Editable(id);
-                task.SetStatus(model.DesignData.TaskCompletedStatus);
+                task.SetStatus(status);
                 ConsoleWriter.Print("Task with id : {0} marked as {1}", id, task.StatusString);
             }
             else
@@ -351,6 +527,7 @@ public class TaskCompleteCommand : CommandHandlerBaseWithUtility
 
         return true;
     }
+    string status;
 }
 
 public class TaskRemoveCommand : CommandHandlerBaseWithUtility
@@ -390,9 +567,9 @@ public class TaskRemoveCommand : CommandHandlerBaseWithUtility
                 model.logManager.RemoveAllEntries(id);
                 ConsoleWriter.Print("Task removed with id : " + id);
 
-                if (notes.DoesNoteExist(id))
+                if (noteUtility.DoesNoteExist(id))
                 {
-                    notes.RemoveNote(id);
+                    noteUtility.RemoveNote(id);
                     ConsoleWriter.Print("Notes removed");
                 }
             }
@@ -609,6 +786,11 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
     {
 
     }
+    public TaskListCommand(CommandHandlerBaseWithUtility parent)
+    {
+        Copy(parent);
+    }
+
     protected override bool ShowHelp()
     {
         SharedLogic.StartCachingHelpText();
@@ -787,7 +969,7 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
                         task.id,
                         (task.categories != null && task.categories.Length > 0 ? Utils.Conversions.ArrayToString(task.categories, true).TruncateWithVisualFeedback(categoryArea - 3) : "INVALID"),
                         task.title.TruncateWithVisualFeedback(titleArea - 7/*for the ...*/)
-                            + (notes.DoesNoteExist(task.id) ? "+(N)" : ""),
+                            + (noteUtility.DoesNoteExist(task.id) ? "+(N)" : ""),
                         task.StatusString,
                         (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") + ("(" + Utils.Time.MinutesToHoursString(model.logManager.GetTotalTimeSpentInMins(task.id)) + "h)"),
                         (isInProgress ? "LOGGING TIME" : "")
@@ -865,7 +1047,7 @@ public class TaskShowCommand : CommandHandlerBaseWithUtility
                     task.TypeString,
                     (isInProgress ? Utils.Time.MinutesToHoursString(timeInProgress) + " + " : "") +
                     ("(" + Utils.Time.MinutesToHoursString(model.logManager.GetTotalTimeSpentInMins(task.id)) + "h)"),
-                    (notes.DoesNoteExist(task.id) ? "YES" : "NO"),
+                    (noteUtility.DoesNoteExist(task.id) ? "YES" : "NO"),
                     (isInProgress ? "YES" : "NO")
                     );
 
@@ -1089,11 +1271,16 @@ public class TaskStatusCommand : CommandHandlerBaseWithUtility
         }
 
         Dictionary<string, int> countByStatus = new Dictionary<string, int>();
+
+        foreach (var status in model.DesignData.tasks.statusList)
+
+        {
+            if (!countByStatus.ContainsKey(status))
+                countByStatus[status] = 0;
+        }
+
         foreach (var task in model.taskManager.Data.entries)
         {
-            if(!countByStatus.ContainsKey(task.status))
-                countByStatus[task.status] = 0;
-
             countByStatus[task.status]++;
         }
 
@@ -1257,12 +1444,12 @@ public class TaskCatNotesCommand : CommandHandlerBaseWithUtility
 
         if (model.taskManager.DoesTaskExist(id))
         {
-            if (!notes.DoesNoteExist(id))
+            if (!noteUtility.DoesNoteExist(id))
                 ConsoleWriter.Print("Notes not found for the task with id : {0}", id);
             else
             {
                 ConsoleWriter.PrintInColor("NOTES :", model.DesignData.HighlightColorForText);
-                ConsoleWriter.PrintText(notes.GetNoteContent(id));
+                ConsoleWriter.PrintText(noteUtility.GetNoteContent(id));
             }
         }
         else
@@ -1370,16 +1557,16 @@ public class TaskEditNoteCommand : CommandHandlerBaseWithUtility
 
         if (model.taskManager.DoesTaskExist(id))
         {
-            notes.CreateNoteIfUnavailable(id);
+            noteUtility.CreateNoteIfUnavailable(id);
 
             if (!appendMessage.IsEmpty())
             {
                 ConsoleWriter.Print("Message appended to the notes");
-                notes.AppendToNote(id, appendMessage);
+                noteUtility.AppendToNote(id, appendMessage);
             }
             else
             {
-                notes.OpenNote(model, id, externalProgram, waitForTheProgramToEnd, true);
+                noteUtility.OpenNote(model, id, externalProgram, waitForTheProgramToEnd, true);
             }
         }
         else
@@ -1417,9 +1604,9 @@ public class TaskDeleteNoteCommand : CommandHandlerBaseWithUtility
 
         if (model.taskManager.DoesTaskExist(id))
         {
-            if (notes.DoesNoteExist(id))
+            if (noteUtility.DoesNoteExist(id))
             {
-                notes.RemoveNote(id);
+                noteUtility.RemoveNote(id);
                 ConsoleWriter.Print("Notes deleted");
             }
             else
