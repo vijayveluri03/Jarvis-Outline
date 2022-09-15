@@ -250,7 +250,7 @@ public class NotebookListCommand : CommandHandlerBaseWithUtility
 
         int lineCount = 0;
         int categoryArea = 30;
-        int titleArea = (optionalArguments_ReadOnly.Contains("-e") || optionalArguments_ReadOnly.Contains("--expand")) ? 120 : 60;
+        int titleArea = (model.DesignData.IsExpandedViewByDefault() || optionalArguments_ReadOnly.Contains("-e") || optionalArguments_ReadOnly.Contains("--expand")) ? 120 : 60;
         const int newLineAfter = 5;
 
         #region TAGS

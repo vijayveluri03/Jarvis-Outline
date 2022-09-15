@@ -828,7 +828,7 @@ public class TaskListCommand : CommandHandlerBaseWithUtility
         }
 
         int lineCount = 0;
-        int titleArea = (optionalArguments_ReadOnly.Contains("-e") || optionalArguments_ReadOnly.Contains("--expand")) ? 120 : 40;
+        int titleArea = (model.DesignData.IsExpandedViewByDefault() || optionalArguments_ReadOnly.Contains("-e") || optionalArguments_ReadOnly.Contains("--expand")) ? 120 : 40;
         int categoryArea = 15;
         int newLineAfter = 5;
 

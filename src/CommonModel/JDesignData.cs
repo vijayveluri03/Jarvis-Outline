@@ -71,6 +71,11 @@ namespace Jarvis
 
         #region PROPERTIES 
 
+        public bool IsExpandedViewByDefault()
+        {
+            return GetBoolProperty("view.expandedViewByDefault");
+        }
+
         public bool TryGetProperty(string key, out string value)
         {
             if(properties.ContainsKey(key))

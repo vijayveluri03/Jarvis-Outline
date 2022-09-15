@@ -242,7 +242,7 @@ public class HabitListCommand : CommandHandlerBaseWithUtility
         List<Habit> habits = new List<Habit>(model.habitManager.Data.entries);
 
         int lineCount = 0;
-        int titleArea = (optionalArguments_ReadOnly.Contains("-e") || optionalArguments_ReadOnly.Contains("--expand")) ? 
+        int titleArea = ( model.DesignData.IsExpandedViewByDefault() || optionalArguments_ReadOnly.Contains("-e") || optionalArguments_ReadOnly.Contains("--expand")) ? 
             model.DesignData.GetIntegerProperty("view.habit.titleWidthExtended") : 
             model.DesignData.GetIntegerProperty("view.habit.titleWidthDefault");
         int categoryArea = 15;
